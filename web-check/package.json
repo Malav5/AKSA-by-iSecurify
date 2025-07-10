@@ -5,7 +5,7 @@
   "homepage": "https://web-check.xyz",
   "scripts": {
     "start": "node server",
-    "start-pm": "pm2 start server.js -i max", 
+    "start-pm": "pm2 start server.js -i max",
     "build": "astro check && astro build",
     "dev:vercel": "PLATFORM='vercel' npx vercel dev",
     "dev:netlify": "PLATFORM='netlify' npx netlify dev",
