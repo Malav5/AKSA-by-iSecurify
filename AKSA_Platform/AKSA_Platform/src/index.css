@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+:root {
+  --primary-color: #800080;  
+  --secondary-color: #f9ecf9; 
+  --trail-color: #fad4fa;
+  --trail-color1: #d323d3;
+}
+
+/* Base Styles */
+.bg-primary {
+  background-color: var(--primary-color);
+}
+.text-primary {
+  color: var(--primary-color);
+}
+
+.bg-secondary {
+  background-color: var(--secondary-color);
+}
+
+.border-primary {
+  border: 1px solid var(--primary-color);
+}
+
+.border-custom {
+  border: 1px solid var(--trail-color);
+}
+
+.accent-primary {
+  accent-color: var(--primary-color);
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 64px;
+}
+
+[id] {
+  scroll-margin-top: 64px;
+}
+
+/* Animations */
+@keyframes pulse-slow {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+/* Animation Classes */
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+.orbit-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: rotate 20s linear infinite;
+}
+
+.orbit-element {
+  position: absolute;
+  animation: orbit 15s linear infinite;
+}
+
+.orbit-element:nth-child(1) { animation-delay: -0s; }
+.orbit-element:nth-child(2) { animation-delay: -3.75s; }
+.orbit-element:nth-child(3) { animation-delay: -7.5s; }
+.orbit-element:nth-child(4) { animation-delay: -11.25s; }
+
+.connection-line {
+  stroke-dasharray: 10;
+  animation: dash 20s linear infinite;
+}
+
+.text-shadow-neon {
+  text-shadow: 0 0 10px rgba(0,255,255,0.5);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--trail-color1);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Progress Bar Styles */
+.circular-progress .CircularProgressbar-path {
+  stroke: var(--primary-color);
+}
+
+.circular-progress .CircularProgressbar-trail {
+  stroke: var(--trail-color);
+}
+
+.circular-progress .CircularProgressbar-text {
+  fill: var(--primary-color);
+  font-size: 20px;
+}
+
+/* Add a new keyframes rule for free movement */
+@keyframes moveFreely {
+  0% {
+    transform: translate(0, 0) rotate(var(--initial-rotate, 0deg));
+  }
+  25% {
+    transform: translate(var(--move-x-1, 10px), var(--move-y-1, 15px)) rotate(var(--rotate-1, 45deg));
+  }
+  50% {
+    transform: translate(var(--move-x-2, -10px), var(--move-y-2, 5px)) rotate(var(--rotate-2, 90deg));
+  }
+  75% {
+    transform: translate(var(--move-x-3, 5px), var(--move-y-3, -10px)) rotate(var(--rotate-3, 135deg));
+  }
+  100% {
+    transform: translate(0, 0) rotate(var(--initial-rotate, 0deg));
+  }
+}
+
+/* Custom scrollbar styles for modal and pre/code blocks */
+.custom-scrollbar,
+.custom-scrollbar-x {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #2563eb #e0e7ff; /* thumb color, track color */
+}
+
+.custom-scrollbar::-webkit-scrollbar,
+.custom-scrollbar-x::-webkit-scrollbar {
+  width: 8px;   /* vertical scrollbar width */
+  height: 8px;  /* horizontal scrollbar height */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.custom-scrollbar-x::-webkit-scrollbar-thumb {
+  background: #2563eb; /* blue-600 */
+  border-radius: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track,
+.custom-scrollbar-x::-webkit-scrollbar-track {
+  background: #e0e7ff; /* blue-50 */
+}
+
+/* End custom scrollbar styles */
+
+@layer utilities {
+  .animate-fade-in-up-message {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeInUpMessage 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes fadeInUpMessage {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-right-message {
+    opacity: 0;
+    transform: translateX(32px);
+    animation: fadeInRightMessage 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .animate-fade-in-left-message {
+    opacity: 0;
+    transform: translateX(-32px);
+    animation: fadeInLeftMessage 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes fadeInRightMessage {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes fadeInLeftMessage {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .animate-ellipsis::after {
+    display: inline-block;
+    content: '';
+    animation: ellipsis steps(4, end) 1s infinite;
+    width: 1.25em;
+    vertical-align: bottom;
+    overflow: hidden;
+  }
+  @keyframes ellipsis {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+    100% { content: ''; }
+  }
+}
