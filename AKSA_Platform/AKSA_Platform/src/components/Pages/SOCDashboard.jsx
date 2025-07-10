@@ -52,7 +52,7 @@ const getInitials = (name) => {
 };
 
 // OpenAI API integration for FIM scan assistant
-const OPENAI_API_KEY = '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'; // Use earlier key
+const OPENAI_API_KEY = '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'; // Use earlier key
 const ASSISTANT_ID = 'asst_sMop8t3yxFEFynVJCBpt5bQC';
 const OPENAI_BETA_HEADER = { 'OpenAI-Beta': 'assistants=v2' };
 const BASE_URL = 'https://api.openai.com/v1';
@@ -127,14 +127,16 @@ const ScanComponent = () => {
 
   useEffect(() => {
     const loadAgents = async () => {
-      const userEmail = localStorage.getItem('soc_useremail');
-      if (!userEmail) return;
-      // 1. Fetch all agents from Wazuh
-      const wazuhAgents = await fetchAgents(); // your existing function
-      // 2. Filter by user email
-      const userAgents = wazuhAgents.filter(agent => agent.email === userEmail);
-      setAgents(userAgents);
-      if (userAgents.length > 0) setAgentId(userAgents[0].id);
+      try {
+        const res = await axios.get('http://localhost:3000/api/wazuh/agents');
+        const wazuhAgents = res.data.data.affected_items || [];
+        console.log('Loaded agents from Wazuh:', wazuhAgents);
+        setAgents(wazuhAgents);
+        if (wazuhAgents.length > 0) setAgentId(wazuhAgents[0].id);
+      } catch (err) {
+        console.error('Failed to fetch agents from Wazuh:', err);
+        setAgents([]);
+      }
     };
     loadAgents();
   }, []);

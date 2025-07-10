@@ -38,7 +38,7 @@ const Vulnerabilities = () => {
   const maxChatboxWidth = 600;
   const isDraggingRef = React.useRef(false);
   // OpenAI API integration
-  const OPENAI_API_KEY = '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'; // Provided for local testing only
+  const OPENAI_API_KEY = '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'; // Provided for local testing only
   const ASSISTANT_ID = 'asst_8IyFzjmdoFxXzohWeqlWvifh'; // Provided for local testing only
   const OPENAI_BETA_HEADER = { 'OpenAI-Beta': 'assistants=v2' };
   const BASE_URL = 'https://api.openai.com/v1';
