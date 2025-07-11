@@ -1,12 +1,13 @@
 // src/components/AddUserModal.jsx
 import React, { useState } from 'react';
 import { X } from 'lucide-react'; // icon for close button
+import axios from 'axios';
 
 const AddUserModal = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    username: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    department: '',
   });
 
   const handleChange = (e) => {
@@ -17,10 +18,20 @@ const AddUserModal = ({ onClose, onSubmit }) => {
     }));
   };
 
-  const handleSubmit = () => {
-    if (formData.username && formData.email && formData.department) {
-      onSubmit(formData);
-      onClose();
+  const handleSubmit = async () => {
+    if (formData.firstName && formData.lastName && formData.email) {
+      try {
+        await axios.post('/api/agentMap/add-user', {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+        });
+        alert('User added successfully!');
+        onSubmit && onSubmit(formData);
+        onClose();
+      } catch (err) {
+        alert('Failed to add user.');
+      }
     }
   };
 
@@ -44,18 +55,30 @@ const AddUserModal = ({ onClose, onSubmit }) => {
         <div className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username
+              First Name
             </label>
             <input
               type="text"
-              name="username"
-              value={formData.username}
+              name="firstName"
+              value={formData.firstName}
               onChange={handleChange}
-              placeholder="Enter username"
+              placeholder="Enter first name"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
-
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Last Name
+            </label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder="Enter last name"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -70,7 +93,7 @@ const AddUserModal = ({ onClose, onSubmit }) => {
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Department
             </label>
@@ -87,7 +110,7 @@ const AddUserModal = ({ onClose, onSubmit }) => {
               <option value="Operations">Operations</option>
               <option value="HR">HR</option>
             </select>
-          </div>
+          </div> */}
         </div>
 
         {/* Buttons */}

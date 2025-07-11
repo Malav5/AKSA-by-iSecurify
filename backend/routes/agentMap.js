@@ -181,6 +181,32 @@ router.get("/users", async (req, res) => {
   }
 });
 
+// Add user (from AddUserModal)
+router.post("/add-user", async (req, res) => {
+  const { firstName, lastName, email } = req.body;
+  if (!firstName || !lastName || !email) {
+    return res.status(400).json({ error: "First name, last name, and email are required" });
+  }
+  try {
+    // Check if user already exists
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(409).json({ error: "User with this email already exists" });
+    }
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      passwordHash: 'placeholder', // You may want to set/reset this later
+      role: 'user',
+    });
+    await newUser.save();
+    res.status(201).json({ message: "User added", user: { firstName, lastName, email } });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to add user", details: err.message });
+  }
+});
+
 // Get all users with role 'user'
 router.get("/users-with-role-user", async (req, res) => {
   try {
