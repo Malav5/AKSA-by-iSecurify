@@ -1,5 +1,6 @@
 // src/components/AddUserModal.jsx
 import React, { useState } from 'react';
+import { X } from 'lucide-react'; // icon for close button
 
 const AddUserModal = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -19,57 +20,86 @@ const AddUserModal = ({ onClose, onSubmit }) => {
   const handleSubmit = () => {
     if (formData.username && formData.email && formData.department) {
       onSubmit(formData);
+      onClose();
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900/50 bg-opacity-40 z-50 flex items-center justify-center">
-      <div className="bg-white w-[90%] sm:w-[400px] rounded-lg shadow-xl p-6 relative">
-        <h2 className="text-xl font-semibold mb-4">Add New User</h2>
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center transition-opacity">
+      <div className="relative w-[90%] sm:w-[450px] bg-white rounded-xl shadow-2xl p-6 sm:p-8 animate-fade-in">
+        {/* Close Button */}
+        <button
+          className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition"
+          onClick={onClose}
+        >
+          <X className="w-6 h-6" />
+        </button>
 
-        <div className="space-y-4">
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            placeholder="Username"
-            className="w-full px-4 py-2 border rounded-lg"
-          />
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Email"
-            className="w-full px-4 py-2 border rounded-lg"
-          />
+        {/* Title */}
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+          Add New User
+        </h2>
 
-          {/* Department Dropdown */}
-          <select
-            name="department"
-            value={formData.department}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg bg-white"
-          >
-            <option value="">Select Department</option>
-            <option value="IT">IT</option>
-            <option value="Security">Security</option>
-            <option value="Development">Development</option>
-            <option value="Operations">Operations</option>
-            <option value="HR">HR</option>
-          </select>
+        {/* Form */}
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Username
+            </label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Enter username"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter email"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Department
+            </label>
+            <select
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+            >
+              <option value="">Select department</option>
+              <option value="IT">IT</option>
+              <option value="Security">Security</option>
+              <option value="Development">Development</option>
+              <option value="Operations">Operations</option>
+              <option value="HR">HR</option>
+            </select>
+          </div>
         </div>
 
-        <div className="flex justify-end gap-3 mt-6">
+        {/* Buttons */}
+        <div className="flex justify-end gap-3 mt-8">
           <button
-            className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
+            className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium"
             onClick={onClose}
           >
             Cancel
           </button>
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            className="px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold"
             onClick={handleSubmit}
           >
             Add User
