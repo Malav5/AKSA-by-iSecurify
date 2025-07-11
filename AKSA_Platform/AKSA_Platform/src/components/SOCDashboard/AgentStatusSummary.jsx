@@ -78,7 +78,7 @@ const AgentStatusSummary = () => {
         {agentStatusBoxes.map((box, index) => (
           <div
             key={index}
-            className={`${box.bg} rounded-2xl flex flex-col items-center justify-center h-36 min-w-[325px] shadow cursor-pointer transition-all duration-300`}
+            className={`${box.bg} rounded-2xl flex flex-col items-center justify-center h-36 min-w-[325px] hover:shadow-xl hover:scale-[1.01] shadow cursor-pointer transition-all duration-300`}
             onClick={() => handleBoxClick(box.key)}
           >
             <div className={`text-5xl font-bold ${box.color}`}>
