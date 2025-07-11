@@ -1,67 +1,85 @@
 import React, { useState, useEffect } from 'react';
 import { getComplianceStatus, fetchAlertSeverityChartData } from '../../services/SOCservices';
 import { motion } from 'framer-motion';
+import PropTypes from 'prop-types';
+import { CheckCircle, AlertCircle, Info, ChevronRight } from 'lucide-react';
 
-const getComplianceLevel = (percentage) => {
-  if (percentage >= 90) return { 
-    label: 'Excellent', 
-    color: 'emerald', 
-    badge: 'bg-emerald-100 text-emerald-800',
-    gradient: 'from-emerald-400 to-emerald-600'
-  };
-  if (percentage >= 75) return { 
-    label: 'Good', 
-    color: 'lime', 
-    badge: 'bg-lime-100 text-lime-800',
-    gradient: 'from-lime-400 to-lime-600'
-  };
-  if (percentage >= 50) return { 
-    label: 'Needs Improvement', 
-    color: 'amber', 
-    badge: 'bg-amber-100 text-amber-800',
-    gradient: 'from-amber-400 to-amber-600'
-  };
-  return { 
-    label: 'Critical', 
-    color: 'rose', 
-    badge: 'bg-rose-100 text-rose-800',
-    gradient: 'from-rose-400 to-rose-600'
-  };
-};
-
-const ComplianceStatus = () => {
+const ComplianceStatus = ({ targetScore = 90 }) => {
   const [compliancePct, setCompliancePct] = useState(0);
   const [lastAudit, setLastAudit] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [alertDebug, setAlertDebug] = useState("");
+  const [statusMessage, setStatusMessage] = useState('');
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Get compliance level with improved visual hierarchy
+  const getComplianceLevel = (percentage) => {
+    if (percentage >= 90) return { 
+      label: 'Excellent', 
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      borderColor: 'border-emerald-100',
+      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
+      gradient: 'from-emerald-400 to-emerald-500'
+    };
+    if (percentage >= 75) return { 
+      label: 'Good', 
+      color: 'text-teal-600',
+      bgColor: 'bg-teal-50',
+      borderColor: 'border-teal-100',
+      icon: <CheckCircle className="w-5 h-5 text-teal-500" />,
+      gradient: 'from-teal-400 to-teal-500'
+    };
+    if (percentage >= 50) return { 
+      label: 'Needs Improvement', 
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      borderColor: 'border-amber-100',
+      icon: <AlertCircle className="w-5 h-5 text-amber-500" />,
+      gradient: 'from-amber-400 to-amber-500'
+    };
+    return { 
+      label: 'Critical', 
+      color: 'text-rose-600',
+      bgColor: 'bg-rose-50',
+      borderColor: 'border-rose-100',
+      icon: <AlertCircle className="w-5 h-5 text-rose-500" />,
+      gradient: 'from-rose-400 to-rose-500'
+    };
+  };
 
   useEffect(() => {
     const fetchComplianceData = async () => {
       try {
-        // Use real-time severity aggregation
+        setIsLoading(true);
         const severityData = await fetchAlertSeverityChartData();
         const labels = severityData.labels || [];
         const data = (severityData.datasets && severityData.datasets[0]?.data) || [];
+        
         let total = 0;
         let highSeverity = 0;
+        
         labels.forEach((label, idx) => {
           const level = parseInt(label.replace(/[^0-9]/g, ''));
           const count = data[idx] || 0;
           total += count;
-          if (level >= 7) highSeverity += count; // Medium, High, Critical
+          if (level >= 7) highSeverity += count;
         });
+
         if (total === 0) {
-          setAlertDebug("No alerts found. Compliance cannot be calculated.");
+          setStatusMessage("No alerts found. Compliance cannot be calculated.");
         } else if (highSeverity === 0) {
-          setAlertDebug("No high-severity alerts found. Compliance will always show 100%.");
+          setStatusMessage("No high-severity alerts found. Compliance shows 100%.");
         } else {
-          setAlertDebug("");
+          setStatusMessage("");
         }
+
         const pct = total ? Math.round(((total - highSeverity) / total) * 100) : 0;
-        // Animate the percentage increase
+        
+        // Animate the percentage
         let start = 0;
         const duration = 1500;
         const startTime = Date.now();
+        
         const animate = () => {
           const elapsed = Date.now() - startTime;
           const progress = Math.min(elapsed / duration, 1);
@@ -74,8 +92,9 @@ const ComplianceStatus = () => {
           }
         };
         animate();
-        const now = new Date();
-        setLastAudit(now.toLocaleDateString('en-IN', {
+
+        // Set last audit time
+        setLastAudit(new Date().toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'short',
           day: 'numeric',
@@ -83,80 +102,137 @@ const ComplianceStatus = () => {
           minute: '2-digit',
         }));
       } catch (err) {
-        console.error('Error fetching compliance alerts:', err);
+        console.error('Error fetching compliance data:', err);
+        setStatusMessage("Failed to load compliance data. Please try again.");
         setIsLoading(false);
       }
     };
+    
     fetchComplianceData();
   }, []);
 
-  const { label, color, badge, gradient } = getComplianceLevel(compliancePct);
+  const complianceLevel = getComplianceLevel(compliancePct);
+  const targetDiff = compliancePct - targetScore;
+  const isMeetingTarget = compliancePct >= targetScore;
 
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white shadow-xl rounded-xl p-6 mb-6 border border-gray-100 hover:shadow-2xl transition-shadow duration-300"
+      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8"
     >
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h3 className="text-2xl font-bold text-gray-800 mb-1 flex items-center gap-2">
-            <span className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </span>
-            Compliance Status
-          </h3>
-          <p className="text-sm text-gray-500">Last audited on: {lastAudit}</p>
-        </div>
-        {isLoading ? (
-          <div className="h-8 w-8 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin"></div>
-        ) : (
-          <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badge}`}>
-            {label}
-          </span>
-        )}
-      </div>
-
-      <div className="mb-6">
-        <div className="flex items-end justify-between mb-2">
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-6">
           <div>
-            <span className="text-sm text-gray-500">Current Score</span>
-            <div className="text-4xl font-bold text-gray-800">
-              {compliancePct}%
+            <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${complianceLevel.bgColor} ${complianceLevel.borderColor} border`}>
+                {complianceLevel.icon}
+              </div>
+              Compliance Status
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Last audited: <span className="font-medium">{lastAudit || '--'}</span>
+            </p>
+          </div>
+          
+          {isLoading ? (
+            <div className="h-8 w-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+          ) : (
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${complianceLevel.bgColor} ${complianceLevel.borderColor} border ${complianceLevel.color}`}>
+              {complianceLevel.label}
+            </span>
+          )}
+        </div>
+
+        {/* Score Display */}
+        <div className="mb-6">
+          <div className="flex items-end justify-between mb-3">
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Current Compliance</p>
+              <div className="text-4xl font-bold text-gray-800">
+                {compliancePct}%
+              </div>
+            </div>
+            
+            <div className="text-right">
+              <p className="text-sm text-gray-500 mb-1">Target</p>
+              <div className={`text-xl font-semibold ${isMeetingTarget ? 'text-emerald-600' : 'text-amber-600'}`}>
+                {targetScore}%
+              </div>
+              {!isLoading && (
+                <p className={`text-xs mt-1 ${isMeetingTarget ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {isMeetingTarget ? (
+                    <span className="flex items-center">
+                      <CheckCircle className="w-3 h-3 mr-1" /> 
+                      {Math.abs(targetDiff)}% above target
+                    </span>
+                  ) : (
+                    <span className="flex items-center">
+                      <AlertCircle className="w-3 h-3 mr-1" />
+                      {Math.abs(targetDiff)}% below target
+                    </span>
+                  )}
+                </p>
+              )}
             </div>
           </div>
-          <div className="text-right">
-            <span className="text-sm text-gray-500">Target</span>
-            <div className="text-xl font-semibold text-gray-700">90%</div>
+
+          {/* Progress Bar */}
+          <div className="relative h-3 bg-gray-100 rounded-full overflow-hidden mb-2">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${compliancePct}%` }}
+              transition={{ duration: 1.5, delay: 0.2 }}
+              className={`h-full bg-gradient-to-r ${complianceLevel.gradient} rounded-full`}
+            />
+          </div>
+          
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>0%</span>
+            <span>100%</span>
           </div>
         </div>
 
-        <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${compliancePct}%` }}
-            transition={{ duration: 1.5, delay: 0.2 }}
-            className={`h-full bg-gradient-to-r ${gradient} rounded-full`}
-          />
-        </div>
+        {/* Details Toggle */}
+        <button 
+          onClick={() => setShowDetails(!showDetails)}
+          className="w-full flex items-center justify-between py-2 text-sm font-medium text-gray-600 hover:text-gray-800"
+        >
+          <span className="flex items-center">
+            <Info className="w-4 h-4 mr-2 text-gray-400" />
+            How is this calculated?
+          </span>
+          <ChevronRight className={`w-4 h-4 transition-transform ${showDetails ? 'rotate-90' : ''}`} />
+        </button>
       </div>
 
-      <div className="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Compliance is calculated based on the ratio of total alerts to medium, high, and critical severity alerts (level ≥ 7).
-        {alertDebug && (
-          <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded">
-            <strong>Debug:</strong> {alertDebug}
-          </div>
-        )}
-      </div>
+      {/* Expanded Details */}
+      {showDetails && (
+        <div className="border-t border-gray-200 bg-gray-50 p-4">
+          <p className="text-sm text-gray-600 mb-2">
+            Compliance is calculated based on the ratio of total alerts to medium, high, 
+            and critical severity alerts (level ≥ 7).
+          </p>
+          <p className="text-sm text-gray-600">
+            Formula: <code className="bg-gray-200 px-1 rounded">(Total Alerts - High Severity Alerts) / Total Alerts</code>
+          </p>
+          
+          {statusMessage && (
+            <div className={`mt-3 p-2 rounded text-sm ${statusMessage.includes("100%") ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>
+              <Info className="inline w-4 h-4 mr-1" />
+              {statusMessage}
+            </div>
+          )}
+        </div>
+      )}
     </motion.div>
   );
+};
+
+ComplianceStatus.propTypes = {
+  targetScore: PropTypes.number
 };
 
 export default ComplianceStatus;
