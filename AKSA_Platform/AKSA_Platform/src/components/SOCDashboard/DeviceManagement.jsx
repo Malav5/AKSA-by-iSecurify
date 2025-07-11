@@ -29,8 +29,8 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
 
     const fetchUsers = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/api/users');
-        setUsers(res.data || []);
+        const res = await axios.get('/api/agentMap/users-with-role-user');
+        setUsers(res.data.users || []);
       } catch (err) {
         console.error('Failed to fetch users');
       }
@@ -45,9 +45,24 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
     setShowModal(true);
   };
 
-  const handleAssignSubmit = () => {
+  const handleAssignSubmit = async () => {
     if (!selectedUser) return alert("Please select a user.");
-    console.log('Assigning', selectedAgent.name, 'to', selectedUser);
+    if (!selectedAgent) return alert("No agent selected.");
+    // Find user name from users array
+    const user = users.find(u => u.email === selectedUser);
+    if (!user) return alert("User not found.");
+    try {
+      await axios.post('/api/agentMap/assign-agent-to-user', {
+        userEmail: user.email,
+        userName: user.name,
+        agentName: selectedAgent.name || selectedAgent.id,
+        agentId: selectedAgent.id,
+        agentIp: selectedAgent.ip || '',
+      });
+      alert('Agent assigned successfully!');
+    } catch (err) {
+      alert('Failed to assign agent.');
+    }
     setShowModal(false);
     setSelectedAgent(null);
     setSelectedUser('');
@@ -128,7 +143,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
                               className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
                               onClick={() => handleAssignClick(agent)}
                             >
-                              Assign Agent
+                              Assign User
                             </button>
                           </td>
                         )}
@@ -172,7 +187,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
             >
               <option value="">-- Select User --</option>
               {users.map((user) => (
-                <option key={user._id} value={user._id}>{user.name}</option>
+                <option key={user.email} value={user.email}>{user.name}</option>
               ))}
             </select>
             <div className="flex justify-end gap-4">

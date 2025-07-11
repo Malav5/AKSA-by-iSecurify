@@ -6,6 +6,7 @@ const axios = require("axios");
 const https = require("https");
 const { getWazuhToken } = require("../wazuh/tokenService");
 const apiBaseUrl = process.env.WAZUH_API_URL;
+const AgentUserAssignment = require("../models/AgentUserAssignment");
 
 // Register agent mapping
 router.post("/register-agent", async (req, res) => {
@@ -102,6 +103,34 @@ router.patch("/agents/:id/assign", async (req, res) => {
   }
 });
 
+// Assign agent to user
+router.post("/assign-agent-to-user", async (req, res) => {
+  const { userEmail, userName, agentName, agentId, agentIp } = req.body;
+  if (!userEmail || !userName || !agentName || !agentId || !agentIp) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  try {
+    let assignment = await AgentUserAssignment.findOne({ userEmail });
+    if (!assignment) {
+      assignment = new AgentUserAssignment({
+        userEmail,
+        userName,
+        agents: [{ agentName, agentId, agentIp }],
+      });
+    } else {
+      // Only add agent if not already assigned
+      const exists = assignment.agents.some(a => a.agentId === agentId);
+      if (!exists) {
+        assignment.agents.push({ agentName, agentId, agentIp });
+      }
+    }
+    await assignment.save();
+    res.json({ message: "Agent assigned to user", assignment });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to assign agent", details: err.message });
+  }
+});
+
 // Sync agents from Wazuh API to MongoDB
 router.get("/sync-wazuh-agents", async (req, res) => {
   try {
@@ -147,6 +176,20 @@ router.get("/users", async (req, res) => {
   try {
     const users = await User.find({}, "_id firstName lastName email");
     res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch users", details: err.message });
+  }
+});
+
+// Get all users with role 'user'
+router.get("/users-with-role-user", async (req, res) => {
+  try {
+    const users = await User.find({ role: "user" }, "email firstName lastName");
+    const formatted = users.map(u => ({
+      email: u.email,
+      name: `${u.firstName} ${u.lastName}`.trim()
+    }));
+    res.json({ users: formatted });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch users", details: err.message });
   }
