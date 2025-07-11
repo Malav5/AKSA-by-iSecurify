@@ -1,8 +1,10 @@
+// src/components/Navbar.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Users2, Home, Bell } from 'lucide-react';
+import { Users2, Bell } from 'lucide-react';
+import AddUserModal from './AddUserModal';
 
-const Navbar = ({ username = 'Hevin Patel', fullname = 'Hevin Patel', onAddUser, onAssignAgent, onLogout }) => {
+const Navbar = ({ onAssignAgent, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -10,29 +12,27 @@ const Navbar = ({ username = 'Hevin Patel', fullname = 'Hevin Patel', onAddUser,
   const [user, setUser] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [showAddUser, setShowAddUser] = useState(false);
-  
+
   const userButtonRef = useRef(null);
   const userMenuRef = useRef(null);
   const notificationButtonRef = useRef(null);
   const panelRef = useRef(null);
 
-  // Use SOC user data from localStorage
   useEffect(() => {
     const socUsername = localStorage.getItem('soc_username');
     const socFullname = localStorage.getItem('soc_fullname');
     const socEmail = localStorage.getItem('soc_email');
     const socRole = localStorage.getItem('role');
+
     if (socUsername && socFullname) {
-      // Parse the fullname to get first and last name
       const nameParts = socFullname.split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
-      
       setUser({
-        firstName: firstName,
-        lastName: lastName,
-        email: socEmail || socUsername || '',
-        companyName: socRole === 'admin' ? 'Admin' : 'SOC User'
+        firstName,
+        lastName,
+        email: socEmail || socUsername,
+        companyName: socRole === 'admin' ? 'Admin' : 'SOC User',
       });
     }
   }, []);
@@ -47,43 +47,37 @@ const Navbar = ({ username = 'Hevin Patel', fullname = 'Hevin Patel', onAddUser,
     setShowNotifications(false);
   };
 
-  // Enhanced click outside handler
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Check if click is outside notifications dropdown and button
-      const isOutsideNotifications = 
-        panelRef.current && 
+      const outsideNotif =
+        panelRef.current &&
         !panelRef.current.contains(event.target) &&
         notificationButtonRef.current &&
         !notificationButtonRef.current.contains(event.target);
 
-      // Check if click is outside user dropdown and button
-      const isOutsideUserMenu = 
-        userMenuRef.current && 
+      const outsideUserMenu =
+        userMenuRef.current &&
         !userMenuRef.current.contains(event.target) &&
         userButtonRef.current &&
         !userButtonRef.current.contains(event.target);
 
-      // Close dropdowns if clicking outside
-      if (isOutsideNotifications) {
-        setShowNotifications(false);
-      }
-      
-      if (isOutsideUserMenu) {
-        setShowUserMenu(false);
-      }
+      if (outsideNotif) setShowNotifications(false);
+      if (outsideUserMenu) setShowUserMenu(false);
     };
 
-    // Add event listener
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
-
-    // Cleanup
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, []);
+
+  const handleAddUserSubmit = (newUser) => {
+    console.log('User submitted:', newUser);
+    setShowAddUser(false);
+    // Optionally send data to backend here
+  };
 
   const navItems = [
     { path: '/soc', label: 'Dashboard' },
@@ -101,18 +95,16 @@ const Navbar = ({ username = 'Hevin Patel', fullname = 'Hevin Patel', onAddUser,
         </div>
         <span className="ml-2 text-3xl font-bold text-black">SOC Dashboard</span>
       </div>
-      
-      {/* Centered Nav Links */}
+
+      {/* Center Nav */}
       <div className="flex-1 flex justify-center">
         <div className="flex gap-7">
           {navItems.map(({ path, label }) => (
             <Link
               key={path}
               to={path}
-              className={`text-xl font-medium transition-colors duration-150 ${
-                location.pathname === path
-                  ? 'text-blue-600 font-semibold'
-                  : 'text-gray-500 hover:text-blue-600'
+              className={`text-xl font-medium ${
+                location.pathname === path ? 'text-blue-600 font-semibold' : 'text-gray-500 hover:text-blue-600'
               }`}
             >
               {label}
@@ -121,148 +113,68 @@ const Navbar = ({ username = 'Hevin Patel', fullname = 'Hevin Patel', onAddUser,
         </div>
       </div>
 
-      {/* Right Section - Notifications and User */}
-      <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+      {/* Notifications & User */}
+      <div className="flex items-center space-x-4">
         {/* Notifications */}
         <div className="relative">
-          <button
-            ref={notificationButtonRef}
-            onClick={toggleNotifications}
-            className="relative p-2 rounded-lg transition-colors"
-          >
-            <Bell className="w-8 h-8 sm:w-9 sm:h-9 hover:text-blue-500 text-gray-600" />
+          <button ref={notificationButtonRef} onClick={toggleNotifications}>
+            <Bell className="w-8 h-8 text-gray-600 hover:text-blue-600" />
             {notifications.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                 {notifications.length > 9 ? '9+' : notifications.length}
               </span>
             )}
           </button>
-
-          {/* Notifications Dropdown */}
           {showNotifications && (
-            <div
-              ref={panelRef}
-              className="absolute right-0 mt-2 w-72 sm:w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden"
-            >
-              <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 border-b">
-                <span className="font-semibold text-sm sm:text-base">SOC Notifications</span>
-                {notifications.length > 0 && (
-                  <button
-                    onClick={() => setNotifications([])}
-                    className="text-xs text-blue-600 hover:underline"
-                  >
-                    Clear All
-                  </button>
-                )}
-              </div>
-
-              <div className="max-h-60 sm:max-h-72 overflow-y-auto">
+            <div ref={panelRef} className="absolute right-0 mt-2 w-72 bg-white shadow-xl rounded z-50">
+              <div className="p-3 font-semibold border-b">SOC Notifications</div>
+              <div className="max-h-60 overflow-y-auto">
                 {notifications.length > 0 ? (
-                  <ul className="divide-y divide-gray-100">
-                    {notifications.map((note, index) => (
-                      <li
-                        key={index}
-                        className="flex items-start gap-3 p-3 sm:p-4 hover:bg-gray-50 transition"
-                      >
-                        <span className="text-lg flex-shrink-0">{note.icon}</span>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm sm:text-base truncate">{note.message}</p>
-                          <span className="text-xs text-gray-400">
-                            {note.time}
-                          </span>
-                        </div>
+                  <ul>
+                    {notifications.map((n, i) => (
+                      <li key={i} className="p-3 hover:bg-gray-50 border-b text-sm">
+                        {n.message}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <div className="p-4 sm:p-5 text-center text-gray-500 text-sm">
-                    No new SOC notifications
-                  </div>
+                  <div className="p-4 text-center text-gray-500 text-sm">No new notifications</div>
                 )}
               </div>
             </div>
           )}
         </div>
 
-        {/* User Menu */}
+        {/* User */}
         <div className="relative">
-          <button
-            ref={userButtonRef}
-            onClick={toggleUserMenu}
-            className="flex items-center space-x-2 p-2 rounded-lg bg-gray-100 hover:bg-gray-300 transition-colors"
-          >
-            {user ? (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-lg sm:text-xl">
-                  {user.firstName.charAt(0).toUpperCase()}
-                </span>
-              </div>
-            ) : (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm sm:text-base font-medium text-gray-700">U</span>
-              </div>
-            )}
-            <span className="hidden sm:block text-xl font-medium text-gray-700">
-              {user ? `${user.firstName}` : "User"}
-            </span>
+          <button ref={userButtonRef} onClick={toggleUserMenu} className="flex items-center space-x-2">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold">
+              {user?.firstName.charAt(0).toUpperCase()}
+            </div>
+            <span className="hidden sm:block text-xl font-medium text-gray-700">{user?.firstName || 'User'}</span>
           </button>
 
-          {/* User Dropdown */}
           {showUserMenu && (
-            <div
-              ref={userMenuRef}
-              className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-50"
-            >
-              <div className="p-3 sm:p-4 border-b border-gray-100">
-                <p className="text-2xl font-medium text-gray-900">
-                  {user ? `${user.firstName} ${user.lastName}` : "User Name"}
-                </p>
-                <p className="text-sm text-gray-500 ">{user?.email || "user@example.com"}</p>
-                <p className="text-sm text-gray-500 ">{user?.companyName || ""}</p>
+            <div ref={userMenuRef} className="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg z-50">
+              <div className="p-4 border-b">
+                <p className="text-lg font-semibold">{user?.firstName} {user?.lastName}</p>
+                <p className="text-sm text-gray-500">{user?.email}</p>
               </div>
               <div className="p-1">
                 {localStorage.getItem('role') === 'admin' && (
                   <>
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        if (onAssignAgent) onAssignAgent();
-                      }}
-                      className="w-full text-left px-3 py-2 text-lg text-gray-700 hover:bg-gray-100 rounded"
-                    >
+                    <button onClick={() => { setShowUserMenu(false); onAssignAgent?.(); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm">
                       Assign Agent
                     </button>
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        if (onAddUser) onAddUser();
-                      }}
-                      className="w-full text-left px-3 py-2 text-lg text-gray-700 hover:bg-gray-100 rounded"
-                    >
+                    <button onClick={() => { setShowUserMenu(false); setShowAddUser(true); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm">
                       Add User
                     </button>
                   </>
                 )}
-                <button
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    navigate('/dashboard');
-                  }}
-                  className="w-full text-left px-3 py-2 text-lg text-gray-700 hover:bg-gray-100 rounded"
-                >
+                <button onClick={() => { setShowUserMenu(false); navigate('/dashboard'); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm">
                   Home
                 </button>
-                <button
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    if (onLogout) onLogout(); 
-                    else { 
-                      localStorage.clear(); 
-                      navigate('/soc-login'); 
-                    }
-                  }}
-                  className="w-full text-left px-3 py-2 text-lg text-gray-700 hover:bg-gray-100 rounded"
-                >
+                <button onClick={() => { setShowUserMenu(false); onLogout?.() || (localStorage.clear(), navigate('/soc-login')); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm">
                   Logout
                 </button>
               </div>
@@ -270,13 +182,9 @@ const Navbar = ({ username = 'Hevin Patel', fullname = 'Hevin Patel', onAddUser,
           )}
         </div>
       </div>
-       {/* 🔥 AddUser Modal */}
-       {showAddUser && (
-        <AddUserModal
-          onClose={() => setShowAddUser(false)}
-          onSubmit={handleAddUserSubmit}
-        />
-      )}
+
+      {/* Modal */}
+      {showAddUser && <AddUserModal onClose={() => setShowAddUser(false)} onSubmit={handleAddUserSubmit} />}
     </nav>
   );
 };

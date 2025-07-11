@@ -23,7 +23,7 @@ const AddUserModal = ({ onClose, onSubmit }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gray-900/50 bg-opacity-40 z-50 flex items-center justify-center">
       <div className="bg-white w-[90%] sm:w-[400px] rounded-lg shadow-xl p-6 relative">
         <h2 className="text-xl font-semibold mb-4">Add New User</h2>
 
@@ -44,14 +44,21 @@ const AddUserModal = ({ onClose, onSubmit }) => {
             placeholder="Email"
             className="w-full px-4 py-2 border rounded-lg"
           />
-          <input
-            type="text"
+
+          {/* Department Dropdown */}
+          <select
             name="department"
             value={formData.department}
             onChange={handleChange}
-            placeholder="Department"
-            className="w-full px-4 py-2 border rounded-lg"
-          />
+            className="w-full px-4 py-2 border rounded-lg bg-white"
+          >
+            <option value="">Select Department</option>
+            <option value="IT">IT</option>
+            <option value="Security">Security</option>
+            <option value="Development">Development</option>
+            <option value="Operations">Operations</option>
+            <option value="HR">HR</option>
+          </select>
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
