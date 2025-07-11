@@ -7,7 +7,8 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
-    "moongoose": "^0.0.5"
+    "moongoose": "^0.0.5",
+    "node-cron": "^4.2.1"
   },
   "name": "backend",
   "version": "1.0.0",

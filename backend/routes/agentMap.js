@@ -2,17 +2,54 @@ const express = require("express");
 const router = express.Router();
 const Agent = require("../models/Agent");
 const User = require("../models/user");
+const axios = require("axios");
+const https = require("https");
+const { getWazuhToken } = require("../wazuh/tokenService");
+const apiBaseUrl = process.env.WAZUH_API_URL;
 
 // Register agent mapping
 router.post("/register-agent", async (req, res) => {
-  const { agentName, userEmail, user_id } = req.body;
-  if (!agentName || !userEmail) {
-    return res.status(400).json({ error: "agentName and userEmail are required" });
+  // Destructure all possible agent fields from req.body
+  const {
+    agentName,
+    agentId,
+    agentIp,
+    deviceType,
+    status,
+    hostname,
+    os,
+    lastSeen,
+    macAddress,
+    manufacturer,
+    model,
+    createdAt,
+    userEmail,
+    user_id
+  } = req.body;
+
+  // agentName, agentId, and agentIp are required
+  if (!agentName || !agentId || !agentIp) {
+    return res.status(400).json({ error: "agentName, agentId, and agentIp are required" });
   }
   try {
-    const agent = new Agent({ agentName, userEmail, user_id });
+    const agent = new Agent({
+      agentName,
+      agentId,
+      agentIp,
+      deviceType,
+      status,
+      hostname,
+      os,
+      lastSeen,
+      macAddress,
+      manufacturer,
+      model,
+      createdAt,
+      userEmail,
+      user_id
+    });
     await agent.save();
-    res.status(201).json({ message: "Agent registered successfully" });
+    res.status(201).json({ message: "Agent registered successfully", agent });
   } catch (err) {
     res.status(500).json({ error: "Failed to register agent", details: err.message });
   }
@@ -62,6 +99,42 @@ router.patch("/agents/:id/assign", async (req, res) => {
     res.json(agent);
   } catch (err) {
     res.status(500).json({ error: "Failed to assign agent", details: err.message });
+  }
+});
+
+// Sync agents from Wazuh API to MongoDB
+router.get("/sync-wazuh-agents", async (req, res) => {
+  try {
+    const token = await getWazuhToken();
+    const response = await axios.get(`${apiBaseUrl}/agents`, {
+      headers: { Authorization: `Bearer ${token}` },
+      httpsAgent: new https.Agent({ rejectUnauthorized: false })
+    });
+    const wazuhAgents = response.data.data.affected_items || [];
+    const results = [];
+    for (const agent of wazuhAgents) {
+      // Map Wazuh agent fields to Agent model
+      const mapped = {
+        agentName: agent.name,
+        agentId: Number(agent.id),
+        agentIp: agent.ip || (agent.registerIP || ""),
+        status: agent.status,
+        hostname: agent.name,
+        lastSeen: agent.lastKeepAlive ? new Date(agent.lastKeepAlive) : undefined,
+        createdAt: agent.dateAdd ? new Date(agent.dateAdd) : undefined,
+      };
+      // Optionally fetch more details (e.g., sysinfo) if needed
+      // Upsert agent in MongoDB
+      const saved = await Agent.findOneAndUpdate(
+        { agentId: mapped.agentId },
+        mapped,
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+      results.push(saved);
+    }
+    res.json({ message: "Wazuh agents synced to MongoDB", count: results.length });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to sync Wazuh agents", details: err.message });
   }
 });
 

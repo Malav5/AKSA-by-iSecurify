@@ -13,6 +13,11 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/elasticsearch/, ''),
         secure: false,
       },
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
       // '/api/wazuh': {
       //   target: 'https://192.168.107.131:55000',
       //   changeOrigin: true,

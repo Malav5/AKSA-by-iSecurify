@@ -132,6 +132,28 @@ const DeviceManagement = () => {
         name: fetchedInfo.hostname,
         type: determineDeviceType(fetchedInfo)
       }));
+
+      // Automatically save agent to backend if agentId and agentIp are present
+      if (fetchedInfo.agentId && ip) {
+        try {
+          await axios.post("/api/agentMap/register-agent", {
+            agentName: fetchedInfo.hostname,
+            agentId: fetchedInfo.agentId,
+            agentIp: ip,
+            deviceType: determineDeviceType(fetchedInfo),
+            status: fetchedInfo.status,
+            hostname: fetchedInfo.hostname,
+            os: fetchedInfo.os,
+            lastSeen: fetchedInfo.lastSeen,
+            macAddress: fetchedInfo.macAddress,
+            manufacturer: fetchedInfo.manufacturer,
+            model: fetchedInfo.model,
+            // Optionally add userEmail/user_id if available in your app context
+          });
+        } catch (err) {
+          console.error("Failed to save agent to backend:", err);
+        }
+      }
     } catch (error) {
       setDeviceInfoError(error.message || 'Failed to fetch device information');
       console.error('Error fetching device info:', error);
