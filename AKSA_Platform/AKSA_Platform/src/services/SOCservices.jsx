@@ -247,3 +247,14 @@ export const fetchUsers = async () => {
 //   const response = await axios.get(`/api/user-agents`, { params: { userEmail } });
 //   return response.data.agents.map(a => a.agentName);
 // };
+
+export const fetchMitreData = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/mitre-data`);
+    if (!response.ok) throw new Error('Failed to fetch MITRE data');
+    return await response.json();
+  } catch (err) {
+    console.error('Error in fetchMitreData:', err);
+    throw err;
+  }
+};
