@@ -27,6 +27,7 @@ import AddAgentModal from "../SOCDashboard/AddAgentModal";
 import RemoveAgentModal from "../SOCDashboard/RemoveAgentModal";
 import { fetchAllAlerts, runFimScan, getFimResults, clearFimResults, getLastFimScanDatetime, fetchAgents } from "../../services/SOCservices";
 import axios from 'axios'; // Added for OpenAI API integration
+import { getOpenAIApiKey } from '../../utils/apiKey';
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -52,7 +53,7 @@ const getInitials = (name) => {
 };
 
 // OpenAI API integration for FIM scan assistant
-const OPENAI_API_KEY = ''; // Use earlier key
+const OPENAI_API_KEY = getOpenAIApiKey();
 const ASSISTANT_ID = 'asst_sMop8t3yxFEFynVJCBpt5bQC';
 const OPENAI_BETA_HEADER = { 'OpenAI-Beta': 'assistants=v2' };
 const BASE_URL = 'https://api.openai.com/v1';

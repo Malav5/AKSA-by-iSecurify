@@ -15,6 +15,7 @@ import VulnerabilityDetail from './VulnerabilityDetail';
 import { fetchVulnerabilities } from '../../services/SOCservices';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import { getOpenAIApiKey } from '../../utils/apiKey';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
 
@@ -38,7 +39,7 @@ const Vulnerabilities = () => {
   const maxChatboxWidth = 600;
   const isDraggingRef = React.useRef(false);
   // OpenAI API integration
-  const OPENAI_API_KEY = ''; // Provided for local testing only
+  const OPENAI_API_KEY = getOpenAIApiKey();
   const ASSISTANT_ID = 'asst_8IyFzjmdoFxXzohWeqlWvifh'; // Provided for local testing only
   const OPENAI_BETA_HEADER = { 'OpenAI-Beta': 'assistants=v2' };
   const BASE_URL = 'https://api.openai.com/v1';
