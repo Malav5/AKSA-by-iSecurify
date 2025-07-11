@@ -52,7 +52,7 @@ const getInitials = (name) => {
 };
 
 // OpenAI API integration for FIM scan assistant
-const OPENAI_API_KEY = 'sk-proj-DgfiRlUn7rZBaORPPXUbSwNphP0JEygQyy2iQKCY7j7u77yAFyhcu-sTzlOpihxu8wFGSk0625T3BlbkFJZt1p7GSKPXbRoHfpA1bLjPBXG7yNx7g3OIy8iaDFOzlP51tn8dACeohvbymqFDCTklOAjH6lwAsk-proj-eOsRnSPcfwaEVG7aYkBCMqGnklDe2bLAlZELQB_Qgr4ScjRuSgsLmqWyE4PjOXVC-AwmFa3wEcT3BlbkFJ2X5U00ELYF__n_XeDq2mIivwU5wSXAOPz30do45Cbcnl3g0krABFVPikfB84YzjtzYlOdKvjEA'; // Use earlier key
+const OPENAI_API_KEY = ''; // Use earlier key
 const ASSISTANT_ID = 'asst_sMop8t3yxFEFynVJCBpt5bQC';
 const OPENAI_BETA_HEADER = { 'OpenAI-Beta': 'assistants=v2' };
 const BASE_URL = 'https://api.openai.com/v1';
