@@ -132,7 +132,7 @@ const Vulnerabilities = () => {
         setLoading(false);
       }
     };
-  
+
     getVulnerabilities();
   }, []);
 
@@ -155,35 +155,35 @@ const Vulnerabilities = () => {
     const agent = v._source?.agent?.name || 'Unknown';
     const severity = v._source?.vulnerability?.severity || 'Unknown';
     return (selectedAgent === 'All' || agent === selectedAgent) &&
-           (selectedSeverity === 'All' || severity === selectedSeverity);
+      (selectedSeverity === 'All' || severity === selectedSeverity);
   });
 
   // Sort by score (low to high or high to low) if selected
   const sortedVulnerabilities =
     sortOrder === 'scoreAsc'
       ? [...filteredVulnerabilities].sort((a, b) => {
-          const aScore = Number(a._source?.vulnerability?.score?.base) || 0;
-          const bScore = Number(b._source?.vulnerability?.score?.base) || 0;
-          return aScore - bScore;
-        })
+        const aScore = Number(a._source?.vulnerability?.score?.base) || 0;
+        const bScore = Number(b._source?.vulnerability?.score?.base) || 0;
+        return aScore - bScore;
+      })
       : sortOrder === 'scoreDesc'
-      ? [...filteredVulnerabilities].sort((a, b) => {
+        ? [...filteredVulnerabilities].sort((a, b) => {
           const aScore = Number(a._source?.vulnerability?.score?.base) || 0;
           const bScore = Number(b._source?.vulnerability?.score?.base) || 0;
           return bScore - aScore;
         })
-      : filteredVulnerabilities;
+        : filteredVulnerabilities;
 
   const totalPages = Math.ceil(sortedVulnerabilities.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = sortedVulnerabilities.slice(startIndex, startIndex + itemsPerPage);
 
   const severityColorMap = {
-    'Critical': 'rgba(239, 68, 68, 0.7)',
-    'High': 'rgba(245, 158, 11, 0.7)',
-    'Medium': 'rgba(251, 191, 36, 0.7)',
-    'Low': 'rgba(59, 130, 246, 0.7)',
-    'Unknown': 'rgba(156, 163, 175, 0.7)',
+    'Critical': 'rgba(236, 72, 153, 0.7)', // pink
+    'High': 'rgba(239, 68, 68, 0.7)',    // red
+    'Medium': 'rgba(234, 179, 8, 0.7)',  // amber/yellow
+    'Low': 'rgba(16, 185, 129, 0.7)',    // emerald/green
+    'Unknown': 'rgba(156, 163, 175, 0.7)', // gray
   };
 
   const severityCounts = sortedVulnerabilities.reduce((acc, item) => {
@@ -197,7 +197,14 @@ const Vulnerabilities = () => {
       label: 'Vulnerabilities by Severity',
       data: Object.values(severityCounts),
       backgroundColor: Object.keys(severityCounts).map(sev => severityColorMap[sev] || severityColorMap['Unknown']),
-      borderColor: Object.keys(severityCounts).map(sev => (severityColorMap[sev] || severityColorMap['Unknown']).replace('0.7', '1')),
+      borderColor: Object.keys(severityCounts).map(sev => {
+        // Use the same color but with opacity 1 for border
+        if (sev === 'Critical') return 'rgba(236, 72, 153, 1)';
+        if (sev === 'High') return 'rgba(239, 68, 68, 1)';
+        if (sev === 'Medium') return 'rgba(234, 179, 8, 1)';
+        if (sev === 'Low') return 'rgba(16, 185, 129, 1)';
+        return 'rgba(156, 163, 175, 1)';
+      }),
       borderWidth: 1,
     }],
   };
@@ -747,7 +754,7 @@ const Vulnerabilities = () => {
         {selectedVulnerability && (
           <VulnerabilityDetail
             vulnerability={selectedVulnerability}
-            onClose={() => setSelectedVulnerability(null)}
+            onClose={() => setSelectedVulnerability(null)}  
           />
         )}
       </div>
