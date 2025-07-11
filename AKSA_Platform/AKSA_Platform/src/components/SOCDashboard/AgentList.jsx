@@ -5,14 +5,14 @@ import Navbar from './Navbar';
 import { X } from 'lucide-react';
 const AgentList = ({ agents, type, onSelectAgent, onDeleteAgent, onClose }) => {
   return (
-    <div className="my-10 max-w-7xl mx-auto">
+    <div className="my-10 max-w-7xl mx-auto scrollbar-hide">
             {/* ✅ Fixed Navbar */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow">
         <Navbar />
       </div>
 
            {/* ✅ Close Button */}
-           <div className="flex justify-end mt-6">
+      <div className="flex justify-end mt-30">
         <button
           onClick={onClose}
           className="flex items-center text-sm text-gray-600 hover:text-red-600 transition"

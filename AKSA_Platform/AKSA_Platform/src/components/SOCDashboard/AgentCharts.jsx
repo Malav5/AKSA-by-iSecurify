@@ -59,7 +59,7 @@ const AgentCharts = ({ agents }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-28 px-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 px-4">
       <ChartCard title="Agents by Status" chartData={formatChartData(statusCounts)} />
       <ChartCard title="Top 5 Operating Systems" chartData={formatChartData(osCounts)} />
       <ChartCard title="Top 5 Agent Groups" chartData={formatChartData(groupCounts)} />

@@ -1,67 +1,101 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import AgentList from './AgentList';
 
 const AgentStatusSummary = () => {
-  const [agentSummary, setAgentSummary] = useState({
-    total: 0,
-    active: 0,
-    disconnected: 0,
-    pending: 0,
-    neverConnected: 0,
-    unknown: 0,
-  });
+  const [agents, setAgents] = useState([]);
+  const [summary, setSummary] = useState({});
+  const [showAgentList, setShowAgentList] = useState(false);
+  const [filteredAgents, setFilteredAgents] = useState([]);
+  const [selectedType, setSelectedType] = useState('');
 
   useEffect(() => {
-    const fetchAgentData = async () => {
+    const fetchAgents = async () => {
       try {
         const res = await axios.get('http://localhost:3000/api/wazuh/agents');
-        const agentItems = res?.data?.data?.affected_items ?? [];
-        const summary = {
-          total: agentItems.length,
+        const items = res?.data?.data?.affected_items ?? [];
+
+        const counts = {
+          total: items.length,
           active: 0,
           disconnected: 0,
           pending: 0,
-          neverConnected: 0,
+          never_connected: 0,
           unknown: 0,
         };
-        agentItems.forEach(agent => {
+
+        items.forEach(agent => {
           switch (agent.status) {
-            case 'active': summary.active++; break;
-            case 'disconnected': summary.disconnected++; break;
-            case 'pending': summary.pending++; break;
-            case 'never_connected': summary.neverConnected++; break;
-            default: summary.unknown++;
+            case 'active': counts.active++; break;
+            case 'disconnected': counts.disconnected++; break;
+            case 'pending': counts.pending++; break;
+            case 'never_connected': counts.never_connected++; break;
+            default: counts.unknown++;
           }
         });
-        setAgentSummary(summary);
+
+        setAgents(items);
+        setSummary(counts);
       } catch (err) {
         console.error('Error fetching agents:', err);
       }
     };
-    fetchAgentData();
+    fetchAgents();
   }, []);
 
+  const handleBoxClick = (type) => {
+    let filtered = [];
+
+    if (type === 'total') {
+      filtered = agents;
+    } else {
+      filtered = agents.filter(agent => {
+        if (type === 'neverConnected') return agent.status === 'never_connected';
+        return agent.status === type;
+      });
+    }
+
+    setFilteredAgents(filtered);
+    setSelectedType(type);
+    setShowAgentList(true);
+  };
+
   const agentStatusBoxes = [
-    { title: 'Total Agents', count: agentSummary.total, color: 'text-blue-600', bg: 'bg-blue-200' },
-    { title: 'Active Agents', count: agentSummary.active, color: 'text-green-600', bg: 'bg-green-200' },
-    { title: 'Disconnected Agents', count: agentSummary.disconnected, color: 'text-red-600', bg: 'bg-red-200' },
-    { title: 'Pending Agents', count: agentSummary.pending, color: 'text-orange-600', bg: 'bg-orange-200' },
-    { title: 'Never Connected', count: agentSummary.neverConnected, color: 'text-gray-600', bg: 'bg-blue-100' },
-    { title: 'Unknown Status', count: agentSummary.unknown, color: 'text-purple-600', bg: 'bg-purple-200' },
+    { key: 'total', title: 'Total Agents', count: summary.total, color: 'text-blue-600', bg: 'bg-blue-200' },
+    { key: 'active', title: 'Active Agents', count: summary.active, color: 'text-green-600', bg: 'bg-green-200' },
+    { key: 'disconnected', title: 'Disconnected Agents', count: summary.disconnected, color: 'text-red-600', bg: 'bg-red-200' },
+    { key: 'pending', title: 'Pending Agents', count: summary.pending, color: 'text-orange-600', bg: 'bg-orange-200' },
+    { key: 'neverConnected', title: 'Never Connected', count: summary.never_connected, color: 'text-gray-600', bg: 'bg-blue-100' },
+    { key: 'unknown', title: 'Unknown Status', count: summary.unknown, color: 'text-purple-600', bg: 'bg-purple-200' },
   ];
 
   return (
-    <div className="flex flex-wrap gap-6 justify-center mb-8">
-      {agentStatusBoxes.map((box, index) => (
-        <div
-          key={index}
-          className={`${box.bg} rounded-2xl flex flex-col items-center justify-center h-36 min-w-[325px] shadow transition-all duration-300`}
-        >
-          <div className={`text-5xl font-bold ${box.color}`}>{box.count}</div>
-          <div className="mt-2 text-base font-medium text-gray-700">{box.title}</div>
+    <>
+      <div className="flex flex-wrap gap-6 justify-center mb-8">
+        {agentStatusBoxes.map((box, index) => (
+          <div
+            key={index}
+            className={`${box.bg} rounded-2xl flex flex-col items-center justify-center h-36 min-w-[325px] shadow cursor-pointer transition-all duration-300`}
+            onClick={() => handleBoxClick(box.key)}
+          >
+            <div className={`text-5xl font-bold ${box.color}`}>{box.count}</div>
+            <div className="mt-2 text-base font-medium text-gray-700">{box.title}</div>
+          </div>
+        ))}
+      </div>
+
+      {showAgentList && (
+        <div className="fixed inset-0 z-50 bg-white overflow-auto shadow-xl scrollbar-hide">
+          <AgentList
+            agents={filteredAgents}
+            type={selectedType}
+            onSelectAgent={(id) => console.log('Selected Agent:', id)}
+            onDeleteAgent={(id) => console.log('Delete Agent:', id)}
+            onClose={() => setShowAgentList(false)}
+          />
         </div>
-      ))}
-    </div>
+      )}
+    </>
   );
 };
 
