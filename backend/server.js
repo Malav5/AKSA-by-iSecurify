@@ -20,7 +20,7 @@ mongoose
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/domains", require("./routes/domains"));
 app.use('/api/wazuh', wazuhRoutes);
-app.use("/api", memberRoutes);
+app.use("/api/member", memberRoutes);
 app.use('/api', taskRoutes);
 
 app.listen(3000, () =>

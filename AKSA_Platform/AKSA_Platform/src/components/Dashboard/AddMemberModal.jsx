@@ -24,7 +24,7 @@ const AddMemberModal = ({ onClose }) => {
     setSuccess("");
 
     try {
-      const response = await fetch("http://localhost:3000/api/add-member", {
+      const response = await fetch("http://localhost:3000/api/member/add-member", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -71,38 +71,43 @@ const OptionsMenu = () => {
       path: "/issuePage",
     },
   ];
-  
+
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 p-3 md:p-4 lg:p-6 bg-white">
         {cardData.map((card, index) => (
           <div
             key={index}
-            className="bg-white p-3 md:p-4 rounded-lg text-gray-800 flex flex-col items-center text-center shadow-sm hover:shadow-md transition"
+            className="bg-white p-3 md:p-4 rounded-lg text-gray-800 flex flex-col text-center shadow-sm hover:shadow-md transition h-full"
           >
             <div
-              className={`w-16 h-16 md:w-20 md:h-20 mb-3 md:mb-4 rounded-full flex items-center justify-center border-4 ${card.iconBorder} ${card.iconBg} ${card.iconColor}`}
+              className={`w-16 h-16 md:w-20 md:h-20 mb-3 md:mb-4 rounded-full mx-auto flex items-center justify-center border-4 ${card.iconBorder} ${card.iconBg} ${card.iconColor}`}
             >
               <span className="text-2xl md:text-3xl">{card.icon}</span>
             </div>
-            <h3 className="font-semibold text-sm md:text-base">{card.title}</h3>
-            <p className="text-xs md:text-sm mt-1 md:mt-2 mb-3 md:mb-4">{card.subtitle}</p>
 
-            {card.path ? (
-              <Link
-                to={card.path}
-                className="bg-primary text-white font-medium px-3 md:px-4 py-1 rounded hover:bg-primary/90 transition text-xs md:text-sm"
-              >
-                {card.buttonLabel}
-              </Link>
-            ) : (
-              <button 
-                onClick={card.onClick}
-                className="bg-primary text-white font-medium px-3 md:px-4 py-1 rounded hover:bg-primary/90 transition text-xs md:text-sm"
-              >
-                {card.buttonLabel}
-              </button>
-            )}
+            <h3 className="font-semibold text-sm md:text-base">{card.title}</h3>
+            <p className="text-xs md:text-sm mt-1 md:mt-2 mb-3 md:mb-4">
+              {card.subtitle}
+            </p>
+
+            <div className="mt-auto">
+              {card.path ? (
+                <Link
+                  to={card.path}
+                  className="bg-primary text-white font-medium px-3 md:px-4 py-1 rounded hover:bg-primary/90 transition text-xs md:text-sm"
+                >
+                  {card.buttonLabel}
+                </Link>
+              ) : (
+                <button
+                  onClick={card.onClick}
+                  className="bg-primary text-white font-medium px-3 md:px-4 py-1 rounded hover:bg-primary/90 transition text-xs md:text-sm"
+                >
+                  {card.buttonLabel}
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -116,7 +121,7 @@ const OptionsMenu = () => {
           onCancel={() => setShowQuestionnaire(false)}
           setQuestionnaireSubmitted={() => {
             setShowQuestionnaire(false);
-            // You can add any additional logic here after questionnaire submission
+            // Optional: handle post-submit logic
           }}
         />
       )}

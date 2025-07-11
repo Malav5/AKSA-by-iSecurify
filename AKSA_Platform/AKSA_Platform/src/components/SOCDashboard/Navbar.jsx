@@ -9,6 +9,7 @@ const Navbar = ({ username = 'Hevin Patel', fullname = 'Hevin Patel', onAddUser,
   const [showNotifications, setShowNotifications] = useState(false);
   const [user, setUser] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [showAddUser, setShowAddUser] = useState(false);
   
   const userButtonRef = useRef(null);
   const userMenuRef = useRef(null);
@@ -21,7 +22,6 @@ const Navbar = ({ username = 'Hevin Patel', fullname = 'Hevin Patel', onAddUser,
     const socFullname = localStorage.getItem('soc_fullname');
     const socEmail = localStorage.getItem('soc_email');
     const socRole = localStorage.getItem('role');
-    
     if (socUsername && socFullname) {
       // Parse the fullname to get first and last name
       const nameParts = socFullname.split(' ');
@@ -270,6 +270,13 @@ const Navbar = ({ username = 'Hevin Patel', fullname = 'Hevin Patel', onAddUser,
           )}
         </div>
       </div>
+       {/* 🔥 AddUser Modal */}
+       {showAddUser && (
+        <AddUserModal
+          onClose={() => setShowAddUser(false)}
+          onSubmit={handleAddUserSubmit}
+        />
+      )}
     </nav>
   );
 };
