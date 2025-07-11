@@ -5,6 +5,7 @@ import AgentList from './AgentList';
 const AgentStatusSummary = () => {
   const [agents, setAgents] = useState([]);
   const [summary, setSummary] = useState({});
+  const [loading, setLoading] = useState(true);
   const [showAgentList, setShowAgentList] = useState(false);
   const [filteredAgents, setFilteredAgents] = useState([]);
   const [selectedType, setSelectedType] = useState('');
@@ -38,6 +39,8 @@ const AgentStatusSummary = () => {
         setSummary(counts);
       } catch (err) {
         console.error('Error fetching agents:', err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchAgents();
@@ -78,7 +81,9 @@ const AgentStatusSummary = () => {
             className={`${box.bg} rounded-2xl flex flex-col items-center justify-center h-36 min-w-[325px] shadow cursor-pointer transition-all duration-300`}
             onClick={() => handleBoxClick(box.key)}
           >
-            <div className={`text-5xl font-bold ${box.color}`}>{box.count}</div>
+            <div className={`text-5xl font-bold ${box.color}`}>
+              {loading ? '0' : box.count}
+            </div>
             <div className="mt-2 text-base font-medium text-gray-700">{box.title}</div>
           </div>
         ))}

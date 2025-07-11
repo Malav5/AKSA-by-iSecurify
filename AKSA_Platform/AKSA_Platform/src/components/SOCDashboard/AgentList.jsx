@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import AgentCharts from './AgentCharts'; // 👈 import chart component
 import Navbar from './Navbar';
 import { X } from 'lucide-react';
+
 const AgentList = ({ agents, type, onSelectAgent, onDeleteAgent, onClose }) => {
   return (
     <div className="my-10 max-w-7xl mx-auto scrollbar-hide">

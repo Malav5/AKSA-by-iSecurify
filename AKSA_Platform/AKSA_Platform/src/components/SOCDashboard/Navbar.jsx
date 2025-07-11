@@ -1,10 +1,9 @@
-// src/components/Navbar.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Users2, Bell } from 'lucide-react';
 import AddUserModal from './AddUserModal';
 
-const Navbar = ({ onAssignAgent, onLogout }) => {
+const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -76,7 +75,7 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
   const handleAddUserSubmit = (newUser) => {
     console.log('User submitted:', newUser);
     setShowAddUser(false);
-    // Optionally send data to backend here
+    // TODO: Send to backend if needed
   };
 
   const navItems = [
@@ -96,7 +95,7 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
         <span className="ml-2 text-2xl font-bold text-black whitespace-nowrap">SOC Dashboard</span>
       </div>
 
-      {/* Center Nav */}
+      {/* Navigation Links */}
       <div className="flex-1 flex justify-center overflow-x-auto scrollbar-hide">
         <div className="flex gap-8 items-center">
           {navItems.map(({ path, label }) => (
@@ -115,7 +114,7 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
         </div>
       </div>
 
-      {/* Notifications & User */}
+      {/* Notification & User Section */}
       <div className="flex items-center space-x-4 flex-shrink-0">
         {/* Notifications */}
         <div className="relative">
@@ -152,13 +151,15 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
           )}
         </div>
 
-        {/* User */}
+        {/* User Menu */}
         <div className="relative">
           <button ref={userButtonRef} onClick={toggleUserMenu} className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold">
-              {user?.firstName.charAt(0).toUpperCase()}
+              {user?.firstName?.charAt(0).toUpperCase()}
             </div>
-            <span className="hidden sm:block text-lg font-medium text-gray-700">{user?.firstName || 'User'}</span>
+            <span className="hidden sm:block text-lg font-medium text-gray-700">
+              {user?.firstName || 'User'}
+            </span>
           </button>
 
           {showUserMenu && (
@@ -171,13 +172,19 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
                 {localStorage.getItem('role') === 'admin' && (
                   <>
                     <button
-                      onClick={() => { setShowUserMenu(false); onAssignAgent?.(); }}
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        navigate('/assign-agent');
+                      }}
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                     >
                       Assign Agent
                     </button>
                     <button
-                      onClick={() => { setShowUserMenu(false); setShowAddUser(true); }}
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        setShowAddUser(true);
+                      }}
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                     >
                       Add User
@@ -185,7 +192,10 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
                   </>
                 )}
                 <button
-                  onClick={() => { setShowUserMenu(false); navigate('/dashboard'); }}
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    navigate('/dashboard');
+                  }}
                   className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                 >
                   Home
@@ -193,7 +203,8 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
                 <button
                   onClick={() => {
                     setShowUserMenu(false);
-                    onLogout?.() || (localStorage.clear(), navigate('/soc-login'));
+                    localStorage.clear();
+                    navigate('/soc-login');
                   }}
                   className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                 >
@@ -206,7 +217,12 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
       </div>
 
       {/* Add User Modal */}
-      {showAddUser && <AddUserModal onClose={() => setShowAddUser(false)} onSubmit={handleAddUserSubmit} />}
+      {showAddUser && (
+        <AddUserModal
+          onClose={() => setShowAddUser(false)}
+          onSubmit={handleAddUserSubmit}
+        />
+      )}
     </nav>
   );
 };
