@@ -234,7 +234,7 @@ const ScanComponent = () => {
         <select
           value={agentId}
           onChange={(e) => setAgentId(e.target.value)}
-          className="border rounded-lg px-4 py-2 text-lg w-100"
+          className="border rounded-lg px-4 py-2 text-lg w-150"
           disabled={loading}
         >
           {agents.length === 0 && <option>Loading agents...</option>}
