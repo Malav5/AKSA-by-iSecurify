@@ -212,7 +212,7 @@ export const getLastFimScanDatetime = async (agentId) => {
 // Fetch all agents (admin) or only assigned agents (user)
 export const fetchAgents = async () => {
   try {
-    const response = await axios.get('/api/agents', { withCredentials: true });
+    const response = await axios.get(`${BASE_URL}/api/agents`, { withCredentials: true });
     return response.data?.agents || [];
   } catch (error) {
     console.error('Error fetching agents:', error);
