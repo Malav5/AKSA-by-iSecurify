@@ -13,11 +13,15 @@ const getLevelColor = (level) => {
   return "bg-green-100 text-green-800";
 };
 
+// Sample user list (you can fetch this from your API instead)
+const users = ["Unassigned", "Alice", "Bob", "Charlie", "David"];
+
 export default function IssuesTable() {
   const [alerts, setAlerts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [assignments, setAssignments] = useState({}); // Store assignments per alert ID
 
   const fetchData = async () => {
     const from = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -55,11 +59,18 @@ export default function IssuesTable() {
     alert.agent.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalPages = Math.ceil(10000 / ITEMS_PER_PAGE); // Assuming 10k total alerts
+  const totalPages = Math.ceil(10000 / ITEMS_PER_PAGE); // Assumed total
+
+  const handleAssignUser = (alertId, user) => {
+    setAssignments(prev => ({
+      ...prev,
+      [alertId]: user
+    }));
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 max-w-full overflow-hidden">
-      {/* Search and Filter Controls */}
+      {/* Search & Filter */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div className="relative w-full md:w-96">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -90,7 +101,7 @@ export default function IssuesTable() {
               <th className="px-4 py-5">Alert ID</th>
               <th className="px-4 py-5">Agent</th>
               <th className="px-4 py-5">Title</th>
-              <th className="px-4 py-5">Result</th>
+              <th className="px-4 py-5">Assigned To</th>
               <th className="px-4 py-5">Level</th>
               <th className="px-4 py-5">Group</th>
               <th className="px-4 py-5">Policy</th>
@@ -111,7 +122,21 @@ export default function IssuesTable() {
                 </td>
                 <td className="px-4 py-3 text-gray-600">{alert.agent}</td>
                 <td className="px-4 py-3 font-medium">{alert.title}</td>
-                <td className="px-4 py-3 text-gray-600">{alert.result}</td>
+
+                {/* Assigned To dropdown */}
+                <td className="px-4 py-3">
+                  <select
+                    className="text-sm bg-white border border-gray-300 rounded-lg px-2 py-1"
+                    value={assignments[alert.id] || "Unassigned"}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => handleAssignUser(alert.id, e.target.value)}
+                  >
+                    {users.map((user) => (
+                      <option key={user} value={user}>{user}</option>
+                    ))}
+                  </select>
+                </td>
+
                 <td className="px-4 py-3">
                   <span
                     className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getLevelColor(alert.level)}`}

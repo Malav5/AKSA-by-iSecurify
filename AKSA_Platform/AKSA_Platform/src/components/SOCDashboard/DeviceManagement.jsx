@@ -128,11 +128,10 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
                         <td className="px-6 py-4 text-gray-500">{agent.ip || 'N/A'}</td>
                         <td className="px-6 py-4">
                           <span
-                            className={`px-2 py-1 rounded-full text-sm font-medium ${
-                              agent.status === 'active'
+                            className={`px-2 py-1 rounded-full text-sm font-medium ${agent.status === 'active'
                                 ? 'bg-green-100 text-green-700'
                                 : 'bg-gray-200 text-gray-800'
-                            }`}
+                              }`}
                           >
                             {agent.status || 'Unknown'}
                           </span>
