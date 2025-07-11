@@ -550,7 +550,7 @@ const SOCDashboard = () => {
         <DeviceManagement onAddAgent={() => setShowAddAgentModal(true)} onRemoveAgent={() => setShowRemoveAgentModal(true)} />
 
         {/* FIM Scan Component */}
-        
+
 
         <div className="mt-8">
           <h2 className="text-3xl font-bold mb-4 ">Security Dashboard</h2>
@@ -563,9 +563,9 @@ const SOCDashboard = () => {
             alertsOverTimeChartOptions={alertsOverTimeChartOptions}
             alertsOverTimeChartData={alertsOverTimeChartData}
             topAgents={alertSummary.topAgents}
-         
+
             alertLevelChartData={alertLevelChartData}
-     
+
             agentAlertChartData={agentAlertChartData}
             topRules={alertSummary.topRules}
           />
@@ -585,7 +585,7 @@ const SOCDashboard = () => {
       {showAddAgentModal && (
         <>
           <div className="fixed inset-0 z-40 backdrop-blur-sm" />
-          <AddAgentModal visible={showAddAgentModal} onClose={() => setShowAddAgentModal(false)} onAdd={() => {}} />
+          <AddAgentModal visible={showAddAgentModal} onClose={() => setShowAddAgentModal(false)} onAdd={() => { }} />
         </>
       )}
       {showRemoveAgentModal && (

@@ -87,24 +87,26 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
   ];
 
   return (
-    <nav className="w-full h-18 flex items-center px-6 bg-white select-none border-b border-gray-300">
+    <nav className="w-full h-20 flex items-center px-6 bg-white border-b border-gray-300 shadow-sm fixed top-0 z-50">
       {/* Logo + Title */}
-      <div className="flex items-center gap-2 min-w-[220px]">
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-          <Users2 className="text-white" size={30} />
+      <div className="flex items-center gap-2 min-w-[220px] flex-shrink-0">
+        <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+          <Users2 className="text-white" size={28} />
         </div>
-        <span className="ml-2 text-3xl font-bold text-black">SOC Dashboard</span>
+        <span className="ml-2 text-2xl font-bold text-black whitespace-nowrap">SOC Dashboard</span>
       </div>
 
       {/* Center Nav */}
-      <div className="flex-1 flex justify-center">
-        <div className="flex gap-7">
+      <div className="flex-1 flex justify-center overflow-x-auto scrollbar-hide">
+        <div className="flex gap-8 items-center">
           {navItems.map(({ path, label }) => (
             <Link
               key={path}
               to={path}
-              className={`text-xl font-medium ${
-                location.pathname === path ? 'text-blue-600 font-semibold' : 'text-gray-500 hover:text-blue-600'
+              className={`text-lg font-medium ${
+                location.pathname === path
+                  ? 'text-blue-600 font-semibold'
+                  : 'text-gray-500 hover:text-blue-600'
               }`}
             >
               {label}
@@ -114,11 +116,11 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
       </div>
 
       {/* Notifications & User */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 flex-shrink-0">
         {/* Notifications */}
         <div className="relative">
           <button ref={notificationButtonRef} onClick={toggleNotifications}>
-            <Bell className="w-8 h-8 text-gray-600 hover:text-blue-600" />
+            <Bell className="w-7 h-7 text-gray-600 hover:text-blue-600" />
             {notifications.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                 {notifications.length > 9 ? '9+' : notifications.length}
@@ -126,7 +128,10 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
             )}
           </button>
           {showNotifications && (
-            <div ref={panelRef} className="absolute right-0 mt-2 w-72 bg-white shadow-xl rounded z-50">
+            <div
+              ref={panelRef}
+              className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded z-50"
+            >
               <div className="p-3 font-semibold border-b">SOC Notifications</div>
               <div className="max-h-60 overflow-y-auto">
                 {notifications.length > 0 ? (
@@ -138,7 +143,9 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
                     ))}
                   </ul>
                 ) : (
-                  <div className="p-4 text-center text-gray-500 text-sm">No new notifications</div>
+                  <div className="p-4 text-center text-gray-500 text-sm">
+                    No new notifications
+                  </div>
                 )}
               </div>
             </div>
@@ -151,7 +158,7 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold">
               {user?.firstName.charAt(0).toUpperCase()}
             </div>
-            <span className="hidden sm:block text-xl font-medium text-gray-700">{user?.firstName || 'User'}</span>
+            <span className="hidden sm:block text-lg font-medium text-gray-700">{user?.firstName || 'User'}</span>
           </button>
 
           {showUserMenu && (
@@ -163,18 +170,33 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
               <div className="p-1">
                 {localStorage.getItem('role') === 'admin' && (
                   <>
-                    <button onClick={() => { setShowUserMenu(false); onAssignAgent?.(); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm">
+                    <button
+                      onClick={() => { setShowUserMenu(false); onAssignAgent?.(); }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                    >
                       Assign Agent
                     </button>
-                    <button onClick={() => { setShowUserMenu(false); setShowAddUser(true); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm">
+                    <button
+                      onClick={() => { setShowUserMenu(false); setShowAddUser(true); }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                    >
                       Add User
                     </button>
                   </>
                 )}
-                <button onClick={() => { setShowUserMenu(false); navigate('/dashboard'); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm">
+                <button
+                  onClick={() => { setShowUserMenu(false); navigate('/dashboard'); }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                >
                   Home
                 </button>
-                <button onClick={() => { setShowUserMenu(false); onLogout?.() || (localStorage.clear(), navigate('/soc-login')); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm">
+                <button
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    onLogout?.() || (localStorage.clear(), navigate('/soc-login'));
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                >
                   Logout
                 </button>
               </div>
@@ -183,7 +205,7 @@ const Navbar = ({ onAssignAgent, onLogout }) => {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Add User Modal */}
       {showAddUser && <AddUserModal onClose={() => setShowAddUser(false)} onSubmit={handleAddUserSubmit} />}
     </nav>
   );
