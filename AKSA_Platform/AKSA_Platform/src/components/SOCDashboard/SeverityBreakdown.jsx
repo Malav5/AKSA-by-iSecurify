@@ -6,14 +6,15 @@ import PropTypes from 'prop-types';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const SeverityBreakdown = ({ alerts = [] }) => {
-  // Severity level configuration
+  // Severity level configuration with pastel colors
   const severityConfig = {
     Critical: {
       threshold: 15,
-      color: '#7e22ce',  // purple-700
-      bgColor: 'bg-purple-100',
+      color: '#C4A1FF',  // Soft purple
+      darkColor: '#7e22ce',
+      bgColor: 'bg-purple-50',
       textColor: 'text-purple-800',
-      borderColor: 'border-purple-200',
+      borderColor: 'border-purple-100',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -22,10 +23,11 @@ const SeverityBreakdown = ({ alerts = [] }) => {
     },
     High: {
       threshold: 12,
-      color: '#dc2626',   // red-600
-      bgColor: 'bg-red-100',
+      color: '#FF9E9E',   // Soft red
+      darkColor: '#dc2626',
+      bgColor: 'bg-red-50',
       textColor: 'text-red-800',
-      borderColor: 'border-red-200',
+      borderColor: 'border-red-100',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01" />
@@ -34,10 +36,11 @@ const SeverityBreakdown = ({ alerts = [] }) => {
     },
     Medium: {
       threshold: 7,
-      color: '#d97706',   // amber-600
-      bgColor: 'bg-amber-100',
+      color: '#FFD6A5',   // Soft orange
+      darkColor: '#d97706',
+      bgColor: 'bg-amber-50',
       textColor: 'text-amber-800',
-      borderColor: 'border-amber-200',
+      borderColor: 'border-amber-100',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -46,10 +49,11 @@ const SeverityBreakdown = ({ alerts = [] }) => {
     },
     Low: {
       threshold: 0,
-      color: '#16a34a',   // green-600
-      bgColor: 'bg-green-100',
+      color: '#A8E6CF',   // Soft green
+      darkColor: '#16a34a',
+      bgColor: 'bg-green-50',
       textColor: 'text-green-800',
-      borderColor: 'border-green-200',
+      borderColor: 'border-green-100',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -77,7 +81,7 @@ const SeverityBreakdown = ({ alerts = [] }) => {
   const total = Object.values(counts).reduce((sum, val) => sum + val, 0);
   const severityLevels = Object.keys(severityConfig);
 
-  // Chart data
+  // Chart data with light colors
   const chartData = {
     labels: severityLevels,
     datasets: [
@@ -85,54 +89,65 @@ const SeverityBreakdown = ({ alerts = [] }) => {
         data: severityLevels.map(level => counts[level]),
         backgroundColor: severityLevels.map(level => severityConfig[level].color),
         borderColor: '#ffffff',
-        borderWidth: 2,
-        hoverOffset: 15,
+        borderWidth: 3,
+        hoverOffset: 20,
+        hoverBorderWidth: 4,
       },
     ],
   };
 
-  // Chart options
+  // Beautiful chart options
   const chartOptions = {
     plugins: {
       legend: { 
         display: false,
       },
       tooltip: {
-        backgroundColor: '#1f2937',
-        titleColor: '#f9fafb',
-        bodyColor: '#f9fafb',
-        borderColor: '#374151',
+        backgroundColor: 'rgba(255, 255, 255, 0.96)',
+        titleColor: '#111827',
+        bodyColor: '#374151',
+        borderColor: '#e5e7eb',
         borderWidth: 1,
         padding: 12,
+        boxPadding: 8,
+        usePointStyle: true,
         callbacks: {
           label: (ctx) => {
             const label = ctx.label || '';
             const value = ctx.raw;
             const pct = total ? ((value / total) * 100).toFixed(1) : 0;
-            return `${label}: ${value} alerts (${pct}%)`;
+            return [`${label}: ${value} alerts`, `${pct}% of total`];
           },
         },
       },
     },
-    cutout: '75%',
+    cutout: '70%',
     animation: {
       animateScale: true,
       animateRotate: true,
       duration: 1500,
     },
     maintainAspectRatio: false,
+    elements: {
+      arc: {
+        borderRadius: 8,
+      }
+    }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+    <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-gray-100">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Severity Distribution</h2>
-          <p className="text-gray-500 mt-1">Breakdown of alerts by severity level</p>
+          <p className="text-gray-500 mt-1">Breakdown of security alerts by severity level</p>
         </div>
         {total > 0 && (
-          <div className="mt-3 md:mt-0 bg-blue-50 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
-            Total Alerts: <span className="font-bold">{total}</span>
+          <div className="mt-3 md:mt-0 bg-blue-50 text-blue-800 px-4 py-2 rounded-full text-sm font-medium flex items-center">
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Total Alerts: <span className="font-bold ml-1">{total}</span>
           </div>
         )}
       </div>
@@ -159,17 +174,20 @@ const SeverityBreakdown = ({ alerts = [] }) => {
                       <h3 className={`${config.textColor} font-semibold`}>{level}</h3>
                     </div>
                     <span className={`${config.textColor} text-xs font-medium px-2 py-1 rounded-full ${config.bgColor}`}>
-                      Threshold: {config.threshold}+
+                      Level {config.threshold}+
                     </span>
                   </div>
                   <div className="flex items-end justify-between">
                     <div>
                       <p className="text-3xl font-bold text-gray-900">{count}</p>
-                      <p className="text-gray-500">alerts</p>
+                      <p className="text-gray-500 text-sm">alerts detected</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900">{percentage}%</p>
-                      <p className="text-gray-500">of total</p>
+                      <div className="flex items-center justify-end">
+                        <p className="text-2xl font-bold text-gray-900 mr-1">{percentage}</p>
+                        <span className="text-gray-500">%</span>
+                      </div>
+                      <p className="text-gray-500 text-sm">of total</p>
                     </div>
                   </div>
                 </div>
@@ -180,33 +198,43 @@ const SeverityBreakdown = ({ alerts = [] }) => {
 
         {/* Chart */}
         <div className="w-full lg:w-1/2">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 h-full flex flex-col">
+          <div className="bg-white rounded-xl p-6 h-full flex flex-col border border-gray-100">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-800">Visual Distribution</h3>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 {severityLevels.map(level => (
                   <div key={level} className="flex items-center">
                     <span 
-                      className="w-3 h-3 rounded-full mr-1" 
+                      className="w-3 h-3 rounded-full mr-1.5 shadow-sm" 
                       style={{ backgroundColor: severityConfig[level].color }}
                     ></span>
-                    <span className="text-xs text-gray-600">{level}</span>
+                    <span className="text-xs text-gray-600 font-medium">{level}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="flex-grow flex items-center justify-center">
+            <div className="flex-grow flex items-center justify-center relative">
               {total > 0 ? (
-                <div className="w-full h-64 md:h-80">
-                  <Pie data={chartData} options={chartOptions} />
-                </div>
+                <>
+                  <div className="w-full h-64 md:h-80 relative">
+                    <Pie data={chartData} options={chartOptions} />
+                    {total > 0 && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="text-center">
+                          <p className="text-3xl font-bold text-gray-700">{total}</p>
+                          <p className="text-gray-500 text-sm">total alerts</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : (
-                <div className="text-center py-12">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <div className="text-center py-12 w-full">
+                  <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No alert data</h3>
-                  <p className="mt-1 text-sm text-gray-500">There are currently no alerts to display.</p>
+                  <h3 className="mt-3 text-sm font-medium text-gray-500">No alert data available</h3>
+                  <p className="mt-1 text-xs text-gray-400">Security alerts will appear here when detected</p>
                 </div>
               )}
             </div>
@@ -216,25 +244,50 @@ const SeverityBreakdown = ({ alerts = [] }) => {
 
       {/* Key Takeaways */}
       {total > 0 && (
-        <div className="mt-8 bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Key Takeaways</h4>
-          <ul className="text-sm text-gray-600 space-y-1">
+        <div className="mt-8 bg-gray-50 rounded-xl p-5 border border-gray-100">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+            <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Key Insights
+          </h4>
+          <ul className="text-sm text-gray-600 space-y-2">
             {counts.Critical > 0 && (
               <li className="flex items-start">
-                <span className="text-purple-600 mr-2">•</span>
-                <span><strong className="font-medium">{counts.Critical} Critical</strong> alerts require immediate attention</span>
+                <span className="text-purple-500 mr-2 mt-0.5">•</span>
+                <div>
+                  <span className="font-medium text-gray-700">{counts.Critical} Critical</span> alerts detected - 
+                  <span className="text-purple-600 font-medium"> immediate action required</span>
+                </div>
               </li>
             )}
             {counts.High > 0 && (
               <li className="flex items-start">
-                <span className="text-red-600 mr-2">•</span>
-                <span><strong className="font-medium">{counts.High} High</strong> priority alerts should be addressed soon</span>
+                <span className="text-red-400 mr-2 mt-0.5">•</span>
+                <div>
+                  <span className="font-medium text-gray-700">{counts.High} High</span> priority alerts - 
+                  <span className="text-red-500 font-medium"> address within 24 hours</span>
+                </div>
               </li>
             )}
-            <li className="flex items-start">
-              <span className="text-gray-600 mr-2">•</span>
-              <span>Severity is calculated based on rule level thresholds</span>
-            </li>
+            {counts.Medium > 0 && (
+              <li className="flex items-start">
+                <span className="text-amber-400 mr-2 mt-0.5">•</span>
+                <div>
+                  <span className="font-medium text-gray-700">{counts.Medium} Medium</span> risk alerts - 
+                  <span> review within this week</span>
+                </div>
+              </li>
+            )}
+            {counts.Low > 0 && (
+              <li className="flex items-start">
+                <span className="text-green-400 mr-2 mt-0.5">•</span>
+                <div>
+                  <span className="font-medium text-gray-700">{counts.Low} Low</span> severity alerts - 
+                  <span> monitor periodically</span>
+                </div>
+              </li>
+            )}
           </ul>
         </div>
       )}
