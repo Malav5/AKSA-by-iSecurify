@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 
+const baseURL = 'http://localhost:3000';
+
 const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
         const userRole = localStorage.getItem("role");
         if (userRole === "admin") {
           // Admin: fetch all agents
-          const res = await axios.get('/api/wazuh/agents', {
+          const res = await axios.get(`${baseURL}/api/wazuh/agents`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           // Wazuh returns agents in res.data.data.affected_items
@@ -35,7 +37,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
             setLoading(false);
             return;
           }
-          const res = await axios.get(`/api/agentMap/assigned-agents?userEmail=${encodeURIComponent(userEmail)}`, {
+          const res = await axios.get(`${baseURL}/api/agentMap/assigned-agents?userEmail=${encodeURIComponent(userEmail)}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setAgents(res.data.agents || []);
@@ -50,7 +52,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get('/api/agentMap/users-with-role-user', {
+        const res = await axios.get(`${baseURL}/api/agentMap/users-with-role-user`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -78,7 +80,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post('/api/agentMap/assign-agent-to-user', {
+      await axios.post(`${baseURL}/api/agentMap/assign-agent-to-user`, {
         userEmail: user.email,
         userName: user.name,
         agentName: selectedAgent.name || selectedAgent.id,

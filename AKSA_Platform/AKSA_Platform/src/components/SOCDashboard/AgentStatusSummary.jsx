@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AgentList from './AgentList';
 
+const baseURL = 'http://localhost:3000';
+
 const AgentStatusSummary = () => {
   const [agents, setAgents] = useState([]);
   const [summary, setSummary] = useState({});
@@ -14,14 +16,30 @@ const AgentStatusSummary = () => {
     const fetchAgents = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get('http://localhost:3000/api/wazuh/agents', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
-        const items = res?.data?.data?.affected_items ?? [];
-  
+        const userRole = localStorage.getItem("role");
+        let items = [];
+        if (userRole === "admin") {
+          // Admin: fetch all agents
+          const res = await axios.get(`${baseURL}/api/wazuh/agents`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          items = res?.data?.data?.affected_items ?? [];
+        } else {
+          // User: fetch only assigned agents
+          const userEmail = localStorage.getItem("soc_email");
+          if (!userEmail) {
+            setAgents([]);
+            setSummary({});
+            setLoading(false);
+            return;
+          }
+          const res = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
+            params: { userEmail },
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          items = res?.data?.agents ?? [];
+        }
+
         const counts = {
           total: items.length,
           active: 0,
@@ -30,7 +48,7 @@ const AgentStatusSummary = () => {
           never_connected: 0,
           unknown: 0,
         };
-  
+
         items.forEach(agent => {
           switch (agent.status) {
             case 'active': counts.active++; break;
@@ -40,7 +58,7 @@ const AgentStatusSummary = () => {
             default: counts.unknown++;
           }
         });
-  
+
         setAgents(items);
         setSummary(counts);
       } catch (err) {
@@ -49,10 +67,10 @@ const AgentStatusSummary = () => {
         setLoading(false);
       }
     };
-  
+
     fetchAgents();
   }, []);
-  
+
 
   const handleBoxClick = (type) => {
     let filtered = [];

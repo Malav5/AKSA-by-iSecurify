@@ -228,10 +228,18 @@ router.get("/assigned-agents", async (req, res) => {
   try {
     const assignment = await AgentUserAssignment.findOne({ userEmail });
     if (!assignment || !assignment.agents) {
+      console.log(`[assigned-agents] No assignment found for email: ${userEmail}`);
       return res.json({ agents: [] });
     }
-    res.json({ agents: assignment.agents });
+    // Normalize agentId to 3-digit string for all returned agents
+    const normalizedAgents = assignment.agents.map(agent => ({
+      ...agent.toObject ? agent.toObject() : agent,
+      agentId: String(agent.agentId).padStart(3, '0')
+    }));
+    console.log(`[assigned-agents] Returning ${normalizedAgents.length} agents for email: ${userEmail}`);
+    res.json({ agents: normalizedAgents });
   } catch (err) {
+    console.error(`[assigned-agents] Error for email ${userEmail}:`, err.message);
     res.status(500).json({ error: "Failed to fetch assigned agents", details: err.message });
   }
 });
@@ -245,11 +253,25 @@ router.get("/assigned-agents-details", async (req, res) => {
     if (!assignment || !assignment.agents) {
       return res.json({ agents: [] });
     }
-    // Get all agentIds assigned to this user
-    const agentIds = assignment.agents.map(a => a.agentId);
-    // Fetch agent details from Agent collection
-    const agents = await Agent.find({ agentId: { $in: agentIds } });
-    res.json({ agents });
+    const agentIds = assignment.agents.map(a => String(a.agentId).padStart(3, '0'));
+    const token = await getWazuhToken();
+
+    // Fetch details for each agent from Wazuh
+    const agentDetails = [];
+    for (const agentId of agentIds) {
+      try {
+        const agentRes = await axios.get(`${apiBaseUrl}/agents/${agentId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          httpsAgent: new https.Agent({ rejectUnauthorized: false })
+        });
+        if (agentRes.data?.data?.affected_items?.length > 0) {
+          agentDetails.push(agentRes.data.data.affected_items[0]);
+        }
+      } catch (err) {
+        // Optionally log or handle errors for missing agents
+      }
+    }
+    res.json({ agents: agentDetails });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch assigned agent details", details: err.message });
   }
