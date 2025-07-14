@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
-import { fetchAgentAlertCounts, fetchAlertSeverityChartData, fetchAlertsOverTimeData } from '../../services/SOCservices';
+import { fetchAgentAlertCounts, fetchAlertSeverityChartData, fetchAlertsOverTimeData, fetchAllAlerts } from '../../services/SOCservices';
 import axios from 'axios';
 import {
   Chart as ChartJS,
@@ -23,8 +23,9 @@ ChartJS.register(
   Filler // ✅ Register Filler here
 );
 
-const AlertsAndMetrics = ({
+const baseURL = 'http://localhost:3000';
 
+const AlertsAndMetrics = ({
   topAgents,
   agentChartOptions,
   agentAlertChartData,
@@ -36,7 +37,7 @@ const AlertsAndMetrics = ({
     labels: [],
     datasets: []
   });
-  
+
 
   const chartOptions = {
     responsive: true,
@@ -94,47 +95,81 @@ const AlertsAndMetrics = ({
       }
     }
   };
-  
+
 
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [severityData, overTimeBuckets, agentBuckets] = await Promise.all([
-          fetchAlertSeverityChartData(),
-          fetchAlertsOverTimeData(),
-          fetchAgentAlertCounts()
-        ]);
-  
-        // 🔹 Handle Severity Chart Data
-        const sortedSeverity = severityData.labels
-          .map((label, i) => ({
-            label,
-            value: severityData.datasets[0].data[i]
-          }))
-          .sort((a, b) => {
-            const aLevel = parseInt(a.label.replace(/\D/g, ''));
-            const bLevel = parseInt(b.label.replace(/\D/g, ''));
-            return aLevel - bLevel;
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('role');
+        let filteredAlerts = [];
+        if (userRole === 'admin') {
+          // Admin: show all alerts
+          const allAlertsData = await fetchAllAlerts();
+          filteredAlerts = allAlertsData.hits?.hits?.map(hit => hit._source) || [];
+        } else {
+          // User: fetch assigned agent IDs
+          const userEmail = localStorage.getItem('soc_email');
+          if (!userEmail) {
+            setAlertLevelChartData({ labels: [], datasets: [] });
+            setAgentAlertCountData({ labels: [], datasets: [] });
+            setAlertsOverTimeChartData({ labels: [], datasets: [] });
+            return;
+          }
+          // Get assigned agents
+          const assignedRes = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
+            params: { userEmail },
+            headers: { Authorization: `Bearer ${token}` },
           });
-  
+          const assignedAgents = assignedRes.data.agents || [];
+          const agentIds = assignedAgents.map(a => String(a.agentId).padStart(3, '0'));
+          // Fetch all alerts, then filter for assigned agentIds
+          const allAlertsData = await fetchAllAlerts();
+          filteredAlerts = (allAlertsData.hits?.hits?.map(hit => hit._source) || []).filter(alert =>
+            agentIds.includes(String(alert.agent?.id || alert.agentId).padStart(3, '0'))
+          );
+        }
+
+        // Build Severity Chart Data
+        const severityCounts = {};
+        filteredAlerts.forEach(alert => {
+          const level = alert.rule?.level || 0;
+          const label = `Level ${level}`;
+          severityCounts[label] = (severityCounts[label] || 0) + 1;
+        });
+        const sortedSeverity = Object.entries(severityCounts)
+          .map(([label, value]) => ({ label, value }))
+          .sort((a, b) => parseInt(a.label.replace(/\D/g, '')) - parseInt(b.label.replace(/\D/g, '')));
         setAlertLevelChartData({
           labels: sortedSeverity.map(item => item.label),
           datasets: [
             {
-              ...severityData.datasets[0],
-              data: sortedSeverity.map(item => item.value)
+              label: 'Alerts',
+              data: sortedSeverity.map(item => item.value),
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
             }
           ]
         });
-  
-        // 🔹 Handle Alerts Over Time Chart
+
+        // Build Alerts Over Time Chart Data
+        const timeCounts = {};
+        filteredAlerts.forEach(alert => {
+          const date = alert['@timestamp'] ? alert['@timestamp'].slice(0, 10) : (alert.timestamp ? alert.timestamp.slice(0, 10) : '');
+          if (date) timeCounts[date] = (timeCounts[date] || 0) + 1;
+        });
+        let sortedDates = Object.keys(timeCounts).sort();
+        if (sortedDates.length > 10) {
+          sortedDates = sortedDates.slice(-10);
+        }
         setAlertsOverTimeChartData({
-          labels: overTimeBuckets.map(b => b.key_as_string),
+          labels: sortedDates,
           datasets: [
             {
               label: 'Alerts Over Time',
-              data: overTimeBuckets.map(b => b.doc_count),
+              data: sortedDates.map(date => timeCounts[date]),
               fill: true,
               borderColor: 'rgba(75,192,192,1)',
               backgroundColor: 'rgba(75,192,192,0.2)',
@@ -142,30 +177,34 @@ const AlertsAndMetrics = ({
             }
           ]
         });
-  
-        // 🔹 Handle Agent Alert Count Chart
+
+        // Build Agent Alert Count Chart Data
+        const agentCounts = {};
+        filteredAlerts.forEach(alert => {
+          const agentName = alert.agent?.name || alert.agentName || 'Unknown';
+          agentCounts[agentName] = (agentCounts[agentName] || 0) + 1;
+        });
+        const agentNames = Object.keys(agentCounts);
         setAgentAlertCountData({
-          labels: agentBuckets.map(b => b.key),
+          labels: agentNames,
           datasets: [
             {
               label: 'Alerts per Agent',
-              data: agentBuckets.map(b => b.doc_count),
+              data: agentNames.map(name => agentCounts[name]),
               backgroundColor: 'rgba(54, 162, 235, 0.6)',
               borderColor: 'rgba(54, 162, 235, 1)',
               borderWidth: 1
             }
           ]
         });
-  
       } catch (error) {
         console.error("❌ Error loading dashboard chart data:", error);
       }
     };
-  
     loadData();
   }, []);
-  
-  
+
+
   return (
     <>
       {/* Charts Section */}
