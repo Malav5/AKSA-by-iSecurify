@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import {
@@ -15,37 +15,91 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Link } from "react-router-dom";
+import { fetchAllTasks } from "../../services/TaskServics";
+// Helper to get ISO week string (YYYY-Www)
+function getISOWeek(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  // Thursday in current week decides the year.
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+  // January 4 is always in week 1.
+  const week1 = new Date(d.getFullYear(), 0, 4);
+  // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+  return (
+    d.getFullYear() +
+    "-W" +
+    (1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7))
+  );
+}
 
 const TaskManagement = ({ hideViewAll = false }) => {
-  const taskScore = 75;
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("weeks");
 
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const data = await fetchAllTasks();
+        setTasks(data);
+      } catch (err) {
+        console.error("Failed to fetch tasks:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTasks();
+  }, []);
+
+  // Calculate counts by status
+  const statusCounts = {
+    "To Do": 0,
+    "In Progress": 0,
+    "Review": 0,
+    "Done": 0,
+    // fallback for other statuses
+    other: 0,
+  };
+  tasks.forEach((task) => {
+    if (statusCounts[task.status] !== undefined) {
+      statusCounts[task.status]++;
+    } else {
+      statusCounts.other++;
+    }
+  });
+
+  // Prepare data for charts
   const barData = [
-    { name: "To Do", value: 12, color: "#3B82F6" },
-    { name: "In Progress", value: 6, color: "#FACC15" },
-    { name: "Review", value: 3, color: "#F97316" },
-    { name: "Done", value: 21, color: "#10B981" },
+    { name: "To Do", value: statusCounts["To Do"], color: "#3B82F6" },
+    { name: "In Progress", value: statusCounts["In Progress"], color: "#FACC15" },
+    { name: "Review", value: statusCounts["Review"], color: "#F97316" },
+    { name: "Done", value: statusCounts["Done"], color: "#10B981" },
   ];
 
-  const weeklyTrend = [
-    { label: "W52", todo: 8, done: 10 },
-    { label: "W53", todo: 10, done: 12 },
-    { label: "W54", todo: 11, done: 14 },
-    { label: "W55", todo: 13, done: 16 },
-    { label: "W56", todo: 12, done: 18 },
-    { label: "W57", todo: 10, done: 20 },
-    { label: "W58", todo: 9, done: 22 },
-    { label: "W59", todo: 6, done: 24 },
-  ];
+  const totalTasks = tasks.length;
+  const doneTasks = statusCounts["Done"];
+  const taskScore = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
-  const monthlyTrend = [
-    { label: "Jan", todo: 40, done: 60 },
-    { label: "Feb", todo: 35, done: 65 },
-    { label: "Mar", todo: 30, done: 70 },
-    { label: "Apr", todo: 28, done: 75 },
-    { label: "May", todo: 25, done: 80 },
-  ];
-
+  // For trend data, group by week using createdAt
+  const weekMap = {};
+  const monthMap = {};
+  tasks.forEach((task) => {
+    if (!task.createdAt) return;
+    // Weekly
+    const week = getISOWeek(task.createdAt);
+    if (!weekMap[week]) weekMap[week] = { label: week, todo: 0, done: 0 };
+    weekMap[week].todo++;
+    if (task.status === "Done") weekMap[week].done++;
+    // Monthly
+    const d = new Date(task.createdAt);
+    const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (!monthMap[month]) monthMap[month] = { label: month, todo: 0, done: 0 };
+    monthMap[month].todo++;
+    if (task.status === "Done") monthMap[month].done++;
+  });
+  // Sort by label ascending
+  const weeklyTrend = Object.values(weekMap).sort((a, b) => (a.label > b.label ? 1 : -1));
+  const monthlyTrend = Object.values(monthMap).sort((a, b) => (a.label > b.label ? 1 : -1));
   const trendData = viewMode === "weeks" ? weeklyTrend : monthlyTrend;
 
   return (
@@ -77,7 +131,7 @@ const TaskManagement = ({ hideViewAll = false }) => {
               </BarChart>
             </ResponsiveContainer>
             <p className="mt-3 md:mt-4 font-bold text-center text-sm md:text-base">
-              This week: 42 Tasks Tracked
+              This week: {totalTasks} Tasks Tracked
             </p>
             <div className="mt-2 md:mt-3 text-xs md:text-sm bg-white border border-custom rounded-lg p-2 text-primary cursor-pointer">
               📌 Overview of tasks by current status
@@ -101,13 +155,13 @@ const TaskManagement = ({ hideViewAll = false }) => {
             </div>
             <div className="mt-3 md:mt-4 space-y-1 text-xs md:text-sm text-gray-700">
               <p>
-                <span className="text-blue-500 font-bold">12</span> To Do
+                <span className="text-blue-500 font-bold">{statusCounts["To Do"]}</span> To Do
               </p>
               <p>
-                <span className="text-yellow-500 font-bold">6</span> In Progress
+                <span className="text-yellow-500 font-bold">{statusCounts["In Progress"]}</span> In Progress
               </p>
               <p>
-                <span className="text-green-500 font-bold">21</span> Done
+                <span className="text-green-500 font-bold">{statusCounts["Done"]}</span> Done
               </p>
             </div>
             <div className="mt-2 md:mt-3 text-xs md:text-sm bg-white border border-custom rounded-lg p-2 text-primary cursor-pointer">
@@ -120,17 +174,15 @@ const TaskManagement = ({ hideViewAll = false }) => {
             <h3 className="font-semibold mb-2 text-sm md:text-base">Task Trend by {viewMode === "weeks" ? "Week" : "Month"}</h3>
             <div className="flex justify-end mb-1">
               <button
-                className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded mr-1 md:mr-2 ${
-                  viewMode === "weeks" ? "bg-gray-200 text-gray-700" : "text-gray-500"
-                }`}
+                className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded mr-1 md:mr-2 ${viewMode === "weeks" ? "bg-gray-200 text-gray-700" : "text-gray-500"
+                  }`}
                 onClick={() => setViewMode("weeks")}
               >
                 Weeks
               </button>
               <button
-                className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded ${
-                  viewMode === "months" ? "bg-gray-200 text-gray-700" : "text-gray-500"
-                }`}
+                className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded ${viewMode === "months" ? "bg-gray-200 text-gray-700" : "text-gray-500"
+                  }`}
                 onClick={() => setViewMode("months")}
               >
                 Months

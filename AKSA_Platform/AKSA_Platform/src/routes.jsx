@@ -19,6 +19,7 @@ import Alerts from "./components/SOCDashboard/Alerts";
 import Settings1 from "./components/SOCDashboard/settings1";
 import UserDashboard from "./components/Pages/UserDashboard";
 import AssignAgent from "./components/SOCDashboard/AssignAgent";
+import Policies from "./components/Dashboard/Policies";
 const AppRoutes = () => {
   // Role-based dashboard selection
   const role = localStorage.getItem('role');
@@ -42,7 +43,7 @@ const AppRoutes = () => {
       <Route path="/logs" element={<Vulnerabilities />} />
       <Route path="/alerts" element={<Alerts />} />
       <Route path="/assign-agent" element={<AssignAgent />} />
-
+      <Route path="/policies" element={<Policies />} />
 
     </Routes>
   );

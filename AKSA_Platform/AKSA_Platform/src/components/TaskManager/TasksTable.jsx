@@ -257,7 +257,7 @@ export default function TasksTable() {
                     <MoreHorizontal className="w-5 h-5 text-gray-500" />
                   </button>
                   {menuTaskId === task._id && (
-                    <div className="absolute right-2 mt-2 w-32 bg-white border rounded shadow z-10">
+                    <div className="absolute right-2 mt-2 w-32 bg-white border border-gray-200 rounded shadow z-10">
                       <button
                         onClick={() => {
                           setSelectedTask(task);

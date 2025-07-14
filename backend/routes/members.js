@@ -16,4 +16,17 @@ router.post("/add-member", async (req, res) => {
   }
 });
 
+// Add this new GET route to fetch all members
+router.get("/get-members", async (req, res) => {
+  try {
+    const members = await Member.find(); // Fetch all member documents
+    const formattedMembers = members.map((m) => `${m.name} - ${m.role}`);
+    res.json({ members: formattedMembers }); // Match the format your frontend expects
+  } catch (error) {
+    console.error("Error fetching members:", error);
+    res.status(500).json({ error: "Failed to fetch members" });
+  }
+});
+
+
 module.exports = router;
