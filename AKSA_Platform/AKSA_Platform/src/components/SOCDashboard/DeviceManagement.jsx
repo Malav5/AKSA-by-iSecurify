@@ -18,8 +18,28 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
   useEffect(() => {
     const fetchAgents = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/api/wazuh/agents');
-        setAgents(res.data.data.affected_items || []);
+        const token = localStorage.getItem("token");
+        const userRole = localStorage.getItem("role");
+        if (userRole === "admin") {
+          // Admin: fetch all agents
+          const res = await axios.get('/api/wazuh/agents', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          // Wazuh returns agents in res.data.data.affected_items
+          setAgents(res.data.data.affected_items || []);
+        } else {
+          // Regular user: fetch only assigned agents
+          const userEmail = localStorage.getItem("soc_email");
+          if (!userEmail) {
+            setError("No user email found.");
+            setLoading(false);
+            return;
+          }
+          const res = await axios.get(`/api/agentMap/assigned-agents?userEmail=${encodeURIComponent(userEmail)}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setAgents(res.data.agents || []);
+        }
       } catch (err) {
         setError('Failed to fetch agents');
       } finally {
@@ -29,10 +49,15 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
 
     const fetchUsers = async () => {
       try {
-        const res = await axios.get('/api/agentMap/users-with-role-user');
+        const token = localStorage.getItem("token");
+        const res = await axios.get('/api/agentMap/users-with-role-user', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         setUsers(res.data.users || []);
       } catch (err) {
-        console.error('Failed to fetch users');
+        console.error('Failed to fetch users:', err.response?.data || err.message);
       }
     };
 
@@ -48,19 +73,25 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
   const handleAssignSubmit = async () => {
     if (!selectedUser) return alert("Please select a user.");
     if (!selectedAgent) return alert("No agent selected.");
-    // Find user name from users array
     const user = users.find(u => u.email === selectedUser);
     if (!user) return alert("User not found.");
+
     try {
+      const token = localStorage.getItem("token");
       await axios.post('/api/agentMap/assign-agent-to-user', {
         userEmail: user.email,
         userName: user.name,
         agentName: selectedAgent.name || selectedAgent.id,
         agentId: selectedAgent.id,
         agentIp: selectedAgent.ip || '',
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
       alert('Agent assigned successfully!');
     } catch (err) {
+      console.error('Failed to assign agent:', err.response?.data || err.message);
       alert('Failed to assign agent.');
     }
     setShowModal(false);
@@ -123,14 +154,14 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
                             if (os.includes('linux')) return <>🐧</>;
                             return <>💻</>;
                           })()}{" "}
-                          {agent.name || agent.id}
+                          {agent.agentName || agent.name || agent.id}
                         </td>
-                        <td className="px-6 py-4 text-gray-500">{agent.ip || 'N/A'}</td>
+                        <td className="px-6 py-4 text-gray-500">{agent.agentIp || agent.ip || 'N/A'}</td>
                         <td className="px-6 py-4">
                           <span
                             className={`px-2 py-1 rounded-full text-sm font-medium ${agent.status === 'active'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-gray-200 text-gray-800'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-200 text-gray-800'
                               }`}
                           >
                             {agent.status || 'Unknown'}

@@ -13,9 +13,15 @@ const AgentStatusSummary = () => {
   useEffect(() => {
     const fetchAgents = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/api/wazuh/agents');
+        const token = localStorage.getItem("token");
+        const res = await axios.get('http://localhost:3000/api/wazuh/agents', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
         const items = res?.data?.data?.affected_items ?? [];
-
+  
         const counts = {
           total: items.length,
           active: 0,
@@ -24,7 +30,7 @@ const AgentStatusSummary = () => {
           never_connected: 0,
           unknown: 0,
         };
-
+  
         items.forEach(agent => {
           switch (agent.status) {
             case 'active': counts.active++; break;
@@ -34,7 +40,7 @@ const AgentStatusSummary = () => {
             default: counts.unknown++;
           }
         });
-
+  
         setAgents(items);
         setSummary(counts);
       } catch (err) {
@@ -43,8 +49,10 @@ const AgentStatusSummary = () => {
         setLoading(false);
       }
     };
+  
     fetchAgents();
   }, []);
+  
 
   const handleBoxClick = (type) => {
     let filtered = [];

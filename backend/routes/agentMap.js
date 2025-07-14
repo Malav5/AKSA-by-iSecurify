@@ -221,4 +221,38 @@ router.get("/users-with-role-user", async (req, res) => {
   }
 });
 
+// Get assigned agents for a user by email
+router.get("/assigned-agents", async (req, res) => {
+  const { userEmail } = req.query;
+  if (!userEmail) return res.status(400).json({ error: "userEmail is required" });
+  try {
+    const assignment = await AgentUserAssignment.findOne({ userEmail });
+    if (!assignment || !assignment.agents) {
+      return res.json({ agents: [] });
+    }
+    res.json({ agents: assignment.agents });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch assigned agents", details: err.message });
+  }
+});
+
+// Get assigned agents details (full agent details)
+router.get("/assigned-agents-details", async (req, res) => {
+  const { userEmail } = req.query;
+  if (!userEmail) return res.status(400).json({ error: "userEmail is required" });
+  try {
+    const assignment = await AgentUserAssignment.findOne({ userEmail });
+    if (!assignment || !assignment.agents) {
+      return res.json({ agents: [] });
+    }
+    // Get all agentIds assigned to this user
+    const agentIds = assignment.agents.map(a => a.agentId);
+    // Fetch agent details from Agent collection
+    const agents = await Agent.find({ agentId: { $in: agentIds } });
+    res.json({ agents });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch assigned agent details", details: err.message });
+  }
+});
+
 module.exports = router; 

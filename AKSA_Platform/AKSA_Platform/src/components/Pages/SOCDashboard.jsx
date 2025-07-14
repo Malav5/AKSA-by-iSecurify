@@ -129,7 +129,13 @@ const ScanComponent = () => {
   useEffect(() => {
     const loadAgents = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/api/wazuh/agents');
+        const token = localStorage.getItem("token");
+const res = await axios.get('http://localhost:3000/api/wazuh/agents', {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
         const wazuhAgents = res.data.data.affected_items || [];
         setAgents(wazuhAgents);
         if (wazuhAgents.length > 0) setAgentId(wazuhAgents[0].id);
