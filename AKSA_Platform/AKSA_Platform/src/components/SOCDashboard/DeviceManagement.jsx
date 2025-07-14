@@ -14,6 +14,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
   const location = useLocation();
   const isSOC = location.pathname === '/soc';
   const isAssignPage = location.pathname.startsWith('/assign-agent');
+  const userRole = localStorage.getItem("role");
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -112,7 +113,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
 
         <div className="flex justify-between items-center mb-2 relative z-10">
           <h3 className="text-2xl font-semibold text-gray-700">Added Devices:</h3>
-          {!isAssignPage && (
+          {userRole === "admin" && !isAssignPage && (
             <button
               className="px-4 py-2 rounded bg-blue-600 text-white text-xl hover:bg-blue-700"
               onClick={onAddAgent}
@@ -186,7 +187,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
           )}
         </div>
 
-        {!isAssignPage && (
+        {userRole === "admin" && !isAssignPage && (
           <div className="flex justify-end mt-4 relative z-10">
             <button
               className="px-4 py-2 rounded bg-red-600 text-white text-xl hover:bg-red-700"

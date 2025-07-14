@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
+import axios from 'axios';
 import { fetchLatestAlerts } from '../../services/SOCservices';
 import AlertDetail from './AlertDetail';
+
+const baseURL = 'http://localhost:3000';
 
 const LatestAlerts = () => {
   const [latestAlerts, setLatestAlerts] = useState([]);
@@ -9,9 +12,44 @@ const LatestAlerts = () => {
 
   useEffect(() => {
     const loadLatestAlerts = async () => {
-      const alerts = await fetchLatestAlerts();
-      // Transform the alerts to match the expected format for AlertDetail
-      const transformedAlerts = alerts.map((alert, index) => ({
+      const token = localStorage.getItem('token');
+      const userRole = localStorage.getItem('role');
+      if (userRole === 'admin') {
+        // Admin: show all alerts
+        const alerts = await fetchLatestAlerts();
+        setLatestAlerts(transformAlerts(alerts));
+        return;
+      }
+      // User: fetch assigned agent IDs
+      const userEmail = localStorage.getItem('soc_email');
+      if (!userEmail) {
+        setLatestAlerts([]);
+        return;
+      }
+      // Get assigned agents
+      let assignedAgents = [];
+      try {
+        const assignedRes = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
+          params: { userEmail },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        assignedAgents = assignedRes.data.agents || [];
+      } catch (e) {
+        setLatestAlerts([]);
+        return;
+      }
+      const agentIds = assignedAgents.map(a => String(a.agentId).padStart(3, '0'));
+      // Fetch all alerts, then filter for assigned agentIds
+      const allAlerts = await fetchLatestAlerts();
+      const filteredAlerts = allAlerts.filter(alert =>
+        agentIds.includes(String(alert.agent?.id || alert.agentId).padStart(3, '0'))
+      );
+      setLatestAlerts(transformAlerts(filteredAlerts));
+    };
+
+    // Helper to transform alerts for display
+    function transformAlerts(alerts) {
+      return alerts.map((alert, index) => ({
         id: alert.id || index + 1,
         title: alert.rule?.description || 'No Title',
         description: alert.full_log || 'No Description',
@@ -36,8 +74,7 @@ const LatestAlerts = () => {
         previous_output: alert.previous_output || '',
         previous_log: alert.previous_log || '',
       }));
-      setLatestAlerts(transformedAlerts);
-    };
+    }
 
     loadLatestAlerts();
   }, []);

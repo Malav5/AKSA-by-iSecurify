@@ -31,7 +31,7 @@ const DeviceManagement = () => {
   const deviceTypes = [
     'Laptop',
     'PC',
-    'Smartphone',     
+    'Smartphone',
     'Smart TV',
     'Server',
     'Network Device',
@@ -185,7 +185,7 @@ const DeviceManagement = () => {
   const isValidIP = (ip) => {
     const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
     if (!ipv4Regex.test(ip)) return false;
-    
+
     const parts = ip.split('.');
     return parts.every(part => {
       const num = parseInt(part);
@@ -240,7 +240,7 @@ const DeviceManagement = () => {
               type="text"
               placeholder="Enter Device Name"
               value={newDevice.name}
-              onChange={(e) => setNewDevice({...newDevice, name: e.target.value})}
+              onChange={(e) => setNewDevice({ ...newDevice, name: e.target.value })}
               className="w-full p-2 border border-gray-300 rounded-md"
             />
           </div>
@@ -252,7 +252,7 @@ const DeviceManagement = () => {
               value={newDevice.ip}
               onChange={(e) => {
                 const ip = e.target.value;
-                setNewDevice({...newDevice, ip});
+                setNewDevice({ ...newDevice, ip });
                 if (isValidIP(ip)) {
                   fetchDeviceInfo(ip);
                 } else {
@@ -277,7 +277,7 @@ const DeviceManagement = () => {
               <div className="mt-2 p-2 bg-gray-50 rounded-md text-sm">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <span className="font-medium">Status:</span> 
+                    <span className="font-medium">Status:</span>
                     <span className={`ml-1 ${deviceInfo.status === 'online' ? 'text-green-600' : 'text-red-600'}`}>
                       {deviceInfo.status}
                     </span>
@@ -299,7 +299,7 @@ const DeviceManagement = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Device Type</label>
             <select
               value={newDevice.type}
-              onChange={(e) => setNewDevice({...newDevice, type: e.target.value})}
+              onChange={(e) => setNewDevice({ ...newDevice, type: e.target.value })}
               className="w-full p-2 border border-gray-300 rounded-md"
             >
               <option value="">Select Type</option>
