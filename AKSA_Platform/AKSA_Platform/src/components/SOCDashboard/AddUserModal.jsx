@@ -8,6 +8,7 @@ const AddUserModal = ({ onClose, onSubmit }) => {
     firstName: '',
     lastName: '',
     email: '',
+    password: '', // Add password to state
   });
 
   const handleChange = (e) => {
@@ -19,12 +20,13 @@ const AddUserModal = ({ onClose, onSubmit }) => {
   };
 
   const handleSubmit = async () => {
-    if (formData.firstName && formData.lastName && formData.email) {
+    if (formData.firstName && formData.lastName && formData.email && formData.password) { // Require password
       try {
         await axios.post('/api/agentMap/add-user', {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
+          password: formData.password, // Send password to backend
         });
         alert('User added successfully!');
         onSubmit && onSubmit(formData);
@@ -89,6 +91,19 @@ const AddUserModal = ({ onClose, onSubmit }) => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter email"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter password"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>

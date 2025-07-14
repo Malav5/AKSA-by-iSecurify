@@ -7,6 +7,7 @@ const https = require("https");
 const { getWazuhToken } = require("../wazuh/tokenService");
 const apiBaseUrl = process.env.WAZUH_API_URL;
 const AgentUserAssignment = require("../models/AgentUserAssignment");
+const bcrypt = require('bcryptjs');
 
 // Register agent mapping
 router.post("/register-agent", async (req, res) => {
@@ -183,9 +184,9 @@ router.get("/users", async (req, res) => {
 
 // Add user (from AddUserModal)
 router.post("/add-user", async (req, res) => {
-  const { firstName, lastName, email } = req.body;
-  if (!firstName || !lastName || !email) {
-    return res.status(400).json({ error: "First name, last name, and email are required" });
+  const { firstName, lastName, email, password } = req.body;
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({ error: "First name, last name, email, and password are required" });
   }
   try {
     // Check if user already exists
@@ -193,11 +194,13 @@ router.post("/add-user", async (req, res) => {
     if (existing) {
       return res.status(409).json({ error: "User with this email already exists" });
     }
+    // Hash the password
+    const hashed = await bcrypt.hash(password, 10);
     const newUser = new User({
       firstName,
       lastName,
       email,
-      passwordHash: 'placeholder', // You may want to set/reset this later
+      passwordHash: hashed,
       role: 'user',
     });
     await newUser.save();
