@@ -78,7 +78,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post('/api/agentMap/assign-agent-to-user', {
+      const response = await axios.post('/api/agentMap/assign-agent-to-user', {
         userEmail: user.email,
         userName: user.name,
         agentName: selectedAgent.name || selectedAgent.id,
@@ -89,7 +89,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
           Authorization: `Bearer ${token}`
         }
       });
-      alert('Agent assigned successfully!');
+      alert(response.data.message); // <-- Use backend message
     } catch (err) {
       console.error('Failed to assign agent:', err.response?.data || err.message);
       alert('Failed to assign agent.');

@@ -16,7 +16,6 @@ router.post("/register-agent", async (req, res) => {
     agentName,
     agentId,
     agentIp,
-    deviceType,
     status,
     hostname,
     os,
@@ -47,10 +46,11 @@ router.post("/register-agent", async (req, res) => {
       manufacturer,
       model,
       createdAt,
-      userEmail,
       user_id
     });
     await agent.save();
+    // Sync status in AgentUserAssignment after registering/updating agent
+    await syncAgentStatus(agentId, status);
     res.status(201).json({ message: "Agent registered successfully", agent });
   } catch (err) {
     res.status(500).json({ error: "Failed to register agent", details: err.message });
@@ -106,27 +106,38 @@ router.patch("/agents/:id/assign", async (req, res) => {
 
 // Assign agent to user
 router.post("/assign-agent-to-user", async (req, res) => {
-  const { userEmail, userName, agentName, agentId, agentIp } = req.body;
+  const { userEmail, userName, agentName, agentId, agentIp, status } = req.body;
   if (!userEmail || !userName || !agentName || !agentId || !agentIp) {
     return res.status(400).json({ error: "Missing required fields" });
   }
   try {
+    const agentIdNum = Number(agentId);
     let assignment = await AgentUserAssignment.findOne({ userEmail });
+    const agentObj = { agentName, agentId: agentIdNum, agentIp, status };
+    let message = "";
     if (!assignment) {
       assignment = new AgentUserAssignment({
         userEmail,
         userName,
-        agents: [{ agentName, agentId, agentIp }],
+        agents: [agentObj],
       });
+      message = "Agent assigned to user";
     } else {
-      // Only add agent if not already assigned
-      const exists = assignment.agents.some(a => a.agentId === agentId);
-      if (!exists) {
-        assignment.agents.push({ agentName, agentId, agentIp });
+      const idx = assignment.agents.findIndex(a => a.agentId === agentIdNum);
+      if (idx === -1) {
+        assignment.agents.push(agentObj);
+        message = "Agent assigned to user";
+      } else {
+        if (status && assignment.agents[idx].status !== status) {
+          assignment.agents[idx].status = status;
+          message = "Agent already assigned, status updated";
+        } else {
+          message = "Agent already assigned, no changes made";
+        }
       }
     }
     await assignment.save();
-    res.json({ message: "Agent assigned to user", assignment });
+    res.json({ message, assignment });
   } catch (err) {
     res.status(500).json({ error: "Failed to assign agent", details: err.message });
   }
