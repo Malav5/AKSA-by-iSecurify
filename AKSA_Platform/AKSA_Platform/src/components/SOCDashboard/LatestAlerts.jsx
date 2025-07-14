@@ -63,8 +63,8 @@ const LatestAlerts = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {latestAlerts.map((alert, index) => (
-                  <tr 
-                    key={index} 
+                  <tr
+                    key={index}
                     className="transform transition-all duration-300 hover:bg-gray-50 cursor-pointer"
                     onClick={() => handleAlertClick(alert)}
                   >
@@ -72,12 +72,11 @@ const LatestAlerts = () => {
                       {moment(alert.time).format('MM/DD HH:mm')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-lg h-10 w-30 justify-center items-center leading-5 font-semibold rounded-full ${
-                        alert.severity === 'critical' ? 'bg-pink-100 text-pink-800' :
+                      <span className={`px-2 inline-flex text-lg h-10 w-30 justify-center items-center leading-5 font-semibold rounded-full ${alert.severity === 'critical' ? 'bg-pink-100 text-pink-800' :
                         alert.severity === 'high' ? 'bg-red-100 text-red-800' :
-                        alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
+                          alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                        }`}>
                         {alert.severity}
                       </span>
                     </td>
@@ -92,12 +91,12 @@ const LatestAlerts = () => {
           <p className="text-gray-600">No recent alerts found.</p>
         )}
       </div>
-      
+
       {/* Alert Detail Modal */}
       {selectedAlert && (
-        <AlertDetail 
-          alert={selectedAlert} 
-          onClose={() => setSelectedAlert(null)} 
+        <AlertDetail
+          alert={selectedAlert}
+          onClose={() => setSelectedAlert(null)}
         />
       )}
     </>
