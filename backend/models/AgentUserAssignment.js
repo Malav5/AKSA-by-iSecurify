@@ -4,6 +4,7 @@ const agentSchema = new mongoose.Schema({
   agentName: { type: String, required: true },
   agentId: { type: Number, required: true },
   agentIp: { type: String, required: true },
+  status: { type: String },
 }, { _id: false });
 
 const agentUserAssignmentSchema = new mongoose.Schema({

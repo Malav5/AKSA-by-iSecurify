@@ -7,6 +7,7 @@ const https = require("https");
 const { getWazuhToken } = require("../wazuh/tokenService");
 const apiBaseUrl = process.env.WAZUH_API_URL;
 const AgentUserAssignment = require("../models/AgentUserAssignment");
+const bcrypt = require('bcryptjs');
 
 // Register agent mapping
 router.post("/register-agent", async (req, res) => {
@@ -15,7 +16,6 @@ router.post("/register-agent", async (req, res) => {
     agentName,
     agentId,
     agentIp,
-    deviceType,
     status,
     hostname,
     os,
@@ -46,10 +46,11 @@ router.post("/register-agent", async (req, res) => {
       manufacturer,
       model,
       createdAt,
-      userEmail,
       user_id
     });
     await agent.save();
+    // Sync status in AgentUserAssignment after registering/updating agent
+    await syncAgentStatus(agentId, status);
     res.status(201).json({ message: "Agent registered successfully", agent });
   } catch (err) {
     res.status(500).json({ error: "Failed to register agent", details: err.message });
@@ -105,27 +106,38 @@ router.patch("/agents/:id/assign", async (req, res) => {
 
 // Assign agent to user
 router.post("/assign-agent-to-user", async (req, res) => {
-  const { userEmail, userName, agentName, agentId, agentIp } = req.body;
+  const { userEmail, userName, agentName, agentId, agentIp, status } = req.body;
   if (!userEmail || !userName || !agentName || !agentId || !agentIp) {
     return res.status(400).json({ error: "Missing required fields" });
   }
   try {
+    const agentIdNum = Number(agentId);
     let assignment = await AgentUserAssignment.findOne({ userEmail });
+    const agentObj = { agentName, agentId: agentIdNum, agentIp, status };
+    let message = "";
     if (!assignment) {
       assignment = new AgentUserAssignment({
         userEmail,
         userName,
-        agents: [{ agentName, agentId, agentIp }],
+        agents: [agentObj],
       });
+      message = "Agent assigned to user";
     } else {
-      // Only add agent if not already assigned
-      const exists = assignment.agents.some(a => a.agentId === agentId);
-      if (!exists) {
-        assignment.agents.push({ agentName, agentId, agentIp });
+      const idx = assignment.agents.findIndex(a => a.agentId === agentIdNum);
+      if (idx === -1) {
+        assignment.agents.push(agentObj);
+        message = "Agent assigned to user";
+      } else {
+        if (status && assignment.agents[idx].status !== status) {
+          assignment.agents[idx].status = status;
+          message = "Agent already assigned, status updated";
+        } else {
+          message = "Agent already assigned, no changes made";
+        }
       }
     }
     await assignment.save();
-    res.json({ message: "Agent assigned to user", assignment });
+    res.json({ message, assignment });
   } catch (err) {
     res.status(500).json({ error: "Failed to assign agent", details: err.message });
   }
@@ -183,9 +195,9 @@ router.get("/users", async (req, res) => {
 
 // Add user (from AddUserModal)
 router.post("/add-user", async (req, res) => {
-  const { firstName, lastName, email } = req.body;
-  if (!firstName || !lastName || !email) {
-    return res.status(400).json({ error: "First name, last name, and email are required" });
+  const { firstName, lastName, email, password } = req.body;
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({ error: "First name, last name, email, and password are required" });
   }
   try {
     // Check if user already exists
@@ -193,11 +205,13 @@ router.post("/add-user", async (req, res) => {
     if (existing) {
       return res.status(409).json({ error: "User with this email already exists" });
     }
+    // Hash the password
+    const hashed = await bcrypt.hash(password, 10);
     const newUser = new User({
       firstName,
       lastName,
       email,
-      passwordHash: 'placeholder', // You may want to set/reset this later
+      passwordHash: hashed,
       role: 'user',
     });
     await newUser.save();
@@ -228,18 +242,10 @@ router.get("/assigned-agents", async (req, res) => {
   try {
     const assignment = await AgentUserAssignment.findOne({ userEmail });
     if (!assignment || !assignment.agents) {
-      console.log(`[assigned-agents] No assignment found for email: ${userEmail}`);
       return res.json({ agents: [] });
     }
-    // Normalize agentId to 3-digit string for all returned agents
-    const normalizedAgents = assignment.agents.map(agent => ({
-      ...agent.toObject ? agent.toObject() : agent,
-      agentId: String(agent.agentId).padStart(3, '0')
-    }));
-    console.log(`[assigned-agents] Returning ${normalizedAgents.length} agents for email: ${userEmail}`);
-    res.json({ agents: normalizedAgents });
+    res.json({ agents: assignment.agents });
   } catch (err) {
-    console.error(`[assigned-agents] Error for email ${userEmail}:`, err.message);
     res.status(500).json({ error: "Failed to fetch assigned agents", details: err.message });
   }
 });
@@ -253,25 +259,11 @@ router.get("/assigned-agents-details", async (req, res) => {
     if (!assignment || !assignment.agents) {
       return res.json({ agents: [] });
     }
-    const agentIds = assignment.agents.map(a => String(a.agentId).padStart(3, '0'));
-    const token = await getWazuhToken();
-
-    // Fetch details for each agent from Wazuh
-    const agentDetails = [];
-    for (const agentId of agentIds) {
-      try {
-        const agentRes = await axios.get(`${apiBaseUrl}/agents/${agentId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-          httpsAgent: new https.Agent({ rejectUnauthorized: false })
-        });
-        if (agentRes.data?.data?.affected_items?.length > 0) {
-          agentDetails.push(agentRes.data.data.affected_items[0]);
-        }
-      } catch (err) {
-        // Optionally log or handle errors for missing agents
-      }
-    }
-    res.json({ agents: agentDetails });
+    // Get all agentIds assigned to this user
+    const agentIds = assignment.agents.map(a => a.agentId);
+    // Fetch agent details from Agent collection
+    const agents = await Agent.find({ agentId: { $in: agentIds } });
+    res.json({ agents });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch assigned agent details", details: err.message });
   }
