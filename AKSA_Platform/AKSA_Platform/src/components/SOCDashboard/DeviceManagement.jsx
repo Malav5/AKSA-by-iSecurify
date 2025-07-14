@@ -28,14 +28,14 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
           // Wazuh returns agents in res.data.data.affected_items
           setAgents(res.data.data.affected_items || []);
         } else {
-          // Regular user: fetch only assigned agents
+          // Regular user: fetch only assigned agents with full details (including status)
           const userEmail = localStorage.getItem("soc_email");
           if (!userEmail) {
             setError("No user email found.");
             setLoading(false);
             return;
           }
-          const res = await axios.get(`/api/agentMap/assigned-agents?userEmail=${encodeURIComponent(userEmail)}`, {
+          const res = await axios.get(`/api/agentMap/assigned-agents-details?userEmail=${encodeURIComponent(userEmail)}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setAgents(res.data.agents || []);
