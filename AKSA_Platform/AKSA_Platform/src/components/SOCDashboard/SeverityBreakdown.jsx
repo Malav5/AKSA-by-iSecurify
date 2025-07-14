@@ -1,11 +1,63 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import PropTypes from 'prop-types';
+import axios from 'axios';
+import { fetchAllAlerts } from '../../services/SOCservices';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const SeverityBreakdown = ({ alerts = [] }) => {
+const baseURL = 'http://localhost:3000';
+
+const SeverityBreakdown = () => {
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadAlerts = async () => {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const userRole = localStorage.getItem('role');
+      if (userRole === 'admin') {
+        // Admin: show all alerts
+        const allAlertsData = await fetchAllAlerts();
+        const allAlerts = allAlertsData?.hits?.hits?.map(hit => hit._source) || [];
+        setAlerts(allAlerts);
+        setLoading(false);
+        return;
+      }
+      // User: fetch assigned agent IDs
+      const userEmail = localStorage.getItem('soc_email');
+      if (!userEmail) {
+        setAlerts([]);
+        setLoading(false);
+        return;
+      }
+      // Get assigned agents
+      let assignedAgents = [];
+      try {
+        const assignedRes = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
+          params: { userEmail },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        assignedAgents = assignedRes.data.agents || [];
+      } catch (e) {
+        setAlerts([]);
+        setLoading(false);
+        return;
+      }
+      const agentIds = assignedAgents.map(a => String(a.agentId).padStart(3, '0'));
+      // Fetch all alerts, then filter for assigned agentIds
+      const allAlertsData = await fetchAllAlerts();
+      const allAlerts = allAlertsData?.hits?.hits?.map(hit => hit._source) || [];
+      const filteredAlerts = allAlerts.filter(alert =>
+        agentIds.includes(String(alert.agent?.id || alert.agentId).padStart(3, '0'))
+      );
+      setAlerts(filteredAlerts);
+      setLoading(false);
+    };
+    loadAlerts();
+  }, []);
+
   const severityConfig = {
     Critical: {
       threshold: 15,
@@ -121,6 +173,15 @@ const SeverityBreakdown = ({ alerts = [] }) => {
       arc: { borderRadius: 8 }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-80">
+        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div>
+        <span className="ml-4 text-lg text-gray-600">Loading severity breakdown...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-3xl shadow p-8 mb-8 border border-gray-100">
@@ -243,17 +304,6 @@ const SeverityBreakdown = ({ alerts = [] }) => {
       )}
     </div>
   );
-};
-
-SeverityBreakdown.propTypes = {
-  alerts: PropTypes.arrayOf(
-    PropTypes.shape({
-      rule: PropTypes.shape({
-        level: PropTypes.number,
-      }),
-      level: PropTypes.number,
-    })
-  ),
 };
 
 export default SeverityBreakdown;
