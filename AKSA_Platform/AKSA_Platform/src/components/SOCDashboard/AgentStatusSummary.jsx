@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import AgentList from './AgentList'; // Import the modal
 
 const baseURL = 'http://localhost:3000';
 
@@ -14,52 +15,54 @@ const AgentStatusSummary = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  // Modal state
+  const [showAgentList, setShowAgentList] = useState(false);
+  const [agentList, setAgentList] = useState([]);
+  const [filteredAgentList, setFilteredAgentList] = useState([]);
+  const [agentListType, setAgentListType] = useState('All');
+
   useEffect(() => {
-    const fetchStatusSummary = async () => {
+    const fetchAgentsAndSummary = async () => {
       const token = localStorage.getItem('token');
       const userRole = localStorage.getItem('role');
-      let assignedAgentIds = [];
-
+      let agents = [];
       if (userRole === 'admin') {
-        // Admin: show all agents
+        // Admin: fetch all agents
+        const wazuhRes = await axios.get(`${baseURL}/api/wazuh/agents`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        agents = wazuhRes.data?.data?.affected_items || [];
+      } else {
+        // User: fetch assigned agent IDs, then fetch all agents and filter
+        const userEmail = localStorage.getItem('soc_email');
+        if (!userEmail) {
+          setAgentList([]);
+          setSummary({
+            total: 0, active: 0, disconnected: 0, pending: 0, never_connected: 0, unknown: 0
+          });
+          setLoading(false);
+          return;
+        }
+        // 1. Get assigned agent IDs
+        const assignedRes = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
+          params: { userEmail },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const assignedAgentIds = (assignedRes.data.agents || []).map(a => String(a.agentId).padStart(3, '0'));
+
+        // 2. Fetch all agents from Wazuh
         const wazuhRes = await axios.get(`${baseURL}/api/wazuh/agents`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const wazuhAgents = wazuhRes.data?.data?.affected_items || [];
-        countAndSetSummary(wazuhAgents);
-        setLoading(false);
-        return;
+
+        // 3. Filter only assigned agents
+        agents = wazuhAgents.filter(agent =>
+          assignedAgentIds.includes(String(agent.id).padStart(3, '0'))
+        );
       }
-
-      // User: fetch assigned agent IDs
-      const userEmail = localStorage.getItem('soc_email');
-      if (!userEmail) {
-        setSummary({
-          total: 0, active: 0, disconnected: 0, pending: 0, never_connected: 0, unknown: 0
-        });
-        setLoading(false);
-        return;
-      }
-      // Get assigned agents
-      const assignedRes = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
-        params: { userEmail },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const assignedAgents = assignedRes.data.agents || [];
-      assignedAgentIds = assignedAgents.map(a => String(a.agentId).padStart(3, '0'));
-
-      // Fetch all wazuh agents
-      const wazuhRes = await axios.get(`${baseURL}/api/wazuh/agents`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const wazuhAgents = wazuhRes.data?.data?.affected_items || [];
-
-      // Filter only assigned agents
-      const filteredAgents = wazuhAgents.filter(agent =>
-        assignedAgentIds.includes(String(agent.id).padStart(3, '0'))
-      );
-
-      countAndSetSummary(filteredAgents);
+      setAgentList(agents);
+      countAndSetSummary(agents);
       setLoading(false);
     };
 
@@ -84,8 +87,23 @@ const AgentStatusSummary = () => {
       setSummary(counts);
     }
 
-    fetchStatusSummary();
+    fetchAgentsAndSummary();
   }, []);
+
+  // Handler for status box click
+  const handleStatusBoxClick = (statusKey) => {
+    let filtered = [];
+    if (statusKey === 'total') {
+      filtered = agentList;
+    } else if (statusKey === 'unknown') {
+      filtered = agentList.filter(agent => !['active', 'disconnected', 'pending', 'never_connected'].includes(agent.status));
+    } else {
+      filtered = agentList.filter(agent => agent.status === statusKey);
+    }
+    setFilteredAgentList(filtered);
+    setAgentListType(statusKey === 'total' ? 'All' : statusKey.charAt(0).toUpperCase() + statusKey.slice(1));
+    setShowAgentList(true);
+  };
 
   // UI rendering (unchanged, but uses summary)
   const agentStatusBoxes = [
@@ -98,19 +116,31 @@ const AgentStatusSummary = () => {
   ];
 
   return (
-    <div className="flex flex-wrap gap-6 justify-center mb-8">
-      {agentStatusBoxes.map((box, index) => (
-        <div
-          key={index}
-          className={`${box.bg} rounded-2xl flex flex-col items-center justify-center h-36 min-w-[325px] hover:shadow-xl hover:scale-[1.01] shadow cursor-pointer transition-all duration-300`}
-        >
-          <div className={`text-5xl font-bold ${box.color}`}>
-            {loading ? '0' : box.count}
+    <>
+      <div className="flex flex-wrap gap-6 justify-center mb-8">
+        {agentStatusBoxes.map((box, index) => (
+          <div
+            key={index}
+            className={`${box.bg} rounded-2xl flex flex-col items-center justify-center h-36 min-w-[325px] hover:shadow-xl hover:scale-[1.01] shadow cursor-pointer transition-all duration-300`}
+            onClick={() => handleStatusBoxClick(box.key)}
+          >
+            <div className={`text-5xl font-bold ${box.color}`}>
+              {loading ? '0' : box.count}
+            </div>
+            <div className="mt-2 text-base font-medium text-gray-700">{box.title}</div>
           </div>
-          <div className="mt-2 text-base font-medium text-gray-700">{box.title}</div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+      {showAgentList && (
+        <AgentList
+          agents={filteredAgentList}
+          type={agentListType}
+          onSelectAgent={() => { }}
+          onDeleteAgent={() => { }}
+          onClose={() => setShowAgentList(false)}
+        />
+      )}
+    </>
   );
 };
 
