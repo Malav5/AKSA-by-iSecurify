@@ -372,7 +372,7 @@ const SOCDashboard = () => {
   return (
     <div className="h-screen flex flex-col bg-gray-100 text-gray-800 relative overflow-hidden scrollbar-hide">
       <Navbar username={username} fullname={fullname} />
-      <div className=" px-4 sm:px-6 lg:px-8 py-8 relative scrollbar-hide pt-20 flex-1 overflow-y-auto">
+      <div className=" px-4 mx-40 sm:px-6 lg:px-8 py-8 relative scrollbar-hide pt-20 flex-1 overflow-y-auto">
         {/* Device Management */}
         <DeviceManagement onAddAgent={() => setShowAddAgentModal(true)} onRemoveAgent={() => setShowRemoveAgentModal(true)} />
 

@@ -43,7 +43,7 @@ const UserDashboard = () => {
       <Navbar fullname={fullname} />
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/70 backdrop-blur-md">
         <div className="relative flex flex-col items-center">
-          <div className="w-20 h-20 border-8 border-primary border-t-transparent border-b-transparent rounded-full animate-spin mb-6 shadow-lg"></div>
+          <div className="w-20 h-20 border-8 border-[#800080] border-t-transparent border-b-transparent rounded-full animate-spin mb-6 shadow-lg"></div>
           <div className="text-2xl font-bold text-primary mb-2">Loading User Dashboard...</div>
           <div className="text-base text-gray-600">Please wait while we fetch your security data.</div>
         </div>
@@ -54,7 +54,7 @@ const UserDashboard = () => {
   return (
     <div className="h-screen flex flex-col bg-gray-100 text-gray-800 relative overflow-hidden scrollbar-hide">
       <Navbar fullname={fullname} />
-      <div className={`px-4 sm:px-6 lg:px-8 py-8 relative scrollbar-hide pt-20 flex-1 overflow-y-auto ${loading ? 'pointer-events-none opacity-50 select-none' : ''}`}>
+      <div className={`px-4 mx-40 sm:px-6 lg:px-8 py-8 relative scrollbar-hide pt-20 flex-1 overflow-y-auto ${loading ? 'pointer-events-none opacity-50 select-none' : ''}`}>
         <DeviceManagement />
         <div className="mt-8">
           <h2 className="text-3xl font-bold mb-4 ">Security Dashboard</h2>

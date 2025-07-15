@@ -471,24 +471,35 @@ const Alerts = () => {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <List size={18} className="text-blue-500" />
-              Alert Distribution by Severity
-            </h3>
-            <div className="h-64">
-              {loading ? <ChartLoader /> : <Bar data={chartData} options={chartOptions} />}
+        <div className="relative">
+          {/* Loader overlay for the whole chart section */}
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/80">
+              <div className="animate-spin rounded-full h-16 w-16 border-8 border-primary border-t-transparent"></div>
             </div>
-          </div>
+          )}
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Info size={18} className="text-blue-500" />
-              Alert Severity Breakdown
-            </h3>
-            <div className="h-64 flex items-center justify-center">
-              {loading ? <ChartLoader /> : <Doughnut data={doughnutData} options={doughnutOptions} />}
+          <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 transition-opacity ${loading ? 'opacity-30 pointer-events-none' : ''}`}>
+            {/* Alert Distribution by Severity */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <List size={18} className="text-blue-500" />
+                Alert Distribution by Severity
+              </h3>
+              <div className="h-64 flex items-center justify-center">
+                <Bar data={chartData} options={chartOptions} />
+              </div>
+            </div>
+
+            {/* Alert Severity Breakdown */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <Info size={18} className="text-blue-500" />
+                Alert Severity Breakdown
+              </h3>
+              <div className="h-64 flex items-center justify-center">
+                <Doughnut data={doughnutData} options={doughnutOptions} />
+              </div>
             </div>
           </div>
         </div>

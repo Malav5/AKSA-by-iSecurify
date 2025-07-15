@@ -4,13 +4,15 @@ import {
   Zap, Target, Shield, Cpu, Users
 } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { fetchMitreData } from '../../services/SOCservices';
+import { fetchMitreData, fetchAssignedAgents } from '../../services/SOCservices';
 
 const MITREAttackMap = ({ topRules }) => {
   const [mitreData, setMitreData] = useState({});
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
   const [error, setError] = useState(null);
+  const [assignedAgents, setAssignedAgents] = useState([]);
+  const [userRole, setUserRole] = useState(localStorage.getItem('role') || 'user');
 
   // Enhanced tactic mapping with better visual hierarchy
   const tacticMap = {
@@ -56,6 +58,26 @@ const MITREAttackMap = ({ topRules }) => {
     };
     getMitreData();
   }, []);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      setUserRole(role);
+      if (role === 'admin') {
+        setAssignedAgents([]); // Admin sees all
+      } else {
+        const userEmail = localStorage.getItem('soc_email');
+        if (!userEmail) {
+          setAssignedAgents([]);
+          return;
+        }
+        const agents = await fetchAssignedAgents(userEmail, token);
+        setAssignedAgents(agents.map(a => a.agentName || a.name));
+      }
+    };
+    fetchAgents();
+  }, []);
   
 
   // Extract MITRE IDs from alert descriptions
@@ -69,7 +91,23 @@ const MITREAttackMap = ({ topRules }) => {
     return ids;
   };
 
-  const alertMitreIds = extractMitreIds();
+  // Filter topRules for assigned agents (if not admin)
+  const filteredTopRules = userRole === 'admin'
+    ? topRules
+    : topRules.filter(([desc, count, agentName]) =>
+        assignedAgents.length === 0 || assignedAgents.includes(agentName)
+      );
+
+  // Extract MITRE IDs from filtered topRules
+  const alertMitreIds = (() => {
+    const mitreIdRegex = /(T\d{4}|G\d{4}|S\d{4}|M\d{4})/gi;
+    const ids = new Set();
+    filteredTopRules.forEach(([desc]) => {
+      const matches = desc.match(mitreIdRegex);
+      if (matches) matches.forEach(id => ids.add(id.toUpperCase()));
+    });
+    return ids;
+  })();
 
   // Filter MITRE data by found IDs
   const filterMitreData = (arr) => (arr || []).filter(item => 
@@ -84,7 +122,7 @@ const MITREAttackMap = ({ topRules }) => {
   const filteredGroups = filterMitreData(mitreData.groups);
 
   // Map rules to tactics with counts
-  const tacticDistribution = topRules.reduce((acc, [desc]) => {
+  const tacticDistribution = filteredTopRules.reduce((acc, [desc]) => {
     const key = Object.keys(tacticMap).find(k => desc.toLowerCase().includes(k));
     const tactic = tacticMap[key] || tacticMap.default;
     acc[tactic.name] = (acc[tactic.name] || { ...tactic, count: 0 });

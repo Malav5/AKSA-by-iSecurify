@@ -267,7 +267,7 @@ const AlertsAndMetrics = ({
   // Loader component
   const ChartLoader = () => (
     <div className="flex flex-col items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-400 border-t-transparent mb-4"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#800080] border-t-transparent mb-4"></div>
       <p className="text-gray-600 text-sm">Loading...</p>
     </div>
   );
@@ -315,7 +315,7 @@ const AlertsAndMetrics = ({
                       <span className="text-orange-500 text-xl">&#9888;&#65039;</span>
                       <span className="text-base font-medium text-gray-900">{item.rule}</span>
                     </div>
-                    <span className="bg-red-100 text-red-500 rounded-full px-3 py-1 text-base font-semibold min-w-[32px] text-center">
+                    <span className="bg-red-100 text-red-00 rounded-full px-3 py-1 text-base font-semibold min-w-[32px] text-center">
                       Max Severity: {item.maxLevel} | Count: {item.count}
                     </span>
                   </div>

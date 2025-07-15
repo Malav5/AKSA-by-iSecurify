@@ -219,29 +219,13 @@ const Vulnerabilities = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = sortedVulnerabilities.slice(startIndex, startIndex + itemsPerPage);
 
-  // Lighter pastel chart colors
-  const pastelColors = [
-    'rgba(186, 230, 253, 0.8)', // light blue
-    'rgba(196, 181, 253, 0.8)', // light purple
-    'rgba(254, 202, 202, 0.8)', // light red
-    'rgba(254, 243, 199, 0.8)', // light yellow
-    'rgba(167, 243, 208, 0.8)', // light green
-    'rgba(253, 230, 138, 0.8)', // light amber
-    'rgba(254, 215, 170, 0.8)', // light orange
-    'rgba(251, 207, 232, 0.8)', // light pink
-    'rgba(221, 214, 254, 0.8)', // light indigo
-    'rgba(216, 180, 254, 0.8)', // light violet
-  ];
-
-  const pastelBorderColors = pastelColors.map(c => c.replace('0.8', '1'));
-
-  // Update severity color map to lighter colors
+  // LIGHTER COLORS
   const severityColorMap = {
-    'Critical': 'rgba(254, 202, 202, 0.8)', // light red
-    'High': 'rgba(254, 215, 170, 0.8)',    // light orange
-    'Medium': 'rgba(253, 230, 138, 0.8)',  // light amber
-    'Low': 'rgba(186, 230, 253, 0.8)',     // light blue
-    'Unknown': 'rgba(221, 214, 254, 0.8)', // light indigo
+    'Critical': 'rgba(236, 72, 153, 0.7)', // #ec4899, pink-500
+    'High': 'rgba(239, 68, 68, 0.7)',      // #ef4444, red-500
+    'Medium': 'rgba(234, 179, 8, 0.7)',    // #eab308, yellow-500
+    'Low': 'rgba(16, 185, 129, 0.7)',      // #10b981, emerald-500
+    'Unknown': 'rgba(156, 163, 175, 0.3)', // gray-400
   };
 
   const severityCounts = sortedVulnerabilities.reduce((acc, item) => {
@@ -254,14 +238,25 @@ const Vulnerabilities = () => {
     datasets: [{
       label: 'Vulnerabilities by Severity',
       data: Object.values(severityCounts),
-      backgroundColor: Object.keys(severityCounts).map(sev => severityColorMap[sev] || pastelColors[0]),
-      borderColor: Object.keys(severityCounts).map(sev => severityColorMap[sev]?.replace('0.8', '1') || pastelBorderColors[0]),
+      backgroundColor: Object.keys(severityCounts).map(sev => severityColorMap[sev] || severityColorMap['Unknown']),
+      borderColor: Object.keys(severityCounts).map(sev => {
+        if (sev === 'Critical') return 'rgba(236, 72, 153, 1)';
+        if (sev === 'High') return 'rgba(239, 68, 68, 1)';
+        if (sev === 'Medium') return 'rgba(234, 179, 8, 1)';
+        if (sev === 'Low') return 'rgba(16, 185, 129, 1)';
+        return 'rgba(156, 163, 175, 0.7)';
+      }),
       borderWidth: 1,
     }],
   };
 
-  // Use pastel colors for package and agent charts
-  const chartColors = pastelColors;
+  const chartColors = [
+    'rgba(236, 72, 153, 0.7)', // Critical
+    'rgba(239, 68, 68, 0.7)',  // High
+    'rgba(234, 179, 8, 0.7)',  // Medium
+    'rgba(16, 185, 129, 0.7)', // Low
+    'rgba(156, 163, 175, 0.3)',// Unknown/Gray
+  ];
 
   const packageCounts = {};
   sortedVulnerabilities.forEach((item) => {
@@ -274,7 +269,13 @@ const Vulnerabilities = () => {
     datasets: [{
       data: topPackages.map(([_, count]) => count),
       backgroundColor: chartColors,
-      borderColor: pastelBorderColors,
+      borderColor: [
+        'rgba(236, 72, 153, 1)',
+        'rgba(239, 68, 68, 1)',
+        'rgba(234, 179, 8, 1)',
+        'rgba(16, 185, 129, 1)',
+        'rgba(156, 163, 175, 0.7)',
+      ],
       borderWidth: 1,
     }],
   };
@@ -290,7 +291,13 @@ const Vulnerabilities = () => {
     datasets: [{
       data: topAgents.map(([_, count]) => count),
       backgroundColor: chartColors,
-      borderColor: pastelBorderColors,
+      borderColor: [
+        'rgba(236, 72, 153, 1)',
+        'rgba(239, 68, 68, 1)',
+        'rgba(234, 179, 8, 1)',
+        'rgba(16, 185, 129, 1)',
+        'rgba(156, 163, 175, 0.7)',
+      ],
       borderWidth: 1,
     }],
   };
@@ -434,9 +441,9 @@ const Vulnerabilities = () => {
 
   try {
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gray-50/50">
+      <div className="h-screen flex flex-col bg-gray-50">
         <Navbar />
-        <div className="max-w-7xl mx-auto p-4 w-full flex-grow overflow-y-auto scrollbar-hide mt-20">
+        <div className="flex-1 overflow-y-auto p-6 mx-40 pt-24 scrollbar-hide">
           <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-8 animate-fade-in-down">Detected Vulnerabilities</h2>
 
           {/* Charts and Filters: Always visible */}
@@ -797,7 +804,7 @@ const Vulnerabilities = () => {
         {selectedVulnerability && (
           <VulnerabilityDetail
             vulnerability={selectedVulnerability}
-            onClose={() => setSelectedVulnerability(null)}
+            onClose={() => setSelectedVulnerability(null)}  
           />
         )}
       </div>
