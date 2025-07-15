@@ -14,12 +14,12 @@ const AgentList = ({ agents, type, onSelectAgent, onDeleteAgent, onClose }) => {
         
         {/* Header with title and close button */}
         <div className="sticky top-[64px] z-10 bg-white border-b border-gray-100 px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 capitalize">
+          <h1 className="text-2xl font-bold mt-10 text-gray-800 capitalize">
             {type} Agents Dashboard
           </h1>
           <button
             onClick={onClose}
-            className="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors duration-200"
+            className="flex items-center gap-1 mt-10 text-gray-500 hover:text-red-500 transition-colors duration-200"
           >
             <X size={20} />
             <span className="hidden sm:inline">Close</span>
@@ -29,7 +29,7 @@ const AgentList = ({ agents, type, onSelectAgent, onDeleteAgent, onClose }) => {
         {/* Main content */}
         <div className="px-8 py-6 space-y-8">
           {/* Charts section */}
-          <section className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+          <section>
             <AgentCharts agents={agents} />
           </section>
 
