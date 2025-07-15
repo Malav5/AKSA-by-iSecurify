@@ -38,7 +38,7 @@ const Vulnerabilities = () => {
   const minChatboxWidth = 320;
   const maxChatboxWidth = 600;
   const isDraggingRef = React.useRef(false);
-  // OpenAI API integration
+  // OpenAI API integratio/n
   const OPENAI_API_KEY = getOpenAIApiKey();
   const ASSISTANT_ID = 'asst_8IyFzjmdoFxXzohWeqlWvifh'; // Provided for local testing only
   const OPENAI_BETA_HEADER = { 'OpenAI-Beta': 'assistants=v2' };

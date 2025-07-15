@@ -67,6 +67,7 @@ const ScanComponent = () => {
     const [agentId, setAgentId] = useState('');
     const [agents, setAgents] = useState([]);
     const [assignedAgentIds, setAssignedAgentIds] = useState([]);
+    const [assignedLoading, setAssignedLoading] = useState(true); // NEW
     const [scanResult, setScanResult] = useState(null);
     const [lastScan, setLastScan] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -84,17 +85,20 @@ const ScanComponent = () => {
             const userRole = localStorage.getItem('role');
             if (userRole === 'admin') {
                 setAssignedAgentIds([]); // Admin sees all
+                setAssignedLoading(false); // NEW
                 return;
             }
             const userEmail = localStorage.getItem('soc_email');
             if (!userEmail) {
                 setAssignedAgentIds([]);
+                setAssignedLoading(false); // NEW
                 return;
             }
             const assignedAgents = await fetchAssignedAgents(userEmail, token);
             // Normalize IDs to 3-digit strings
             const ids = (assignedAgents || []).map(a => String(a.agentId).padStart(3, '0'));
             setAssignedAgentIds(ids);
+            setAssignedLoading(false); // NEW
         };
         fetchAssignedAgentsForUser();
     }, []);
@@ -104,25 +108,38 @@ const ScanComponent = () => {
         const loadAgents = async () => {
             try {
                 const token = localStorage.getItem("token");
+                const userRole = localStorage.getItem('role');
+                // If not admin and assigned agents are loaded and none assigned, set agents to [] and return early
+                if (userRole !== 'admin' && !assignedLoading && assignedAgentIds.length === 0) {
+                    setAgents([]);
+                    setAgentId('');
+                    return;
+                }
                 const res = await axios.get('http://localhost:3000/api/wazuh/agents', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
                 let wazuhAgents = res.data.data.affected_items || [];
-                // If not admin, filter for assigned agents only
-                if (assignedAgentIds.length > 0) {
+                if (userRole === 'admin') {
+                    setAgents(wazuhAgents);
+                    if (wazuhAgents.length > 0) setAgentId(wazuhAgents[0].id);
+                } else {
                     wazuhAgents = wazuhAgents.filter(agent => assignedAgentIds.includes(String(agent.id).padStart(3, '0')));
+                    setAgents(wazuhAgents);
+                    if (wazuhAgents.length > 0) setAgentId(wazuhAgents[0].id);
+                    else setAgentId('');
                 }
-                setAgents(wazuhAgents);
-                if (wazuhAgents.length > 0) setAgentId(wazuhAgents[0].id);
             } catch (err) {
                 console.error('Failed to fetch agents from Wazuh:', err);
                 setAgents([]);
+                setAgentId('');
             }
         };
-        loadAgents();
-    }, [assignedAgentIds]);
+        if (!assignedLoading) {
+            loadAgents();
+        }
+    }, [assignedAgentIds, assignedLoading]);
 
     useEffect(() => {
         if (!fimThreadId) {
@@ -218,14 +235,19 @@ const ScanComponent = () => {
                     value={agentId}
                     onChange={(e) => setAgentId(e.target.value)}
                     className="border rounded-lg px-4 py-2 text-lg w-150"
-                    disabled={loading}
+                    disabled={loading || assignedLoading}
                 >
-                    {agents.length === 0 && <option>Loading agents...</option>}
-                    {agents.map((agent) => (
-                        <option key={agent.id} value={agent.id}>
-                            {agent.name ? `${agent.name} (${agent.id})` : agent.id}
-                        </option>
-                    ))}
+                    {assignedLoading ? (
+                        <option>Loading agents...</option>
+                    ) : agents.length === 0 ? (
+                        <option>No agents available</option>
+                    ) : (
+                        agents.map((agent) => (
+                            <option key={agent.id} value={agent.id}>
+                                {agent.name ? `${agent.name} (${agent.id})` : agent.id}
+                            </option>
+                        ))
+                    )}
                 </select>
 
                 <div className="flex flex-wrap gap-2 sm:gap-3">
