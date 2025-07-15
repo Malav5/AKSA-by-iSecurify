@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { fetchAllAlerts } from '../../services/SOCservices';
+import { fetchAllAlerts, fetchAssignedAgents } from '../../services/SOCservices';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
@@ -44,11 +44,7 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
           // Get assigned agents
           let assignedAgents = [];
           try {
-            const assignedRes = await axios.get('http://localhost:3000/api/agentMap/assigned-agents', {
-              params: { userEmail },
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            assignedAgents = assignedRes.data.agents || [];
+            assignedAgents = await fetchAssignedAgents(userEmail, token);
           } catch (e) {
             setError('Failed to fetch assigned agents.');
             setLoading(false);

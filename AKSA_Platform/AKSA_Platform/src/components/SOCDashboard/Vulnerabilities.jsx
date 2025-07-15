@@ -12,7 +12,7 @@ import {
   Legend,
 } from 'chart.js';
 import VulnerabilityDetail from './VulnerabilityDetail';
-import { fetchVulnerabilities } from '../../services/SOCservices';
+import { fetchVulnerabilities, fetchAssignedAgents } from '../../services/SOCservices';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { getOpenAIApiKey } from '../../utils/apiKey';
@@ -98,10 +98,7 @@ const Vulnerabilities = () => {
           setAssignedAgents([]);
           return;
         }
-        const res = await axios.get(`/api/agentMap/assigned-agents-details?userEmail=${encodeURIComponent(userEmail)}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const assignedAgentsArr = res.data.agents || [];
+        const assignedAgentsArr = await fetchAssignedAgents(userEmail, token);
         setAssignedAgents(assignedAgentsArr);
       }
     };

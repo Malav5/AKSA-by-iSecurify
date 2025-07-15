@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import axios from 'axios';
-import { fetchAllAlerts } from '../../services/SOCservices';
+import { fetchAllAlerts, fetchAssignedAgents } from '../../services/SOCservices';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -35,11 +35,7 @@ const SeverityBreakdown = () => {
       // Get assigned agents
       let assignedAgents = [];
       try {
-        const assignedRes = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
-          params: { userEmail },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        assignedAgents = assignedRes.data.agents || [];
+        assignedAgents = await fetchAssignedAgents(userEmail, token);
       } catch (e) {
         setAlerts([]);
         setLoading(false);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import axios from 'axios';
-import { fetchLatestAlerts } from '../../services/SOCservices';
+import { fetchLatestAlerts, fetchAssignedAgents } from '../../services/SOCservices';
 import AlertDetail from './AlertDetail';
 
 const baseURL = 'http://localhost:3000';
@@ -29,11 +29,7 @@ const LatestAlerts = () => {
       // Get assigned agents
       let assignedAgents = [];
       try {
-        const assignedRes = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
-          params: { userEmail },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        assignedAgents = assignedRes.data.agents || [];
+        assignedAgents = await fetchAssignedAgents(userEmail, token);
       } catch (e) {
         setLatestAlerts([]);
         return;

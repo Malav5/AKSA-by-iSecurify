@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import { fetchAssignedAgents } from '../../services/SOCservices';
 
 const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
   const [agents, setAgents] = useState([]);
@@ -36,10 +37,8 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
             setLoading(false);
             return;
           }
-          const res = await axios.get(`/api/agentMap/assigned-agents-details?userEmail=${encodeURIComponent(userEmail)}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setAgents(res.data.agents || []);
+          const assignedAgentsArr = await fetchAssignedAgents(userEmail, token);
+          setAgents(assignedAgentsArr);
         }
       } catch (err) {
         setError('Failed to fetch agents');

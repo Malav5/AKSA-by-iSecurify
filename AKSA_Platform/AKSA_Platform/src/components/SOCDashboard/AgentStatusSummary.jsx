@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AgentList from './AgentList'; // Import the modal
+import { fetchAssignedAgents } from '../../services/SOCservices';
 
 const baseURL = 'http://localhost:3000';
 
@@ -44,11 +45,8 @@ const AgentStatusSummary = () => {
           return;
         }
         // 1. Get assigned agent IDs
-        const assignedRes = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
-          params: { userEmail },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const assignedAgentIds = (assignedRes.data.agents || []).map(a => String(a.agentId).padStart(3, '0'));
+        const assignedAgents = await fetchAssignedAgents(userEmail, token);
+        const assignedAgentIds = (assignedAgents || []).map(a => String(a.agentId).padStart(3, '0'));
 
         // 2. Fetch all agents from Wazuh
         const wazuhRes = await axios.get(`${baseURL}/api/wazuh/agents`, {

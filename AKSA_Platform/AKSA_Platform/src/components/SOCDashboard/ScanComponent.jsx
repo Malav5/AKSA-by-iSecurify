@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
-import { runFimScan, getFimResults, clearFimResults, getLastFimScanDatetime } from '../../services/SOCservices';
+import { runFimScan, getFimResults, clearFimResults, getLastFimScanDatetime, fetchAssignedAgents } from '../../services/SOCservices';
 import { getOpenAIApiKey } from '../../utils/apiKey';
 
 // OpenAI API integration for FIM scan assistant
@@ -79,7 +79,7 @@ const ScanComponent = () => {
 
     // Fetch assigned agent IDs for user
     useEffect(() => {
-        const fetchAssignedAgents = async () => {
+        const fetchAssignedAgentsForUser = async () => {
             const token = localStorage.getItem('token');
             const userRole = localStorage.getItem('role');
             if (userRole === 'admin') {
@@ -91,15 +91,12 @@ const ScanComponent = () => {
                 setAssignedAgentIds([]);
                 return;
             }
-            const res = await axios.get('http://localhost:3000/api/agentMap/assigned-agents', {
-                params: { userEmail },
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const assignedAgents = await fetchAssignedAgents(userEmail, token);
             // Normalize IDs to 3-digit strings
-            const ids = (res.data.agents || []).map(a => String(a.agentId).padStart(3, '0'));
+            const ids = (assignedAgents || []).map(a => String(a.agentId).padStart(3, '0'));
             setAssignedAgentIds(ids);
         };
-        fetchAssignedAgents();
+        fetchAssignedAgentsForUser();
     }, []);
 
     // Fetch all agents, then filter for assigned if needed

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
-import { fetchAgentAlertCounts, fetchAlertSeverityChartData, fetchAlertsOverTimeData, fetchAllAlerts } from '../../services/SOCservices';
+import { fetchAgentAlertCounts, fetchAlertSeverityChartData, fetchAlertsOverTimeData, fetchAllAlerts, fetchAssignedAgents } from '../../services/SOCservices';
 import axios from 'axios';
 import {
   Chart as ChartJS,
@@ -118,11 +118,7 @@ const AlertsAndMetrics = ({
             return;
           }
           // Get assigned agents
-          const assignedRes = await axios.get(`${baseURL}/api/agentMap/assigned-agents`, {
-            params: { userEmail },
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const assignedAgents = assignedRes.data.agents || [];
+          const assignedAgents = await fetchAssignedAgents(userEmail, token);
           const agentIds = assignedAgents.map(a => String(a.agentId).padStart(3, '0'));
           // Fetch all alerts, then filter for assigned agentIds
           const allAlertsData = await fetchAllAlerts();

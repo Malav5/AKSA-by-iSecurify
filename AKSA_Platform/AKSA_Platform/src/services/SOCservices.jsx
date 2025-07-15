@@ -258,3 +258,16 @@ export const fetchMitreData = async () => {
     throw err;
   }
 };
+
+// Fetch assigned agents for a user by email
+export const fetchAssignedAgents = async (userEmail, token) => {
+  try {
+    const response = await axios.get(`/api/agentMap/assigned-agents-details?userEmail=${encodeURIComponent(userEmail)}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data.agents || [];
+  } catch (error) {
+    console.error('Error fetching assigned agents:', error);
+    return [];
+  }
+};

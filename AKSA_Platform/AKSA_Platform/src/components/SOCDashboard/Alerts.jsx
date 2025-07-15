@@ -25,7 +25,7 @@ import {
   Info
 } from 'lucide-react';
 import Navbar from './Navbar';
-import { fetchAllAlerts, fetchPaginatedAlerts } from '../../services/SOCservices';
+import { fetchAllAlerts, fetchPaginatedAlerts, fetchAssignedAgents } from '../../services/SOCservices';
 import AlertDetail from './AlertDetail';
 import axios from 'axios';
 
@@ -198,10 +198,7 @@ const Alerts = () => {
           setAssignedAgents([]);
           return;
         }
-        const res = await axios.get(`/api/agentMap/assigned-agents-details?userEmail=${encodeURIComponent(userEmail)}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const assignedAgentsArr = res.data.agents || [];
+        const assignedAgentsArr = await fetchAssignedAgents(userEmail, token);
         setAssignedAgents(assignedAgentsArr);
       }
     };
