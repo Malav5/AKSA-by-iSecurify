@@ -308,6 +308,20 @@ const Alerts = () => {
         }
       }
     },
+    hover: {
+      mode: 'nearest',
+      intersect: true,
+      animationDuration: 400,
+      onHover: function(e, activeEls) {
+        if (e.native) {
+          e.native.target.style.cursor = activeEls.length ? 'pointer' : 'default';
+        }
+      }
+    },
+    animation: {
+      duration: 600,
+      easing: 'easeOutQuart',
+    },
     scales: {
       y: {
         beginAtZero: true,
@@ -317,6 +331,24 @@ const Alerts = () => {
       }
     },
     maintainAspectRatio: false,
+    elements: {
+      bar: {
+        borderWidth: 1,
+        hoverBorderWidth: 4,
+        backgroundColor: [
+          'rgba(236, 72, 153, 0.7)',
+          'rgba(239, 68, 68, 0.7)',
+          'rgba(234, 179, 8, 0.7)',
+          'rgba(16, 185, 129, 0.7)',
+        ],
+        hoverBackgroundColor: [
+          'rgba(236, 72, 153, 1)',
+          'rgba(239, 68, 68, 1)',
+          'rgba(234, 179, 8, 1)',
+          'rgba(16, 185, 129, 1)',
+        ],
+      }
+    }
   };
 
   const doughnutOptions = {
@@ -331,7 +363,15 @@ const Alerts = () => {
       }
     },
     cutout: '70%',
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    animation: {
+      animateRotate: true,
+      animateScale: true,
+      duration: 600,
+      easing: 'easeOutQuart',
+    },
+    hoverOffset: 16,
+    hoverBorderWidth: 4,
   };
 
   // Loader component for charts
