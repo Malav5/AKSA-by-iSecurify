@@ -3,6 +3,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { fetchAllAlerts } from '../../services/SOCservices';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -25,8 +26,42 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
     const getTopRules = async () => {
       try {
         setLoading(true);
-        const res = await fetchAllAlerts();
-        const allAlerts = res?.hits?.hits || [];
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('role');
+        let allAlerts = [];
+        if (userRole === 'admin') {
+          // Admin: use all alerts
+          const res = await fetchAllAlerts();
+          allAlerts = res?.hits?.hits || [];
+        } else {
+          // User: fetch assigned agent IDs
+          const userEmail = localStorage.getItem('soc_email');
+          if (!userEmail) {
+            setError('No user email found.');
+            setLoading(false);
+            return;
+          }
+          // Get assigned agents
+          let assignedAgents = [];
+          try {
+            const assignedRes = await axios.get('http://localhost:3000/api/agentMap/assigned-agents', {
+              params: { userEmail },
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            assignedAgents = assignedRes.data.agents || [];
+          } catch (e) {
+            setError('Failed to fetch assigned agents.');
+            setLoading(false);
+            return;
+          }
+          const agentIds = assignedAgents.map(a => String(a.agentId).padStart(3, '0'));
+          // Fetch all alerts, then filter for assigned agentIds
+          const res = await fetchAllAlerts();
+          const fetchedAlerts = res?.hits?.hits || [];
+          allAlerts = fetchedAlerts.filter(alert =>
+            agentIds.includes(String(alert._source?.agent?.id || alert._source?.agentId).padStart(3, '0'))
+          );
+        }
         setAlerts(allAlerts);
 
         const ruleMap = {};
