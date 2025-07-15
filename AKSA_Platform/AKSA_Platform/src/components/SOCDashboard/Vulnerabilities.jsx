@@ -219,12 +219,29 @@ const Vulnerabilities = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = sortedVulnerabilities.slice(startIndex, startIndex + itemsPerPage);
 
+  // Lighter pastel chart colors
+  const pastelColors = [
+    'rgba(186, 230, 253, 0.8)', // light blue
+    'rgba(196, 181, 253, 0.8)', // light purple
+    'rgba(254, 202, 202, 0.8)', // light red
+    'rgba(254, 243, 199, 0.8)', // light yellow
+    'rgba(167, 243, 208, 0.8)', // light green
+    'rgba(253, 230, 138, 0.8)', // light amber
+    'rgba(254, 215, 170, 0.8)', // light orange
+    'rgba(251, 207, 232, 0.8)', // light pink
+    'rgba(221, 214, 254, 0.8)', // light indigo
+    'rgba(216, 180, 254, 0.8)', // light violet
+  ];
+
+  const pastelBorderColors = pastelColors.map(c => c.replace('0.8', '1'));
+
+  // Update severity color map to lighter colors
   const severityColorMap = {
-    'Critical': 'rgba(236, 72, 153, 0.7)', // pink
-    'High': 'rgba(239, 68, 68, 0.7)',    // red
-    'Medium': 'rgba(234, 179, 8, 0.7)',  // amber/yellow
-    'Low': 'rgba(16, 185, 129, 0.7)',    // emerald/green
-    'Unknown': 'rgba(156, 163, 175, 0.7)', // gray
+    'Critical': 'rgba(254, 202, 202, 0.8)', // light red
+    'High': 'rgba(254, 215, 170, 0.8)',    // light orange
+    'Medium': 'rgba(253, 230, 138, 0.8)',  // light amber
+    'Low': 'rgba(186, 230, 253, 0.8)',     // light blue
+    'Unknown': 'rgba(221, 214, 254, 0.8)', // light indigo
   };
 
   const severityCounts = sortedVulnerabilities.reduce((acc, item) => {
@@ -237,26 +254,14 @@ const Vulnerabilities = () => {
     datasets: [{
       label: 'Vulnerabilities by Severity',
       data: Object.values(severityCounts),
-      backgroundColor: Object.keys(severityCounts).map(sev => severityColorMap[sev] || severityColorMap['Unknown']),
-      borderColor: Object.keys(severityCounts).map(sev => {
-        // Use the same color but with opacity 1 for border
-        if (sev === 'Critical') return 'rgba(236, 72, 153, 1)';
-        if (sev === 'High') return 'rgba(239, 68, 68, 1)';
-        if (sev === 'Medium') return 'rgba(234, 179, 8, 1)';
-        if (sev === 'Low') return 'rgba(16, 185, 129, 1)';
-        return 'rgba(156, 163, 175, 1)';
-      }),
+      backgroundColor: Object.keys(severityCounts).map(sev => severityColorMap[sev] || pastelColors[0]),
+      borderColor: Object.keys(severityCounts).map(sev => severityColorMap[sev]?.replace('0.8', '1') || pastelBorderColors[0]),
       borderWidth: 1,
     }],
   };
 
-  const chartColors = [
-    'rgba(88, 80, 141, 0.7)',
-    'rgba(188, 80, 144, 0.7)',
-    'rgba(255, 99, 97, 0.7)',
-    'rgba(255, 166, 0, 0.7)',
-    'rgba(44, 115, 210, 0.7)',
-  ];
+  // Use pastel colors for package and agent charts
+  const chartColors = pastelColors;
 
   const packageCounts = {};
   sortedVulnerabilities.forEach((item) => {
@@ -269,7 +274,7 @@ const Vulnerabilities = () => {
     datasets: [{
       data: topPackages.map(([_, count]) => count),
       backgroundColor: chartColors,
-      borderColor: chartColors.map(c => c.replace('0.7', '1')),
+      borderColor: pastelBorderColors,
       borderWidth: 1,
     }],
   };
@@ -285,7 +290,7 @@ const Vulnerabilities = () => {
     datasets: [{
       data: topAgents.map(([_, count]) => count),
       backgroundColor: chartColors,
-      borderColor: chartColors.map(c => c.replace('0.7', '1')),
+      borderColor: pastelBorderColors,
       borderWidth: 1,
     }],
   };
@@ -792,7 +797,7 @@ const Vulnerabilities = () => {
         {selectedVulnerability && (
           <VulnerabilityDetail
             vulnerability={selectedVulnerability}
-            onClose={() => setSelectedVulnerability(null)}  
+            onClose={() => setSelectedVulnerability(null)}
           />
         )}
       </div>
