@@ -27,6 +27,7 @@ import {
 import Navbar from './Navbar';
 import { fetchAllAlerts, fetchPaginatedAlerts } from '../../services/SOCservices';
 import AlertDetail from './AlertDetail';
+import axios from 'axios';
 
 ChartJS.register(BarElement, ArcElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -42,6 +43,10 @@ const Alerts = () => {
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [selectedSeverity, setSelectedSeverity] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
+  const [userRole, setUserRole] = useState(localStorage.getItem('role') || 'user');
+  const [assignedAgentNames, setAssignedAgentNames] = useState([]);
+  const [assignedAgentIds, setAssignedAgentIds] = useState([]);
+  const [assignedAgents, setAssignedAgents] = useState([]);
 
   const username = localStorage.getItem('soc_username') || 'User';
   const fullname = localStorage.getItem('soc_fullname') || 'Security Analyst';
@@ -174,10 +179,55 @@ const Alerts = () => {
     getPageAlerts();
   }, [currentPage, pageSize]);
 
+  useEffect(() => {
+    const fetchAgentsForFilter = async () => {
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      setUserRole(role);
+      if (role === 'admin') {
+        // Admin: fetch all agents
+        const res = await axios.get('/api/wazuh/agents', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const allAgents = res.data.data.affected_items || [];
+        setAssignedAgents(allAgents);
+      } else {
+        // Regular user: fetch only assigned agents
+        const userEmail = localStorage.getItem('soc_email');
+        if (!userEmail) {
+          setAssignedAgents([]);
+          return;
+        }
+        const res = await axios.get(`/api/agentMap/assigned-agents-details?userEmail=${encodeURIComponent(userEmail)}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const assignedAgentsArr = res.data.agents || [];
+        setAssignedAgents(assignedAgentsArr);
+      }
+    };
+    fetchAgentsForFilter();
+  }, []);
+
+  // Filter alerts based on agent assignment (for non-admin)
   const filteredAlerts = allAlerts.filter((a) => {
-    const agentMatch = selectedAgent === 'All' || a.agentName === selectedAgent;
-    const severityMatch = selectedSeverity === 'All' || a.severity === selectedSeverity;
-    return agentMatch && severityMatch;
+    const agentMatch = selectedAgent === 'All' || a.agent?.name === selectedAgent || a.agent?.agentName === selectedAgent;
+    const alertSeverity = (a.severity || '').toLowerCase();
+    const selectedSeverityLower = (selectedSeverity || '').toLowerCase();
+    const severityMatch = selectedSeverity === 'All' || alertSeverity === selectedSeverityLower;
+
+    if (userRole === 'admin') {
+      return agentMatch && severityMatch;
+    } else {
+      if (selectedAgent === 'All') {
+        // Only show assigned agents
+        const assignedAgentNames = assignedAgents.map(a => a.agentName || a.name);
+        const isAssigned = assignedAgentNames.includes(a.agent?.name) || assignedAgentNames.includes(a.agent?.agentName);
+        return agentMatch && severityMatch && isAssigned;
+      } else {
+        // If a specific agent is selected, it's already assigned (from dropdown)
+        return agentMatch && severityMatch;
+      }
+    }
   });
 
   const paginatedFilteredAlerts = filteredAlerts.slice(
@@ -187,8 +237,8 @@ const Alerts = () => {
 
   const totalPages = Math.ceil(filteredAlerts.length / pageSize);
 
-  // Calculate severity counts from the full allAlerts array for summary boxes
-  const summarySeverityCounts = allAlerts.reduce(
+  // Calculate severity counts from the filtered alerts array for summary boxes
+  const summarySeverityCounts = filteredAlerts.reduce(
     (acc, alert) => {
       const level = alert.rule?.level ?? alert.level ?? 0;
       if (level >= severityConfig.critical.level) acc.critical++;
@@ -311,7 +361,7 @@ const Alerts = () => {
               Security Alerts Dashboard
             </h2>
             <p className="text-gray-600 mt-1">
-              {totalAlerts.toLocaleString()} total alerts detected
+              {filteredAlerts.length.toLocaleString()} total alerts detected
             </p>
           </div>
           
@@ -368,11 +418,20 @@ const Alerts = () => {
                   value={selectedAgent}
                   onChange={(e) => setSelectedAgent(e.target.value)}
                   className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
+                  disabled={assignedAgents.length === 0}
                 >
-                  <option value="All">All Agents</option>
-                  {agentList.map((agent) => (
-                    <option key={agent} value={agent}>{agent}</option>
-                  ))}
+                  {assignedAgents.length === 0 ? (
+                    <option disabled>No agents available</option>
+                  ) : (
+                    <>
+                      <option value="All">All Agents</option>
+                      {assignedAgents.map((agent) => (
+                        <option key={agent.agentName || agent.name} value={agent.agentName || agent.name}>
+                          {agent.agentName || agent.name}
+                        </option>
+                      ))}
+                    </>
+                  )}
                 </select>
               </div>
             </div>
@@ -400,7 +459,7 @@ const Alerts = () => {
                 {summarySeverityCounts[severity].toLocaleString()}
               </div>
               <div className="text-xs text-gray-500 mt-1">
-                {Math.round((summarySeverityCounts[severity] / totalAlerts) * 100)}% of total
+                {Math.round((summarySeverityCounts[severity] / filteredAlerts.length) * 100)}% of total
               </div>
             </div>
           ))}
