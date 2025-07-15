@@ -300,7 +300,7 @@ const AlertsAndMetrics = ({
           </div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-6 min-h-[350px] flex flex-col shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
-          <h3 className="text-2xl font-bold mb-4">Top Dangerous Alert Rules</h3>
+          <h3 className="text-2xl font-bold mb-4">Top Alert Rules</h3>
           <div className="flex-1 min-h-[256px]">
             {loading ? (
               <ChartLoader />
@@ -315,7 +315,7 @@ const AlertsAndMetrics = ({
                       <span className="text-orange-500 text-xl">&#9888;&#65039;</span>
                       <span className="text-base font-medium text-gray-900">{item.rule}</span>
                     </div>
-                    <span className="bg-red-200 text-red-700 rounded-full px-3 py-1 text-base font-semibold min-w-[32px] text-center">
+                    <span className="bg-red-100 text-red-500 rounded-full px-3 py-1 text-base font-semibold min-w-[32px] text-center">
                       Max Severity: {item.maxLevel} | Count: {item.count}
                     </span>
                   </div>

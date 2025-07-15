@@ -173,7 +173,7 @@ const SeverityBreakdown = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-80">
-        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div>
+        <div className="loader ease-linear rounded-full border-8 border-t-8 border-primary border-t-primary h-24 w-24"></div>
         <span className="ml-4 text-lg text-gray-600">Loading severity breakdown...</span>
       </div>
     );

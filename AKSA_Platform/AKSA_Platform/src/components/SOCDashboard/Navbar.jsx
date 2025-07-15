@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Users2, Bell, Home, Shield, Bug, Settings } from 'lucide-react';
+import { Users2, Bell, Home, Shield, Settings } from 'lucide-react';
 import AddUserModal from './AddUserModal';
 
 const Navbar = () => {
@@ -73,7 +73,6 @@ const Navbar = () => {
   }, []);
 
   const handleAddUserSubmit = (newUser) => {
-    console.log('User submitted:', newUser);
     setShowAddUser(false);
     // TODO: Send to backend if needed
   };
@@ -86,13 +85,13 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="w-full h-20 flex items-center px-6 bg-white border-b border-gray-300 shadow-sm fixed top-0 z-50">
+    <nav className="w-full h-20 flex items-center px-6 bg-white border-b border-gray-200 shadow-sm fixed top-0 z-50">
       {/* Logo + Title */}
-      <div className="flex items-center gap-2 min-w-[220px] flex-shrink-0">
-        <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+      <div className="flex items-center gap-3 min-w-[200px] flex-shrink-0">
+        <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center shadow">
           <Users2 className="text-white" size={28} />
         </div>
-        <span className="ml-2 text-2xl font-bold text-black whitespace-nowrap">SOC Dashboard</span>
+        <span className="ml-2 text-2xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">SOC Dashboard</span>
       </div>
 
       {/* Navigation Links */}
@@ -102,10 +101,11 @@ const Navbar = () => {
             <Link
               key={path}
               to={path}
-              className={`flex items-center text-lg font-medium ${location.pathname === path
-                  ? 'text-blue-600 font-semibold'
-                  : 'text-gray-500 hover:text-blue-600'
-                }`}
+              className={`flex items-center text-lg px-3 py-2 rounded-lg transition font-medium ${
+                location.pathname === path
+                  ? 'text-primary bg-secondary font-semibold shadow'
+                  : 'text-gray-500 hover:text-primary hover:bg-secondary'
+              }`}
             >
               {icon}
               {label}
@@ -118,10 +118,15 @@ const Navbar = () => {
       <div className="flex items-center space-x-4 flex-shrink-0">
         {/* Notifications */}
         <div className="relative">
-          <button ref={notificationButtonRef} onClick={toggleNotifications}>
+          <button
+            ref={notificationButtonRef}
+            onClick={toggleNotifications}
+            className="relative p-2 rounded-full hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+            aria-label="Notifications"
+          >
             <Bell className="w-7 h-7 text-gray-600 hover:text-blue-600" />
             {notifications.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                 {notifications.length > 9 ? '9+' : notifications.length}
               </span>
             )}
@@ -129,20 +134,20 @@ const Navbar = () => {
           {showNotifications && (
             <div
               ref={panelRef}
-              className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded z-50"
+              className="absolute right-0 mt-2 w-80 bg-white shadow-2xl rounded-xl z-50 border border-gray-100"
             >
-              <div className="p-3 font-semibold border-b">SOC Notifications</div>
-              <div className="max-h-60 overflow-y-auto">
+              <div className="p-4 font-bold border-b text-gray-800">SOC Notifications</div>
+              <div className="max-h-64 overflow-y-auto">
                 {notifications.length > 0 ? (
                   <ul>
                     {notifications.map((n, i) => (
-                      <li key={i} className="p-3 hover:bg-gray-50 border-b text-sm">
+                      <li key={i} className="p-4 hover:bg-gray-50 border-b text-sm">
                         {n.message}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <div className="p-4 text-center text-gray-500 text-sm">
+                  <div className="p-6 text-center text-gray-500 text-base">
                     No new notifications
                   </div>
                 )}
@@ -153,19 +158,26 @@ const Navbar = () => {
 
         {/* User Menu */}
         <div className="relative">
-          <button ref={userButtonRef} onClick={toggleUserMenu} className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold">
-              {user?.firstName?.charAt(0).toUpperCase()}
+          <button
+            ref={userButtonRef}
+            onClick={toggleUserMenu}
+            className="flex items-center space-x-2 group focus:outline-none"
+          >
+            <div className="w-11 h-11 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold shadow group-hover:bg-blue-700 transition">
+              {user?.firstName?.charAt(0).toUpperCase() || <Users2 size={24} />}
             </div>
-            <span className="hidden sm:block text-lg font-medium text-gray-700">
+            <span className="hidden sm:block text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition">
               {user?.firstName || 'User'}
             </span>
           </button>
 
           {showUserMenu && (
-            <div ref={userMenuRef} className="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg z-50">
+            <div
+              ref={userMenuRef}
+              className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl z-50 border border-gray-100"
+            >
               <div className="p-4 border-b">
-                <p className="text-lg font-semibold">{user?.firstName} {user?.lastName}</p>
+                <p className="text-lg font-bold text-gray-900">{user?.firstName} {user?.lastName}</p>
                 <p className="text-sm text-gray-500">{user?.email}</p>
               </div>
               <div className="p-1">
@@ -176,7 +188,7 @@ const Navbar = () => {
                         setShowUserMenu(false);
                         navigate('/assign-agent');
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                      className="w-full text-left px-4 py-2 hover:bg-blue-50 text-sm rounded transition"
                     >
                       Assign Agent
                     </button>
@@ -185,7 +197,7 @@ const Navbar = () => {
                         setShowUserMenu(false);
                         setShowAddUser(true);
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                      className="w-full text-left px-4 py-2 hover:bg-blue-50 text-sm rounded transition"
                     >
                       Add User
                     </button>
@@ -196,7 +208,7 @@ const Navbar = () => {
                     setShowUserMenu(false);
                     navigate('/dashboard');
                   }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  className="w-full text-left px-4 py-2 hover:bg-blue-50 text-sm rounded transition"
                 >
                   Home
                 </button>
@@ -206,7 +218,7 @@ const Navbar = () => {
                     localStorage.clear();
                     navigate('/soc-login');
                   }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  className="w-full text-left px-4 py-2 hover:bg-blue-50 text-sm rounded transition"
                 >
                   Logout
                 </button>

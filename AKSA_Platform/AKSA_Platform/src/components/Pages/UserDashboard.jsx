@@ -43,8 +43,8 @@ const UserDashboard = () => {
       <Navbar fullname={fullname} />
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/70 backdrop-blur-md">
         <div className="relative flex flex-col items-center">
-          <div className="w-20 h-20 border-8 border-blue-400 border-t-transparent border-b-transparent rounded-full animate-spin mb-6 shadow-lg"></div>
-          <div className="text-2xl font-bold text-blue-700 mb-2">Loading User Dashboard...</div>
+          <div className="w-20 h-20 border-8 border-primary border-t-transparent border-b-transparent rounded-full animate-spin mb-6 shadow-lg"></div>
+          <div className="text-2xl font-bold text-primary mb-2">Loading User Dashboard...</div>
           <div className="text-base text-gray-600">Please wait while we fetch your security data.</div>
         </div>
       </div>
