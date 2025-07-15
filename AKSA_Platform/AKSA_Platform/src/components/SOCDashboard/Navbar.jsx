@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Users2, Bell } from 'lucide-react';
+import { Users2, Bell, Home, Shield, Bug, Settings } from 'lucide-react';
 import AddUserModal from './AddUserModal';
 
 const Navbar = () => {
@@ -79,10 +79,10 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { path: '/soc', label: 'Dashboard' },
-    { path: '/alerts', label: 'Alerts' },
-    { path: '/logs', label: 'Vulnerabilities' },
-    { path: '/settings1', label: 'Settings' },
+    { path: '/soc', label: 'Dashboard', icon: <Home className="w-5 h-5 mr-2" /> },
+    { path: '/alerts', label: 'Alerts', icon: <Bell className="w-5 h-5 mr-2" /> },
+    { path: '/logs', label: 'Vulnerabilities', icon: <Shield className="w-5 h-5 mr-2" /> },
+    { path: '/settings1', label: 'Settings', icon: <Settings className="w-5 h-5 mr-2" /> },
   ];
 
   return (
@@ -98,16 +98,16 @@ const Navbar = () => {
       {/* Navigation Links */}
       <div className="flex-1 flex justify-center overflow-x-auto scrollbar-hide">
         <div className="flex gap-8 items-center">
-          {navItems.map(({ path, label }) => (
+          {navItems.map(({ path, label, icon }) => (
             <Link
               key={path}
               to={path}
-              className={`text-lg font-medium ${
-                location.pathname === path
+              className={`flex items-center text-lg font-medium ${location.pathname === path
                   ? 'text-blue-600 font-semibold'
                   : 'text-gray-500 hover:text-blue-600'
-              }`}
+                }`}
             >
+              {icon}
               {label}
             </Link>
           ))}
