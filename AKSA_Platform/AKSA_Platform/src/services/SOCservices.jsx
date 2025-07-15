@@ -62,107 +62,107 @@ export const fetchPaginatedAlerts = async (from, size) => {
 
 //  Fetch alert severity aggregation data
 export const fetchAlertSeverityChartData = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/alert-severity-chart`);
-      return response.data;
-    } catch (error) {
-      console.error("❌ Error fetching alert severity chart data:", error);
-      throw error;
-    }
-  };
-  
-  //  Fetch alerts over time (histogram)
-  export const fetchAlertsOverTimeData = async () => {
-    try {
-      const response = await axios.post(`${BASE_URL}/alerts`, {
-        size: 0,
-        aggs: {
-          alerts_over_time: {
-            date_histogram: {
-              field: "@timestamp",
-              calendar_interval: "day",
-              format: "yyyy-MM-dd"
-            }
-          }
-        }
-      });
-      return response.data.aggregations?.alerts_over_time?.buckets || [];
-    } catch (error) {
-      console.error("❌ Error fetching alerts over time data:", error);
-      throw error;
-    }
-  };
-  // Fetch agent alert count aggregation
-  export const fetchAgentAlertCounts = async () => {
-    try {
-      const response = await axios.post(`${BASE_URL}/alerts`, {
-        size: 0,
-        aggs: {
-          agents: {
-            terms: {
-              field: "agent.name"
-            }
-          }
-        }
-      });
-      return response.data.aggregations?.agents?.buckets || [];
-    } catch (error) {
-      console.error("❌ Error fetching agent alert counts:", error);
-      throw error;
-    }
-  };
+  try {
+    const response = await axios.get(`${BASE_URL}/alert-severity-chart`);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error fetching alert severity chart data:", error);
+    throw error;
+  }
+};
 
-  export const fetchLatestAlerts = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/alerts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: 0,
-          size: 5,
-          query: { match_all: {} },
-          sort: [{ timestamp: { order: "desc" } }]
-        })
-      });
-  
-      const data = await response.json();
-      return data.hits?.hits?.map(hit => hit._source) || [];
-    } catch (error) {
-      console.error("❌ Error fetching latest alerts:", error);
-      return [];
-    }
-  };
-  
-  export const fetchSeverityChartData = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/alert-severity-chart`);
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("❌ Error fetching severity chart data:", error);
-      return null;
-    }
-  };
-  
+//  Fetch alerts over time (histogram)
+export const fetchAlertsOverTimeData = async () => {
+  try {
+    const response = await axios.post(`${BASE_URL}/alerts`, {
+      size: 0,
+      aggs: {
+        alerts_over_time: {
+          date_histogram: {
+            field: "@timestamp",
+            calendar_interval: "day",
+            format: "yyyy-MM-dd"
+          }
+        }
+      }
+    });
+    return response.data.aggregations?.alerts_over_time?.buckets || [];
+  } catch (error) {
+    console.error("❌ Error fetching alerts over time data:", error);
+    throw error;
+  }
+};
+// Fetch agent alert count aggregation
+export const fetchAgentAlertCounts = async () => {
+  try {
+    const response = await axios.post(`${BASE_URL}/alerts`, {
+      size: 0,
+      aggs: {
+        agents: {
+          terms: {
+            field: "agent.name"
+          }
+        }
+      }
+    });
+    return response.data.aggregations?.agents?.buckets || [];
+  } catch (error) {
+    console.error("❌ Error fetching agent alert counts:", error);
+    throw error;
+  }
+};
+
+export const fetchLatestAlerts = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/alerts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 0,
+        size: 5,
+        query: { match_all: {} },
+        sort: [{ timestamp: { order: "desc" } }]
+      })
+    });
+
+    const data = await response.json();
+    return data.hits?.hits?.map(hit => hit._source) || [];
+  } catch (error) {
+    console.error("❌ Error fetching latest alerts:", error);
+    return [];
+  }
+};
+
+export const fetchSeverityChartData = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/alert-severity-chart`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("❌ Error fetching severity chart data:", error);
+    return null;
+  }
+};
+
 
 export const getComplianceStatus = async () => {
-    try {
-      const response = await axios.post(`${BASE_URL}/alerts`, {
-        size: 1000,
-        query: {
-          match_all: {}
-        }
-      });
-      const alerts = response.data.hits?.hits || [];
-      // Debug: log alert count and high severity count
-      const highSeverity = alerts.filter(alert => (alert._source?.rule?.level || 0) >= 10).length;
-      console.log(`[Compliance Debug] Total alerts: ${alerts.length}, High severity: ${highSeverity}`);
-      return alerts;
-    } catch (error) {
-      console.error('❌ Failed to fetch Wazuh alerts:', error);
-      throw error;
-    }
-  };
+  try {
+    const response = await axios.post(`${BASE_URL}/alerts`, {
+      size: 1000,
+      query: {
+        match_all: {}
+      }
+    });
+    const alerts = response.data.hits?.hits || [];
+    // Debug: log alert count and high severity count
+    const highSeverity = alerts.filter(alert => (alert._source?.rule?.level || 0) >= 10).length;
+    console.log(`[Compliance Debug] Total alerts: ${alerts.length}, High severity: ${highSeverity}`);
+    return alerts;
+  } catch (error) {
+    console.error('❌ Failed to fetch Wazuh alerts:', error);
+    throw error;
+  }
+};
 
 // === FIM Scan & Syscheck Services ===
 // Run FIM scan on all agents
