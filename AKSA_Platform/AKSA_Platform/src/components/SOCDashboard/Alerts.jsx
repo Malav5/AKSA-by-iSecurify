@@ -588,139 +588,39 @@ const Alerts = () => {
             </table>
           </div>
 
-          {/* Enhanced Pagination */}
-          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-            {/* Mobile pagination */}
-            <div className="flex-1 flex justify-between items-center sm:hidden">
-              <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`relative inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === 1
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-blue-600 hover:bg-blue-50 shadow-sm border border-gray-300'
-                  }`}
+          {/* Pagination - Centered, modern style as in image */}
+          <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-white rounded-b-xl">
+            {/* Rows per page selector left-aligned */}
+            <div className="flex items-center text-sm text-gray-600 mb-2 sm:mb-0">
+              <span className="mr-2">Rows per page:</span>
+              <select
+                value={pageSize}
+                onChange={handlePageSizeChange}
+                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               >
-                Previous
-              </button>
-              <span className="text-sm text-gray-700 px-4">
-                {currentPage}/{totalPages}
-              </span>
-              <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`relative inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === totalPages
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-blue-600 hover:bg-blue-50 shadow-sm border border-gray-300'
-                  }`}
-              >
-                Next
-              </button>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
             </div>
-
-            {/* Desktop pagination */}
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-gray-700">
-                  Showing <span className="font-medium">{(currentPage - 1) * pageSize + 1}</span> to{' '}
-                  <span className="font-medium">{Math.min(currentPage * pageSize, filteredAlerts.length)}</span> of{' '}
-                  <span className="font-medium">{filteredAlerts.length}</span> alerts
-                </p>
-              </div>
-              <div>
-                <nav className="flex items-center gap-1" aria-label="Pagination">
-                  <button
-                    onClick={() => goToPage(1)}
-                    disabled={currentPage === 1}
-                    className={`p-2 rounded-lg ${currentPage === 1
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    aria-label="First page"
-                  >
-                    <ChevronsLeft className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`p-2 rounded-lg ${currentPage === 1
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    aria-label="Previous page"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-
-                  {/* Page numbers */}
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-
-                      // Show ellipsis if needed
-                      if (i === 0 && pageNum > 1) {
-                        return (
-                          <span key="start-ellipsis" className="px-2 py-1 text-gray-500">
-                            ...
-                          </span>
-                        );
-                      }
-
-                      if (i === 4 && pageNum < totalPages) {
-                        return (
-                          <span key="end-ellipsis" className="px-2 py-1 text-gray-500">
-                            ...
-                          </span>
-                        );
-                      }
-
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => goToPage(pageNum)}
-                          className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === pageNum
-                            ? 'bg-blue-600 text-white shadow-md'
-                            : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                          aria-current={currentPage === pageNum ? 'page' : undefined}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`p-2 rounded-lg ${currentPage === totalPages
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    aria-label="Next page"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => goToPage(totalPages)}
-                    disabled={currentPage === totalPages}
-                    className={`p-2 rounded-lg ${currentPage === totalPages
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    aria-label="Last page"
-                  >
-                    <ChevronsRight className="h-5 w-5" />
-                  </button>
-                </nav>
+            {/* Centered pagination controls */}
+            <div className="flex-1 flex justify-end">
+              <div className="flex items-center gap-2 px-4 py-2">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transform transition-transform duration-200 hover:scale-105"
+                >
+                  Prev
+                </button>
+                <span className="text-gray-700 text-base font-semibold min-w-[60px] text-center">{currentPage} / {totalPages}</span>
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transform transition-transform duration-200 hover:scale-105"
+                >
+                  Next
+                </button>
               </div>
             </div>
           </div>
