@@ -150,7 +150,7 @@ const AgentDetails = ({ agentId, onBack }) => {
     <>
      
 
-      <div className="bg-white p-6 rounded-xl shadow-lg my-20 max-w-7xl mx-auto scrollbar-hide py-10">
+      <div className="my-20 max-w-7xl mx-auto scrollbar-hide py-10">
         <div className="flex justify-between items-center mb-6">
           <button
             onClick={onBack}
