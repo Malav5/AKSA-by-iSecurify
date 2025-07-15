@@ -105,7 +105,7 @@ const AgentDetails = ({ agentId, onBack }) => {
         </div>
         <div className="flex items-center justify-center h-screen bg-gray-50 pt-20">
           <div className="flex flex-col items-center space-y-4">
-            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-12 h-12 border-4 border-[#800080] border-t-transparent rounded-full animate-spin"></div>
             <p className="text-gray-600">Loading agent details...</p>
           </div>
         </div>
@@ -122,7 +122,7 @@ const AgentDetails = ({ agentId, onBack }) => {
             <div className="text-red-500 mb-4 text-lg">{error}</div>
             <button
               onClick={onBack}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              className="px-4 py-2 bg-primary text-white rounded hover:bg-blue-600 transition-colors"
             >
               ← Back to Agents
             </button>
@@ -154,7 +154,7 @@ const AgentDetails = ({ agentId, onBack }) => {
         <div className="flex justify-between items-center mb-6">
           <button
             onClick={onBack}
-            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            className="flex items-center px-4 py-2 bg-primary text-white rounded hover:bg-blue-600 transition-colors"
           >
             <ArrowLeft className="mr-2" size={18} />
             Back to Agents

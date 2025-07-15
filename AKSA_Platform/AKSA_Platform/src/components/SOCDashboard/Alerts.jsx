@@ -422,7 +422,7 @@ const Alerts = () => {
                 <select
                   value={selectedAgent}
                   onChange={(e) => setSelectedAgent(e.target.value)}
-                  className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm"
+                  className="w-full p-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                   disabled={assignedAgents.length === 0}
                 >
                   {assignedAgents.length === 0 ? (

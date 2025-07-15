@@ -20,20 +20,21 @@ const AgentList = ({ agents, type, onSelectAgent, onDeleteAgent, onClose }) => {
           <Navbar />
         </div>
         {/* Header with title and close button */}
-        <div className="sticky top-[64px] z-10 bg-white border-b border-gray-100 px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold mt-10 text-gray-800 capitalize">
-            {type} Agents Dashboard
-          </h1>
-          <button
-            onClick={onClose}
-            className="flex items-center gap-1 mt-10 text-gray-500 hover:text-red-500 transition-colors duration-200"
-          >
-            <X size={20} />
-            <span className="hidden sm:inline">Close</span>
-          </button>
-        </div>
+
         {/* Main content */}
-        <div className="px-8 py-6 space-y-8">
+        <div className="px-8 py-6 space-y-8 mx-40">
+          <div className="z-10 bg-white mb-10 px-8 py-4 pt-16 flex justify-between items-center">
+            <h1 className="text-2xl font-bold mt-10 text-gray-800 capitalize">
+              {type} Agents Dashboard
+            </h1>
+            <button
+              onClick={onClose}
+              className="flex items-center gap-1 mt-10 text-gray-500 hover:text-red-500 transition-colors duration-200"
+            >
+              <X size={20} />
+              <span className="hidden sm:inline">Close</span>
+            </button>
+          </div>
           {/* Charts section */}
           <section>
             <AgentCharts agents={agents} />
@@ -74,14 +75,14 @@ const AgentList = ({ agents, type, onSelectAgent, onDeleteAgent, onClose }) => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${agent.status === 'active'
-                              ? 'bg-green-100 text-green-800'
-                              : agent.status === 'disconnected'
-                                ? 'bg-red-100 text-red-800'
-                                : agent.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : agent.status === 'never_connected'
-                                    ? 'bg-gray-100 text-gray-800'
-                                    : 'bg-purple-100 text-purple-800'
+                            ? 'bg-green-100 text-green-800'
+                            : agent.status === 'disconnected'
+                              ? 'bg-red-100 text-red-800'
+                              : agent.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : agent.status === 'never_connected'
+                                  ? 'bg-gray-100 text-gray-800'
+                                  : 'bg-purple-100 text-purple-800'
                             }`}
                         >
                           {agent.status ? agent.status.replace('_', ' ') : 'N/A'}
@@ -113,7 +114,7 @@ const AgentList = ({ agents, type, onSelectAgent, onDeleteAgent, onClose }) => {
             <div className="sticky top-0 z-50 bg-white shadow">
               <Navbar />
             </div>
-           
+
             <div className="flex-1 overflow-y-auto scrollbar-hide">
               <AgentDetails agentId={selectedAgentId} onBack={() => setSelectedAgentId(null)} />
             </div>

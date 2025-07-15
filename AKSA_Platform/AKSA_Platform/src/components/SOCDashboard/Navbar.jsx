@@ -166,9 +166,9 @@ const Navbar = () => {
             <div className="w-11 h-11 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold shadow group-hover:bg-blue-700 transition">
               {user?.firstName?.charAt(0).toUpperCase() || <Users2 size={24} />}
             </div>
-            <span className="hidden sm:block text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition">
+            {/* <span className="hidden sm:block text-lg font-semibold text-gray-800 group-hover:text-[#800080] transition">
               {user?.firstName || 'User'}
-            </span>
+            </span> */}
           </button>
 
           {showUserMenu && (
@@ -177,7 +177,7 @@ const Navbar = () => {
               className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl z-50 border border-gray-100"
             >
               <div className="p-4 border-b">
-                <p className="text-lg font-bold text-gray-900">{user?.firstName} {user?.lastName}</p>
+                <p className="text-lg font-bold text-primary">{user?.firstName} {user?.lastName}</p>
                 <p className="text-sm text-gray-500">{user?.email}</p>
               </div>
               <div className="p-1">
