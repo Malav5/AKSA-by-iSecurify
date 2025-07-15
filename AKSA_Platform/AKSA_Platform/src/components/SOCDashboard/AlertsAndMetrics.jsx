@@ -38,6 +38,7 @@ const AlertsAndMetrics = ({
     datasets: []
   });
   const [topVulnRules, setTopVulnRules] = useState([]);
+  const [topDangerRules, setTopDangerRules] = useState([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -235,6 +236,25 @@ const AlertsAndMetrics = ({
           .map(([rule, count]) => [rule, count])
           .sort((a, b) => b[1] - a[1]);
         setTopVulnRules(sortedVulnRules);
+
+        // Build Top Dangerous Alert Rules (by highest severity/level)
+        const ruleSeverityMap = {};
+        filteredAlerts.forEach(alert => {
+          const ruleName = alert.rule?.description || alert.rule?.name || alert.title || 'Unknown';
+          const level = alert.rule?.level || 0;
+          if (!ruleSeverityMap[ruleName]) {
+            ruleSeverityMap[ruleName] = { count: 0, maxLevel: 0 };
+          }
+          ruleSeverityMap[ruleName].count += 1;
+          if (level > ruleSeverityMap[ruleName].maxLevel) {
+            ruleSeverityMap[ruleName].maxLevel = level;
+          }
+        });
+        // Sort by maxLevel (desc), then by count (desc)
+        const sortedDangerRules = Object.entries(ruleSeverityMap)
+          .map(([rule, data]) => ({ rule, ...data }))
+          .sort((a, b) => b.maxLevel - a.maxLevel || b.count - a.count);
+        setTopDangerRules(sortedDangerRules.slice(0, 3));
       } catch (error) {
         console.error("❌ Error loading dashboard chart data:", error);
       } finally {
@@ -280,29 +300,29 @@ const AlertsAndMetrics = ({
           </div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-6 min-h-[350px] flex flex-col shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
-          <h3 className="text-2xl font-bold mb-4">Top Alert Rules (by Vulnerabilities)</h3>
+          <h3 className="text-2xl font-bold mb-4">Top Dangerous Alert Rules</h3>
           <div className="flex-1 min-h-[256px]">
             {loading ? (
               <ChartLoader />
-            ) : topVulnRules && topVulnRules.length > 0 ? (
+            ) : topDangerRules && topDangerRules.length > 0 ? (
               <div className="space-y-4">
-                {topVulnRules.slice(0, 3).map(([rule, count], index) => (
+                {topDangerRules.map((item, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between bg-gray-50 rounded-xl px-5 py-4"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-orange-500 text-xl">&#9888;&#65039;</span>
-                      <span className="text-base font-medium text-gray-900">{rule}</span>
+                      <span className="text-base font-medium text-gray-900">{item.rule}</span>
                     </div>
-                    <span className="bg-gray-200 text-gray-700 rounded-full px-3 py-1 text-base font-semibold min-w-[32px] text-center">
-                      {count}
+                    <span className="bg-red-200 text-red-700 rounded-full px-3 py-1 text-base font-semibold min-w-[32px] text-center">
+                      Max Severity: {item.maxLevel} | Count: {item.count}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-600">No vulnerability rule data available.</p>
+              <p className="text-gray-600">No dangerous alert rules found.</p>
             )}
           </div>
         </div>

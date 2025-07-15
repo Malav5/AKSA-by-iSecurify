@@ -9,11 +9,11 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { 
-  AlertTriangle, 
-  ShieldAlert, 
-  ShieldCheck, 
-  Shield, 
+import {
+  AlertTriangle,
+  ShieldAlert,
+  ShieldCheck,
+  Shield,
   ShieldOff,
   Filter,
   X,
@@ -298,23 +298,23 @@ const Alerts = () => {
 
   const chartOptions = {
     responsive: true,
-    plugins: { 
-      legend: { 
+    plugins: {
+      legend: {
         position: 'top',
         labels: {
           font: {
             size: 12
           }
         }
-      } 
+      }
     },
-    scales: { 
-      y: { 
-        beginAtZero: true, 
+    scales: {
+      y: {
+        beginAtZero: true,
         ticks: {
           precision: 0
         }
-      } 
+      }
     },
     maintainAspectRatio: false,
   };
@@ -333,6 +333,14 @@ const Alerts = () => {
     cutout: '70%',
     maintainAspectRatio: false
   };
+
+  // Loader component for charts
+  const ChartLoader = () => (
+    <div className="flex flex-col items-center justify-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-400 border-t-transparent mb-4"></div>
+      <p className="text-gray-600 text-sm">Loading...</p>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -361,7 +369,7 @@ const Alerts = () => {
               {filteredAlerts.length.toLocaleString()} total alerts detected
             </p>
           </div>
-          
+
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg ${showFilters ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'} transition-colors`}
@@ -438,7 +446,7 @@ const Alerts = () => {
         {/* Severity Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {Object.entries(severityConfig).map(([severity, config]) => (
-            <div 
+            <div
               key={severity}
               className={`rounded-xl border ${config.color} p-4 transition-all hover:shadow-md cursor-pointer ${selectedSeverity === severity ? 'ring-2 ring-blue-500' : ''}`}
               onClick={() => setSelectedSeverity(selectedSeverity === severity ? 'All' : severity)}
@@ -470,7 +478,7 @@ const Alerts = () => {
               Alert Distribution by Severity
             </h3>
             <div className="h-64">
-              <Bar data={chartData} options={chartOptions} />
+              {loading ? <ChartLoader /> : <Bar data={chartData} options={chartOptions} />}
             </div>
           </div>
 
@@ -480,7 +488,7 @@ const Alerts = () => {
               Alert Severity Breakdown
             </h3>
             <div className="h-64 flex items-center justify-center">
-              <Doughnut data={doughnutData} options={doughnutOptions} />
+              {loading ? <ChartLoader /> : <Doughnut data={doughnutData} options={doughnutOptions} />}
             </div>
           </div>
         </div>
@@ -492,7 +500,7 @@ const Alerts = () => {
               <h3 className="text-lg font-semibold text-gray-800">
                 Alert Details ({filteredAlerts.length.toLocaleString()} filtered)
               </h3>
-              
+
               <div className="flex items-center gap-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <span className="mr-2">Rows per page:</span>
@@ -534,8 +542,8 @@ const Alerts = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {paginatedFilteredAlerts.length > 0 ? (
                   paginatedFilteredAlerts.map((alert) => (
-                    <tr 
-                      key={alert.id} 
+                    <tr
+                      key={alert.id}
                       className="hover:bg-gray-50 cursor-pointer"
                       onClick={() => setSelectedAlert(alert)}
                     >
@@ -576,11 +584,10 @@ const Alerts = () => {
               <button
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`relative inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  currentPage === 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-blue-600 hover:bg-blue-50 shadow-sm border border-gray-300'
-                }`}
+                className={`relative inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-blue-600 hover:bg-blue-50 shadow-sm border border-gray-300'
+                  }`}
               >
                 Previous
               </button>
@@ -590,11 +597,10 @@ const Alerts = () => {
               <button
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className={`relative inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  currentPage === totalPages
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-blue-600 hover:bg-blue-50 shadow-sm border border-gray-300'
-                }`}
+                className={`relative inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-blue-600 hover:bg-blue-50 shadow-sm border border-gray-300'
+                  }`}
               >
                 Next
               </button>
@@ -614,11 +620,10 @@ const Alerts = () => {
                   <button
                     onClick={() => goToPage(1)}
                     disabled={currentPage === 1}
-                    className={`p-2 rounded-lg ${
-                      currentPage === 1
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                    className={`p-2 rounded-lg ${currentPage === 1
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-100'
+                      }`}
                     aria-label="First page"
                   >
                     <ChevronsLeft className="h-5 w-5" />
@@ -626,11 +631,10 @@ const Alerts = () => {
                   <button
                     onClick={() => goToPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`p-2 rounded-lg ${
-                      currentPage === 1
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                    className={`p-2 rounded-lg ${currentPage === 1
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-100'
+                      }`}
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="h-5 w-5" />
@@ -649,7 +653,7 @@ const Alerts = () => {
                       } else {
                         pageNum = currentPage - 2 + i;
                       }
-                      
+
                       // Show ellipsis if needed
                       if (i === 0 && pageNum > 1) {
                         return (
@@ -658,7 +662,7 @@ const Alerts = () => {
                           </span>
                         );
                       }
-                      
+
                       if (i === 4 && pageNum < totalPages) {
                         return (
                           <span key="end-ellipsis" className="px-2 py-1 text-gray-500">
@@ -671,11 +675,10 @@ const Alerts = () => {
                         <button
                           key={pageNum}
                           onClick={() => goToPage(pageNum)}
-                          className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-                            currentPage === pageNum
-                              ? 'bg-blue-600 text-white shadow-md'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
+                          className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === pageNum
+                            ? 'bg-blue-600 text-white shadow-md'
+                            : 'text-gray-700 hover:bg-gray-100'
+                            }`}
                           aria-current={currentPage === pageNum ? 'page' : undefined}
                         >
                           {pageNum}
@@ -687,11 +690,10 @@ const Alerts = () => {
                   <button
                     onClick={() => goToPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`p-2 rounded-lg ${
-                      currentPage === totalPages
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                    className={`p-2 rounded-lg ${currentPage === totalPages
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-100'
+                      }`}
                     aria-label="Next page"
                   >
                     <ChevronRight className="h-5 w-5" />
@@ -699,11 +701,10 @@ const Alerts = () => {
                   <button
                     onClick={() => goToPage(totalPages)}
                     disabled={currentPage === totalPages}
-                    className={`p-2 rounded-lg ${
-                      currentPage === totalPages
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                    className={`p-2 rounded-lg ${currentPage === totalPages
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-100'
+                      }`}
                     aria-label="Last page"
                   >
                     <ChevronsRight className="h-5 w-5" />
@@ -716,9 +717,9 @@ const Alerts = () => {
       </div>
 
       {selectedAlert && (
-        <AlertDetail 
-          alert={selectedAlert} 
-          onClose={() => setSelectedAlert(null)} 
+        <AlertDetail
+          alert={selectedAlert}
+          onClose={() => setSelectedAlert(null)}
         />
       )}
     </div>
