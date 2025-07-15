@@ -66,6 +66,7 @@ function trimFimResult(data, depth = 0) {
 const ScanComponent = () => {
     const [agentId, setAgentId] = useState('');
     const [agents, setAgents] = useState([]);
+    const [assignedAgentIds, setAssignedAgentIds] = useState([]);
     const [scanResult, setScanResult] = useState(null);
     const [lastScan, setLastScan] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -76,6 +77,32 @@ const ScanComponent = () => {
     const [fimAssistantReply, setFimAssistantReply] = useState('');
     const [agentThreads, setAgentThreads] = useState({});
 
+    // Fetch assigned agent IDs for user
+    useEffect(() => {
+        const fetchAssignedAgents = async () => {
+            const token = localStorage.getItem('token');
+            const userRole = localStorage.getItem('role');
+            if (userRole === 'admin') {
+                setAssignedAgentIds([]); // Admin sees all
+                return;
+            }
+            const userEmail = localStorage.getItem('soc_email');
+            if (!userEmail) {
+                setAssignedAgentIds([]);
+                return;
+            }
+            const res = await axios.get('http://localhost:3000/api/agentMap/assigned-agents', {
+                params: { userEmail },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            // Normalize IDs to 3-digit strings
+            const ids = (res.data.agents || []).map(a => String(a.agentId).padStart(3, '0'));
+            setAssignedAgentIds(ids);
+        };
+        fetchAssignedAgents();
+    }, []);
+
+    // Fetch all agents, then filter for assigned if needed
     useEffect(() => {
         const loadAgents = async () => {
             try {
@@ -85,7 +112,11 @@ const ScanComponent = () => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                const wazuhAgents = res.data.data.affected_items || [];
+                let wazuhAgents = res.data.data.affected_items || [];
+                // If not admin, filter for assigned agents only
+                if (assignedAgentIds.length > 0) {
+                    wazuhAgents = wazuhAgents.filter(agent => assignedAgentIds.includes(String(agent.id).padStart(3, '0')));
+                }
                 setAgents(wazuhAgents);
                 if (wazuhAgents.length > 0) setAgentId(wazuhAgents[0].id);
             } catch (err) {
@@ -94,7 +125,7 @@ const ScanComponent = () => {
             }
         };
         loadAgents();
-    }, []);
+    }, [assignedAgentIds]);
 
     useEffect(() => {
         if (!fimThreadId) {
