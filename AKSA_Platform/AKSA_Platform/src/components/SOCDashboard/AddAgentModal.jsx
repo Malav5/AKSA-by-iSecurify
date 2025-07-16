@@ -83,7 +83,7 @@ const AddAgentModal = ({ visible, onClose }) => {
 
   return (
     <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-fade-in-fast">
-      <div className="bg-white rounded-xl shadow-2xl border-2 border-primary max-w-4xl min-w-[600px] min-h-[500px] w-full relative max-h-[95vh] flex flex-col animate-zoom-in">
+      <div className="bg-white rounded-xl shadow-2xl  max-w-4xl min-w-[600px] min-h-[500px] w-full relative max-h-[95vh] flex flex-col animate-zoom-in">
         {/* Fixed Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 flex justify-between items-start rounded-t-xl">
           <h2 className="text-2xl font-bold text-primary">Deploy new agent</h2>
@@ -126,7 +126,7 @@ const AddAgentModal = ({ visible, onClose }) => {
                 {copiedInstall ? 'Copied!' : 'Copy'}
               </button>
             </div>
-            <pre className="bg-gray-100 rounded p-3 text-sm overflow-x-auto select-all mb-2 custom-scrollbar-x">{installCmd}</pre>
+            <pre className="bg-gray-100 rounded p-3 text-sm select-all mb-2 custom-scrollbar-x whitespace-pre-wrap">{installCmd}</pre>
             <div className="text-m text-primary bg-primary/10 rounded p-4 mb-2">
               <b>Requirements</b>
               <ul className="list-disc ml-5">
@@ -148,7 +148,7 @@ const AddAgentModal = ({ visible, onClose }) => {
                 {copiedStart ? 'Copied!' : 'Copy'}
               </button>
             </div>
-            <pre className="bg-gray-100 rounded p-3 text-sm overflow-x-auto select-all add-agent-modal-pre">{startCmd}</pre>
+            <pre className="bg-gray-100 rounded p-3 text-sm select-all add-agent-modal-pre whitespace-pre-wrap">{startCmd}</pre>
           </div>
           <div className="flex justify-end gap-2 mt-6">
             <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={onClose}>Cancel</button>

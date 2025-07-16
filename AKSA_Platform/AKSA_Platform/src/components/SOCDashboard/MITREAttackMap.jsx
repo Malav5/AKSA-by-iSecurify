@@ -18,8 +18,8 @@ const MITREAttackMap = ({ topRules }) => {
   const tacticMap = {
     ssh: { 
       name: 'Initial Access', 
-      color: 'bg-blue-50 border border-blue-100 text-blue-700',
-      icon: <LogIn size={18} className="text-blue-500" /> 
+      color: 'bg-primary/10 border border-primary/20 text-primary',
+      icon: <LogIn size={18} className="text-primary" /> 
     },
     login: { 
       name: 'Credential Access', 
@@ -134,8 +134,8 @@ const MITREAttackMap = ({ topRules }) => {
 
   // Summary card component
   const SummaryCard = ({ icon, value, label }) => (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col items-center justify-center transition-all hover:shadow-md hover:border-blue-200">
-      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 mb-3">
+    <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col items-center justify-center transition-all hover:shadow-md hover:border-primary">
+      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3">
         {icon}
       </div>
       <div className="text-3xl font-bold text-gray-900">{value}</div>
@@ -155,7 +155,7 @@ const MITREAttackMap = ({ topRules }) => {
           onClick={() => setExpanded(isExpanded ? null : title)}
         >
           <div className="flex items-center">
-            <div className="mr-3 text-blue-500">{icon}</div>
+            <div className="mr-3 text-primary">{icon}</div>
             <h3 className="text-xl font-semibold text-gray-800">
               {title} <span className="text-gray-500">({items?.length || 0})</span>
             </h3>
@@ -187,7 +187,7 @@ const MITREAttackMap = ({ topRules }) => {
                                 href={item.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
+                                className="text-primary hover:underline"
                               >
                                 {item[f]}
                               </a>
@@ -223,7 +223,7 @@ const MITREAttackMap = ({ topRules }) => {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
       </div>
     );
@@ -245,8 +245,8 @@ const MITREAttackMap = ({ topRules }) => {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-3">
-          <div className="bg-blue-100 p-2 rounded-lg">
-            <Target className="w-6 h-6 text-blue-600" />
+          <div className="bg-primary/20 p-2 rounded-lg">
+            <Target className="w-6 h-6 text-primary" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900">MITRE ATT&CK Mapping</h2>
         </div>
@@ -276,27 +276,27 @@ const MITREAttackMap = ({ topRules }) => {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
         <SummaryCard 
-          icon={<Zap className="w-5 h-5 text-blue-500" />} 
+          icon={<Zap className="w-5 h-5 text-primary" />} 
           value={filteredTechniques.length} 
           label="Techniques" 
         />
         <SummaryCard 
-          icon={<Target className="w-5 h-5 text-blue-500" />} 
+          icon={<Target className="w-5 h-5 text-primary" />} 
           value={filteredTactics.length} 
           label="Tactics" 
         />
         <SummaryCard 
-          icon={<Shield className="w-5 h-5 text-blue-500" />} 
+          icon={<Shield className="w-5 h-5 text-primary" />} 
           value={filteredMitigations.length} 
           label="Mitigations" 
         />
         <SummaryCard 
-          icon={<Cpu className="w-5 h-5 text-blue-500" />} 
+          icon={<Cpu className="w-5 h-5 text-primary" />} 
           value={filteredSoftware.length} 
           label="Software" 
         />
         <SummaryCard 
-          icon={<Users className="w-5 h-5 text-blue-500" />} 
+          icon={<Users className="w-5 h-5 text-primary" />} 
           value={filteredGroups.length} 
           label="Groups" 
         />

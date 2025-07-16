@@ -17,7 +17,7 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
   const [error, setError] = useState(null);
 
   const colors = [
-    '#3B82F6', '#EF4444', '#F59E0B', '#10B981',
+    '#800080', '#EF4444', '#F59E0B', '#10B981',
     '#8B5CF6', '#EC4899', '#14B8A6', '#F97316',
     '#6366F1', '#D946EF'
   ];
@@ -129,7 +129,7 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
 
   if (loading) return (
     <div className="bg-white rounded-xl shadow p-6 mb-8 flex justify-center items-center h-64">
-      <div className="animate-spin h-10 w-10 border-4 border-blue-400 border-t-transparent rounded-full"></div>
+      <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
     </div>
   );
 
@@ -147,7 +147,7 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
           <h2 className="text-2xl font-bold text-gray-800">Rule Category Analysis</h2>
           <p className="text-gray-500">Visual and card breakdown of rule-based alerts</p>
         </div>
-        <div className="bg-blue-50 text-blue-800 px-4 py-1.5 rounded-full text-sm font-medium">
+        <div className="bg-primary-50 text-primary px-4 py-1.5 rounded-full text-sm font-medium">
           Total Alerts: <span className="font-semibold">{total.toLocaleString()}</span>
         </div>
       </div>
@@ -166,7 +166,7 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
               </div>
             </div>
             {mostTriggered[0] && (
-              <div className="mt-4 text-sm text-center text-blue-700">
+              <div className="mt-4 text-sm text-center text-black">
                 <div className="font-semibold">Most Frequent:</div>
                 <div>{mostTriggered[0]} ({mostTriggeredPct}%)</div>
               </div>
@@ -186,7 +186,7 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="text-gray-700 font-semibold text-lg truncate pr-2">{desc}</div>
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">{pct}%</span>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-secondary text-primary">{pct}%</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">
@@ -213,11 +213,11 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
         <div className="mt-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-gray-800">
-              Alerts for: <span className="text-blue-600">{selectedRule}</span>
+              Alerts for: <span className="text-primary">{selectedRule}</span>
             </h3>
             <button
               onClick={clearSelection}
-              className="text-sm text-blue-500 hover:underline"
+              className="text-sm text-primary hover:underline"
             >
               Clear
             </button>
