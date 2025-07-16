@@ -1,64 +1,47 @@
 import React from "react";
 
-export default function Pagination({ currentPage, totalPages, onPageChange }) {
-  const getPageNumbers = () => {
-    const pages = [];
-
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      pages.push(1);
-
-      if (currentPage > 4) pages.push("...");
-
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = start; i <= end; i++) pages.push(i);
-
-      if (currentPage < totalPages - 3) pages.push("...");
-
-      pages.push(totalPages);
-    }
-
-    return pages;
-  };
-
-  const pageNumbers = getPageNumbers();
-
+export default function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  rowsPerPage,
+  onRowsPerPageChange,
+  rowsPerPageOptions = [5, 10, 20, 50],
+  totalItems
+}) {
   return (
-    <div className="flex justify-center items-center mt-6 space-x-2 flex-wrap">
-      <button
-        className="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50"
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-        Previous
-      </button>
-
-      {pageNumbers.map((page, index) =>
-        page === "..." ? (
-          <span key={index} className="px-3 py-1 text-sm text-gray-500">...</span>
-        ) : (
-          <button
-            key={index}
-            onClick={() => onPageChange(page)}
-            className={`px-3 py-1 border rounded text-sm hover:bg-gray-100 ${
-              currentPage === page ? "bg-gray-200 font-semibold" : ""
-            }`}
-          >
-            {page}
-          </button>
-        )
-      )}
-
-      <button
-        className="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50"
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-      >
-        Next
-      </button>
+    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 px-4 py-4 bg-white rounded-b-xl border-t border-gray-100">
+      <div className="flex items-center gap-2">
+        <span className="text-gray-700 font-medium">Rows per page:</span>
+        <select
+          value={rowsPerPage}
+          onChange={e => onRowsPerPageChange(Number(e.target.value))}
+          className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 bg-white"
+        >
+          {rowsPerPageOptions.map(opt => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      </div>
+      <div className="flex items-center gap-4">
+        <button
+          className="px-4 py-1 border border-gray-300 rounded-md text-gray-700 font-medium bg-white hover:bg-gray-50 disabled:opacity-50"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </button>
+        <span className="text-gray-800 font-semibold text-base">
+          {currentPage} / {totalPages}
+        </span>
+        <button
+          className="px-4 py-1 border border-gray-300 rounded-md text-gray-700 font-medium bg-white hover:bg-gray-50 disabled:opacity-50"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

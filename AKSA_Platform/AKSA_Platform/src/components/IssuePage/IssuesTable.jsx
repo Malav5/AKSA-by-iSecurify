@@ -21,6 +21,7 @@ export default function IssuesTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [assignments, setAssignments] = useState({}); // Store assignments per alert ID
 
   const fetchData = async () => {
@@ -59,7 +60,10 @@ export default function IssuesTable() {
     alert.agent.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalPages = Math.ceil(10000 / ITEMS_PER_PAGE); // Assumed total
+  const totalPages = Math.ceil(filteredAlerts.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentAlerts = filteredAlerts.slice(startIndex, endIndex);
 
   const handleAssignUser = (alertId, user) => {
     setAssignments(prev => ({
@@ -110,7 +114,7 @@ export default function IssuesTable() {
             </tr>
           </thead>
           <tbody>
-            {filteredAlerts.map((alert) => (
+            {currentAlerts.map((alert) => (
               <tr
                 key={alert.id}
                 className="border-t border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
@@ -162,7 +166,7 @@ export default function IssuesTable() {
                 </td>
               </tr>
             ))}
-            {filteredAlerts.length === 0 && (
+            {currentAlerts.length === 0 && (
               <tr>
                 <td colSpan="9" className="px-4 py-8 text-center text-gray-500">
                   No alerts found matching your search criteria
@@ -174,15 +178,15 @@ export default function IssuesTable() {
       </div>
 
       {/* Pagination */}
-      {filteredAlerts.length > 0 && (
-        <div className="flex justify-end mt-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={setRowsPerPage}
+        rowsPerPageOptions={[5, 10, 20, 50]}
+        totalItems={filteredAlerts.length}
+      />
 
       {/* Alert Detail Modal */}
       {selectedAlert && (

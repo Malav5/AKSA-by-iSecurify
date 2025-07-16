@@ -105,12 +105,12 @@ const AgentStatusSummary = () => {
 
   // UI rendering (unchanged, but uses summary)
   const agentStatusBoxes = [
-    { key: 'total', title: 'Total Agents', count: summary.total, color: 'text-blue-600', bg: 'bg-blue-200', shadow: 'shadow-blue-200/20' },
-    { key: 'active', title: 'Active Agents', count: summary.active, color: 'text-green-600', bg: 'bg-green-200', shadow: 'shadow-green-200/20' },
-    { key: 'disconnected', title: 'Disconnected Agents', count: summary.disconnected, color: 'text-red-600', bg: 'bg-red-200', shadow: 'shadow-red-200/20' },
-    { key: 'pending', title: 'Pending Agents', count: summary.pending, color: 'text-orange-600', bg: 'bg-orange-200', shadow: 'shadow-orange-200/20' },
+    { key: 'total', title: 'Total Agents', count: summary.total, color: 'text-blue-600', bg: 'bg-blue-200', shadow: 'shadow-blue-300/20' },
+    { key: 'active', title: 'Active Agents', count: summary.active, color: 'text-green-600', bg: 'bg-green-200', shadow: 'shadow-green-300/20' },
+    { key: 'disconnected', title: 'Disconnected Agents', count: summary.disconnected, color: 'text-red-600', bg: 'bg-red-200', shadow: 'shadow-red-300/20' },
+    { key: 'pending', title: 'Pending Agents', count: summary.pending, color: 'text-orange-600', bg: 'bg-orange-200', shadow: 'shadow-orange-300/20' },
     { key: 'never_connected', title: 'Never Connected', count: summary.never_connected, color: 'text-gray-600', bg: 'bg-blue-100', shadow: 'shadow-blue-200/60' },
-    { key: 'unknown', title: 'Unknown Status', count: summary.unknown, color: 'text-purple-600', bg: 'bg-purple-200', shadow: 'shadow-purple-200/20' },
+    { key: 'unknown', title: 'Unknown Status', count: summary.unknown, color: 'text-purple-600', bg: 'bg-purple-200', shadow: 'shadow-purple-300/20' },
   ];
 
   return (

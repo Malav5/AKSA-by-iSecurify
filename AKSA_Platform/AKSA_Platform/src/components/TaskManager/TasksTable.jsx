@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import TaskDetail from "./TaskDetail";
 import { fetchAllTasks, deleteTaskById, updateTaskById } from "../../services/TaskServics";
+import Pagination from "../Pagination";
 
 const getCriticalityStyle = (criticality) => {
   switch (criticality) {
@@ -64,6 +65,8 @@ export default function TasksTable() {
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
   const [menuTaskId, setMenuTaskId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const users = ["Alice Johnson", "Bob Smith", "Charlie Davis", "Dana Lane"];
   const statuses = ["Unassigned", "To Do", "In Progress", "Resolved", "Reopened"];
@@ -136,6 +139,12 @@ export default function TasksTable() {
     if (fieldA > fieldB) return sortDirection === "asc" ? 1 : -1;
     return 0;
   });
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentTasks = sortedTasks.slice(startIndex, endIndex);
+
+  const totalPages = Math.ceil(filteredTasks.length / rowsPerPage);
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 max-w-full overflow-hidden">
@@ -220,7 +229,7 @@ export default function TasksTable() {
             </tr>
           </thead>
           <tbody>
-            {sortedTasks.map((task) => (
+            {currentTasks.map((task) => (
               <tr key={task._id} className="border-t border-gray-200 hover:bg-gray-50">
                 <td
                   className="px-4 py-2 font-medium text-primary cursor-pointer flex items-center gap-2"
@@ -281,7 +290,7 @@ export default function TasksTable() {
                 </td>
               </tr>
             ))}
-            {sortedTasks.length === 0 && (
+            {currentTasks.length === 0 && (
               <tr>
                 <td colSpan="9" className="text-center py-8 text-gray-500">
                   No tasks found
@@ -291,6 +300,16 @@ export default function TasksTable() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={setRowsPerPage}
+        rowsPerPageOptions={[5, 10, 20, 50]}
+        totalItems={filteredTasks.length}
+      />
 
       {selectedTask && (
         <TaskDetail
