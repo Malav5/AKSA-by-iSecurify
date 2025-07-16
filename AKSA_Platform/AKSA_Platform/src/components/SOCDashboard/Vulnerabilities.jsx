@@ -571,7 +571,7 @@ const Vulnerabilities = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <button
-                              className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600 font-bold hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 transform transition-transform duration-200 hover:scale-110"
+                              className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary text-primary font-bold hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 transform transition-transform duration-200 hover:scale-110"
                               onClick={async e => {
                                 e.stopPropagation();
                                 setShowChatbox(false); // Close if open to reset state
@@ -757,7 +757,7 @@ const Vulnerabilities = () => {
                 ))}
                 {isLoading && (
                   <div className="flex items-end mb-2 justify-start">
-                    <div className="px-5 py-3 rounded-2xl shadow-lg max-w-[70%] break-words bg-gradient-to-br from-blue-100 via-blue-50 to-white text-black animate-fade-in-left">
+                    <div className="px-5 py-3 rounded-2xl shadow-lg max-w-[70%] break-words bg-secondary to-white text-primary animate-fade-in-left">
                       Thinking...
                     </div>
                   </div>
