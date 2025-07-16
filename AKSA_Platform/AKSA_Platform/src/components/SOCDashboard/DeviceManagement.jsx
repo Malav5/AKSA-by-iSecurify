@@ -113,10 +113,13 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
           <h3 className="text-2xl font-bold text-gray-800">Added Devices</h3>
           {userRole === "admin" && !isAssignPage && (
             <button
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white text-lg font-semibold shadow hover:bg-blue-700 transition"
+              className="flex items-center gap-2 px-6 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-700 text-white text-lg font-bold shadow-lg hover:from-blue-600 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-200 transform hover:scale-105 active:scale-95"
               onClick={onAddAgent}
             >
-              + Add Agent
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Add Agent
             </button>
           )}
         </div>
@@ -130,7 +133,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
             <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
               <div className="max-h-[400px] overflow-y-auto scrollbar-hide">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-100">
+                  <thead className="bg-gray-100 sticky top-0 z-20">
                     <tr>
                       <th className="px-6 py-3 text-left text-gray-500 font-semibold uppercase tracking-wider">Name</th>
                       <th className="px-6 py-3 text-left text-gray-500 font-semibold uppercase tracking-wider">IP</th>
@@ -189,10 +192,13 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
         {userRole === "admin" && !isAssignPage && (
           <div className="flex justify-end mt-6 relative z-10">
             <button
-              className="px-5 py-2 rounded-lg bg-red-600 text-white text-lg font-semibold shadow hover:bg-red-700 transition"
+              className="flex items-center gap-2 px-6 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-700 text-white text-lg font-bold shadow-lg hover:from-red-600 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-300 transition-all duration-200 transform hover:scale-105 active:scale-95"
               onClick={onRemoveAgent}
             >
-              - Remove Agent
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
+              </svg>
+              Remove Agent
             </button>
           </div>
         )}

@@ -351,7 +351,7 @@ const SOCDashboard = () => {
   if (loading) return (
     <div className="bg-white p-6 mb-8 flex justify-center items-center h-full">
       <div className="flex flex-col items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-400 border-t-transparent mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#800080] border-t-transparent mb-4"></div>
         <p className="text-gray-600 text-sm">Loading rule category data...</p>
       </div>
     </div>

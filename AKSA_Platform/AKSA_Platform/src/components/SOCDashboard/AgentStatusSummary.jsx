@@ -105,12 +105,12 @@ const AgentStatusSummary = () => {
 
   // UI rendering (unchanged, but uses summary)
   const agentStatusBoxes = [
-    { key: 'total', title: 'Total Agents', count: summary.total, color: 'text-blue-600', bg: 'bg-blue-200' },
-    { key: 'active', title: 'Active Agents', count: summary.active, color: 'text-green-600', bg: 'bg-green-200' },
-    { key: 'disconnected', title: 'Disconnected Agents', count: summary.disconnected, color: 'text-red-600', bg: 'bg-red-200' },
-    { key: 'pending', title: 'Pending Agents', count: summary.pending, color: 'text-orange-600', bg: 'bg-orange-200' },
-    { key: 'never_connected', title: 'Never Connected', count: summary.never_connected, color: 'text-gray-600', bg: 'bg-blue-100' },
-    { key: 'unknown', title: 'Unknown Status', count: summary.unknown, color: 'text-purple-600', bg: 'bg-purple-200' },
+    { key: 'total', title: 'Total Agents', count: summary.total, color: 'text-blue-600', bg: 'bg-blue-200', shadow: 'shadow-blue-200/20' },
+    { key: 'active', title: 'Active Agents', count: summary.active, color: 'text-green-600', bg: 'bg-green-200', shadow: 'shadow-green-200/20' },
+    { key: 'disconnected', title: 'Disconnected Agents', count: summary.disconnected, color: 'text-red-600', bg: 'bg-red-200', shadow: 'shadow-red-200/20' },
+    { key: 'pending', title: 'Pending Agents', count: summary.pending, color: 'text-orange-600', bg: 'bg-orange-200', shadow: 'shadow-orange-200/20' },
+    { key: 'never_connected', title: 'Never Connected', count: summary.never_connected, color: 'text-gray-600', bg: 'bg-blue-100', shadow: 'shadow-blue-200/60' },
+    { key: 'unknown', title: 'Unknown Status', count: summary.unknown, color: 'text-purple-600', bg: 'bg-purple-200', shadow: 'shadow-purple-200/20' },
   ];
 
   return (
@@ -119,7 +119,7 @@ const AgentStatusSummary = () => {
         {agentStatusBoxes.map((box, index) => (
           <div
             key={index}
-            className={`${box.bg} rounded-2xl flex flex-col items-center justify-center h-36 min-w-[325px] hover:shadow-xl hover:scale-[1.01] shadow cursor-pointer transition-all duration-300`}
+            className={`${box.bg} rounded-2xl flex flex-col items-center justify-center h-36 min-w-[325px] hover:shadow-xl hover:scale-[1.01] shadow ${box.shadow} cursor-pointer transition-all duration-300`}
             onClick={() => handleStatusBoxClick(box.key)}
           >
             <div className={`text-5xl font-bold ${box.color}`}>
