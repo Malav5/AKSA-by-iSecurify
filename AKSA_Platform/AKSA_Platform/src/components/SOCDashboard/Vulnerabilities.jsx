@@ -678,7 +678,7 @@ const Vulnerabilities = () => {
         {/* Absolutely positioned, resizable chatbox */}
         {showChatbox && (
           <div
-            className="fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white shadow-2xl border-l-2 border-gray-300 z-50 overflow-auto"
+            className="fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white shadow-2xl z-50 overflow-auto rounded-l-3xl animate-fade-in-right"
             style={{
               width: chatboxWidth,
               minWidth: minChatboxWidth,
@@ -694,21 +694,23 @@ const Vulnerabilities = () => {
                 position: 'absolute',
                 left: 0,
                 top: 0,
-                width: 4, // thinner handle
+                width: 4,
                 height: '100%',
                 cursor: 'ew-resize',
                 zIndex: 100,
-                background: 'rgba(0,0,0,0.05)', // subtle background for visibility
+                background: 'rgba(0,0,0,0.05)',
               }}
               onMouseDown={startDragging}
             />
             <div className="flex flex-col h-full">
-              <div className="flex justify-between items-center p-4 border-b border-gray-200">
-                <span className="font-semibold text-lg">
+              {/* Header */}
+              <div className="flex justify-between items-center p-4 rounded-t-3xl bg-secondary shadow text-primary">
+                <span className="font-semibold text-lg tracking-wide flex items-center gap-2">
+                  <svg className="w-6 h-6 text-primary opacity-80" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V10a2 2 0 012-2h2M12 15v-6m0 0l-3 3m3-3l3 3" /></svg>
                   Chat{chatboxVulnId ? ` (ID: ${chatboxVulnId})` : ''}
                 </span>
                 <button
-                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold focus:outline-none"
+                  className="text-primary text-3xl font-bold focus:outline-none transition"
                   onClick={() => setShowChatbox(false)}
                   aria-label="Close"
                 >
@@ -718,7 +720,7 @@ const Vulnerabilities = () => {
               {/* Message area: flex-1, scrollable */}
               <div
                 ref={chatContainerRef}
-                className="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar bg-white scrollbar-left"
+                className="flex-1 p-4 overflow-y-auto space-y-4 bg-transparent scrollbar-hide"
               >
                 {messages.length === 0 && (
                   <div className="text-gray-400 text-center">No messages yet.</div>
@@ -729,10 +731,10 @@ const Vulnerabilities = () => {
                     className={`flex items-end mb-2 ${msg.isUser ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`px-4 py-2 rounded-2xl shadow max-w-[70%] break-words ${msg.isUser ? 'bg-[#f8eef9] text-black animate-fade-in-right' : 'bg-gray-200 text-black animate-fade-in-left'}`}
+                      className={`px-5 py-3 rounded-2xl shadow-lg max-w-[70%] break-words transition-all duration-200 ${msg.isUser ? 'bg-primary text-white' : 'bg-secondary text-primary'}`}
                       style={{
-                        borderTopLeftRadius: msg.isUser ? 20 : 0,
-                        borderTopRightRadius: msg.isUser ? 0 : 20,
+                        borderTopLeftRadius: msg.isUser ? 20 : 20,
+                        borderTopRightRadius: msg.isUser ? 20 : 20,
                         textAlign: msg.isUser ? 'right' : 'left',
                         direction: 'ltr',
                       }}
@@ -754,20 +756,21 @@ const Vulnerabilities = () => {
                 ))}
                 {isLoading && (
                   <div className="flex items-end mb-2 justify-start">
-                    <div className="px-4 py-2 rounded-2xl shadow max-w-[70%] break-words bg-gray-200 text-black animate-fade-in-left">
+                    <div className="px-5 py-3 rounded-2xl shadow-lg max-w-[70%] break-words bg-gradient-to-br from-blue-100 via-blue-50 to-white text-black animate-fade-in-left">
                       Thinking...
                     </div>
                   </div>
                 )}
               </div>
+      
               {/* Input area: always visible at the bottom */}
-              <div className="p-4 border-t border-gray-200 flex flex-col gap-2 bg-white">
+              <div className="p-4 bg-white rounded-b-3xl flex flex-col gap-2">
                 {showChatbox && !threadId && (
                   <div className="text-gray-500 text-center py-2">Connecting to assistant...</div>
                 )}
                 <div className="flex gap-2">
                   <textarea
-                    className="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400 resize-none"
+                    className="flex-1 rounded-xl px-4 py-2 focus:outline-none focus:ring focus:ring-[#800080]  resize-none shadow-sm bg-secondary"
                     placeholder="Type a message..."
                     value={chatInput}
                     onChange={e => {
@@ -788,7 +791,7 @@ const Vulnerabilities = () => {
                     disabled={isLoading || !threadId}
                   />
                   <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                    className="bg-primary text-white px-6 py-2 rounded-2xl font-semibold shadow hover:from-blue-700 hover:to-purple-700 transition-colors disabled:opacity-60"
                     onClick={handleSend}
                     disabled={isLoading || !threadId}
                   >

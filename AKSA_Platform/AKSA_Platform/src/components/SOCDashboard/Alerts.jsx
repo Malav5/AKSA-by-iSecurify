@@ -552,7 +552,7 @@ const Alerts = () => {
                 Alert Details ({filteredAlerts.length.toLocaleString()} filtered)
               </h3>
 
-              <div className="flex items-center gap-4">
+              {/* <div className="flex items-center gap-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <span className="mr-2">Rows per page:</span>
                   <select
@@ -565,7 +565,7 @@ const Alerts = () => {
                     <option value={50}>50</option>
                   </select>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
