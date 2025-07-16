@@ -170,7 +170,7 @@ const Header = () => {
           <button
             ref={userButtonRef}
             onClick={toggleUserMenu}
-            className="flex items-center space-x-2 p-2 rounded-lg bg-gray-100 hover:bg-gray-300 transition-colors"
+            className="flex items-center space-x-2"
           >
             {user ? (
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
@@ -183,9 +183,9 @@ const Header = () => {
                 <span className="text-sm sm:text-base font-medium text-gray-700">U</span>
               </div>
             )}
-            <span className="hidden sm:block text-xl font-medium text-gray-700">
+            {/* <span className="hidden sm:block text-xl font-medium text-gray-700">
               {user ? `${user.firstName}` : "User"}
-            </span>
+            </span> */}
           </button>
 
           {/* User Dropdown */}
