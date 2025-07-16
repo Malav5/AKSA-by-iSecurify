@@ -149,14 +149,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
                     {agents.map((agent, index) => (
                       <tr key={index} className="hover:bg-blue-50 transition">
                         <td className="px-6 py-4 flex items-center gap-2 text-gray-900 font-medium">
-                          {(() => {
-                            const os = agent.os?.name?.toLowerCase?.() || '';
-                            if (os.includes('windows')) return <>🪟</>;
-                            if (os.includes('mac')) return <>🍏</>;
-                            if (os.includes('linux')) return <>🐧</>;
-                            return <>💻</>;
-                          })()}{" "}
-                          {agent.agentName || agent.name || agent.id}
+                           {agent.agentName || agent.name || agent.id}
                         </td>
                         <td className="px-6 py-4 text-gray-700">{agent.agentIp || agent.ip || 'N/A'}</td>
                         <td className="px-6 py-4">

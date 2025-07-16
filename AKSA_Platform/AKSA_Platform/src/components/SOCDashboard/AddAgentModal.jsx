@@ -50,6 +50,9 @@ const AddAgentModal = ({ visible, onClose }) => {
   const [rememberServer, setRememberServer] = useState(true);
   const [agentName, setAgentName] = useState('');
   const [group, setGroup] = useState(defaultGroup);
+  // Copy feedback state
+  const [copiedInstall, setCopiedInstall] = useState(false);
+  const [copiedStart, setCopiedStart] = useState(false);
 
   // Update package when OS changes
   React.useEffect(() => {
@@ -60,15 +63,31 @@ const AddAgentModal = ({ visible, onClose }) => {
   const installCmd = getInstallCommand(selectedOS, selectedPkg, server);
   const startCmd = getStartCommand(selectedOS);
 
+  // Copy handlers
+  const handleCopy = async (text, type) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (type === 'install') {
+        setCopiedInstall(true);
+        setTimeout(() => setCopiedInstall(false), 1200);
+      } else {
+        setCopiedStart(true);
+        setTimeout(() => setCopiedStart(false), 1200);
+      }
+    } catch (e) {
+      // fallback or error
+    }
+  };
+
   if (!visible) return null;
 
   return (
     <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-fade-in-fast">
-      <div className="bg-white rounded-xl shadow-2xl border-2 border-blue-200 max-w-4xl min-w-[600px] min-h-[500px] w-full relative max-h-[95vh] flex flex-col animate-zoom-in">
+      <div className="bg-white rounded-xl shadow-2xl border-2 border-primary max-w-4xl min-w-[600px] min-h-[500px] w-full relative max-h-[95vh] flex flex-col animate-zoom-in">
         {/* Fixed Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 flex justify-between items-start rounded-t-xl">
-          <h2 className="text-2xl font-bold text-blue-700">Deploy new agent</h2>
-          <button className="text-gray-500 hover:text-blue-600 text-2xl font-bold" onClick={onClose}>×</button>
+          <h2 className="text-2xl font-bold text-primary">Deploy new agent</h2>
+          <button className="text-gray-500 hover:text-primary text-2xl font-bold" onClick={onClose}>×</button>
         </div>
         {/* Scrollable Content */}
         <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
@@ -77,7 +96,7 @@ const AddAgentModal = ({ visible, onClose }) => {
             <div className="font-semibold mb-2">1. Select the package to download and install on your system:</div>
             <div className="flex gap-6 mb-2">
               {osOptions.map(os => (
-                <div key={os.value} className={`flex-1 border rounded-xl p-4 cursor-pointer ${selectedOS === os.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}
+                <div key={os.value} className={`flex-1 border rounded-xl p-4 cursor-pointer ${selectedOS === os.value ? 'border-primary bg-primary/10' : 'border-gray-200 bg-white'}`}
                   onClick={() => setSelectedOS(os.value)}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">{os.label === 'LINUX' ? '🐧' : os.label === 'WINDOWS' ? '🪟' : '🍏'}</span>
@@ -86,7 +105,7 @@ const AddAgentModal = ({ visible, onClose }) => {
                   <div className="flex flex-col gap-1">
                     {os.packages.map(pkg => (
                       <label key={pkg.value} className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name={`pkg-${os.value}`} checked={selectedPkg === pkg.value} onChange={() => setSelectedPkg(pkg.value)} />
+                        <input type="radio" name={`pkg-${os.value}`} checked={selectedPkg === pkg.value} onChange={() => setSelectedPkg(pkg.value)} className="accent-primary focus:ring-primary text-primary" />
                         <span>{pkg.label}</span>
                       </label>
                     ))}
@@ -94,15 +113,21 @@ const AddAgentModal = ({ visible, onClose }) => {
                 </div>
               ))}
             </div>
-            {/* <div className="text-xs text-blue-700 mt-2">
-              For additional systems and architectures, please check our <a href="#" className="underline">documentation</a>.
-            </div> */}
           </div>
           {/* Step 4: Install command (now step 2) */}
           <div className="mb-6">
-            <div className="font-semibold mb-2">2. Run the following commands to download and install the agent:</div>
+            <div className="font-semibold mb-2 flex items-center gap-2">
+              2. Run the following commands to download and install the agent:
+              <button
+                className="ml-2 px-2 py-1 text-xs rounded bg-secondary text-primary font-semibold border border-primary hover:bg-primary hover:text-white transition"
+                onClick={() => handleCopy(installCmd, 'install')}
+                type="button"
+              >
+                {copiedInstall ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
             <pre className="bg-gray-100 rounded p-3 text-sm overflow-x-auto select-all mb-2 custom-scrollbar-x">{installCmd}</pre>
-            <div className="text-m text-blue-700 bg-blue-50 rounded p-4 mb-2">
+            <div className="text-m text-primary bg-primary/10 rounded p-4 mb-2">
               <b>Requirements</b>
               <ul className="list-disc ml-5">
                 <li>You will need administrator privileges to perform this installation.</li>
@@ -113,12 +138,21 @@ const AddAgentModal = ({ visible, onClose }) => {
           </div>
           {/* Step 5: Start agent (now step 3) */}
           <div className="mb-6">
-            <div className="font-semibold mb-2">3. Start the agent:</div>
+            <div className="font-semibold mb-2 flex items-center gap-2">
+              3. Start the agent:
+              <button
+                className="ml-2 px-2 py-1 text-xs rounded bg-secondary text-primary font-semibold border border-primary hover:bg-primary hover:text-white transition"
+                onClick={() => handleCopy(startCmd, 'start')}
+                type="button"
+              >
+                {copiedStart ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
             <pre className="bg-gray-100 rounded p-3 text-sm overflow-x-auto select-all add-agent-modal-pre">{startCmd}</pre>
           </div>
           <div className="flex justify-end gap-2 mt-6">
             <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={onClose}>Cancel</button>
-            <button className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" onClick={onClose}>Done</button>
+            <button className="px-4 py-2 rounded bg-primary text-white hover:bg-primary-dark" onClick={onClose}>Done</button>
           </div>
         </div>
       </div>

@@ -571,7 +571,7 @@ const Vulnerabilities = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <button
-                              className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary text-primary font-bold hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 transform transition-transform duration-200 hover:scale-110"
+                              className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary text-primary font-bold hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-[#800080] transform transition-transform duration-200 hover:scale-110"
                               onClick={async e => {
                                 e.stopPropagation();
                                 setShowChatbox(false); // Close if open to reset state
