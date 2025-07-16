@@ -19,6 +19,7 @@ import rehypeRaw from 'rehype-raw';
 import { getOpenAIApiKey } from '../../utils/apiKey';
 import VulnerabilitiesChart from './Vulnerabilities/VulnerabilitiesChart';
 import VulnerabilitiesTable from './Vulnerabilities/VulnerabilitiesTable';
+import CustomListbox from './CustomListbox';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
 
@@ -444,6 +445,11 @@ const Vulnerabilities = () => {
   }
 
   try {
+    const sortOptions = [
+      { value: 'default', label: 'Default' },
+      { value: 'scoreAsc', label: 'Low to High' },
+      { value: 'scoreDesc', label: 'High to Low' },
+    ];
     return (
       <div className="h-screen flex flex-col bg-gray-50">
         <Navbar />
@@ -476,62 +482,28 @@ const Vulnerabilities = () => {
           {showFilters && (
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200/80 mb-6 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
               <div className="flex flex-col md:flex-row flex-wrap gap-4 pb-4 border-b border-gray-200 mb-4 items-stretch md:items-center">
-                <div className="flex flex-col">
-                  <label className="mb-1 font-medium flex items-center gap-1 text-gray-700">
-                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a4 4 0 014-4h6" /></svg>
-                    Agent
-                  </label>
-                  <select
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition w-48 bg-gray-50"
-                    value={selectedAgent}
-                    onChange={e => {
-                      setSelectedAgent(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <option value="All">All</option>
-                    {agentOptions.map(agent => (
-                      <option key={agent} value={agent}>{agent}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-1 font-medium flex items-center gap-1 text-gray-700">
-                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
-                    Severity
-                  </label>
-                  <select
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition w-48 bg-gray-50"
-                    value={selectedSeverity}
-                    onChange={e => {
-                      setSelectedSeverity(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <option value="All">All</option>
-                    {severityOptions.map(sev => (
-                      <option key={sev} value={sev}>{sev}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-1 font-medium flex items-center gap-1 text-gray-700">
-                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 6h18M3 18h18" /></svg>
-                    Sort
-                  </label>
-                  <select
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition w-48 bg-gray-50"
-                    value={sortOrder}
-                    onChange={e => {
-                      setSortOrder(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <option value="default">Default</option>
-                    <option value="scoreAsc">Score: Low to High</option>
-                    <option value="scoreDesc">Score: High to Low</option>
-                  </select>
-                </div>
+                <CustomListbox
+                  label={<span><svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a4 4 0 014-4h6" /></svg>Agent</span>}
+                  options={["All", ...agentOptions]}
+                  value={selectedAgent}
+                  onChange={val => { setSelectedAgent(val); setCurrentPage(1); }}
+                />
+                <CustomListbox
+                  label={<span><svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>Severity</span>}
+                  options={["All", ...severityOptions]}
+                  value={selectedSeverity}
+                  onChange={val => { setSelectedSeverity(val); setCurrentPage(1); }}
+                />
+                <CustomListbox
+                  label={<span><svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 6h18M3 18h18" /></svg>Sort</span>}
+                  options={sortOptions.map(o => o.label)}
+                  value={sortOptions.find(o => o.value === sortOrder)?.label || 'Default'}
+                  onChange={label => {
+                    const selected = sortOptions.find(o => o.label === label);
+                    setSortOrder(selected ? selected.value : 'default');
+                    setCurrentPage(1);
+                  }}
+                />
               </div>
             </div>
           )}
