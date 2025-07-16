@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Send } from 'lucide-react';
+import { Send, Filter, X} from 'lucide-react';
 import VulnerabilityDetail from './VulnerabilityDetail';
 import { fetchVulnerabilities, fetchAssignedAgents } from '../../services/SOCservices';
 import ReactMarkdown from 'react-markdown';
@@ -79,6 +79,7 @@ const Vulnerabilities = () => {
   const [sortOrder, setSortOrder] = useState('default'); // 'default', 'scoreAsc', or 'scoreDesc'
   const [userRole, setUserRole] = useState(localStorage.getItem('role') || 'user');
   const [assignedAgents, setAssignedAgents] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const fetchAgentsForFilter = async () => {
@@ -445,7 +446,93 @@ const Vulnerabilities = () => {
       <div className="h-screen flex flex-col bg-gray-50">
         <Navbar />
         <div className="flex-1 overflow-y-auto p-6 mx-40 pt-24 scrollbar-hide">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-8 animate-fade-in-down">Detected Vulnerabilities</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 animate-fade-in-down gap-4">
+            <h2 className="text-3xl font-bold mt-4 text-transparent bg-clip-text text-primary">Detected Vulnerabilities</h2>
+            <button
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold w-max transition-colors
+                ${showFilters
+                  ? 'bg-secondary text-primary'
+                  : 'bg-gray-100 text-gray-700'}
+              `}
+              onClick={() => setShowFilters(f => !f)}
+            >
+              {showFilters ? (
+                <>
+                   <X size={18} />
+                  Hide Filters
+                </>
+              ) : (
+                <>
+                  <Filter size={18} />
+                  Show Filters
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Filters and Sort: Toggleable */}
+          {showFilters && (
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200/80 mb-6 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+              <div className="flex flex-col md:flex-row flex-wrap gap-4 pb-4 border-b border-gray-200 mb-4 items-stretch md:items-center">
+                <div className="flex flex-col">
+                  <label className="mb-1 font-medium flex items-center gap-1 text-gray-700">
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a4 4 0 014-4h6" /></svg>
+                    Agent
+                  </label>
+                  <select
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition w-48 bg-gray-50"
+                    value={selectedAgent}
+                    onChange={e => {
+                      setSelectedAgent(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="All">All</option>
+                    {agentOptions.map(agent => (
+                      <option key={agent} value={agent}>{agent}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col">
+                  <label className="mb-1 font-medium flex items-center gap-1 text-gray-700">
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
+                    Severity
+                  </label>
+                  <select
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition w-48 bg-gray-50"
+                    value={selectedSeverity}
+                    onChange={e => {
+                      setSelectedSeverity(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="All">All</option>
+                    {severityOptions.map(sev => (
+                      <option key={sev} value={sev}>{sev}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col">
+                  <label className="mb-1 font-medium flex items-center gap-1 text-gray-700">
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 6h18M3 18h18" /></svg>
+                    Sort
+                  </label>
+                  <select
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition w-48 bg-gray-50"
+                    value={sortOrder}
+                    onChange={e => {
+                      setSortOrder(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="default">Default</option>
+                    <option value="scoreAsc">Score: Low to High</option>
+                    <option value="scoreDesc">Score: High to Low</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Charts and Filters: Always visible */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -463,56 +550,6 @@ const Vulnerabilities = () => {
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200/80 mb-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            {/* Filters and Sort: Always visible */}
-            <div className="flex flex-wrap gap-4 pb-4 border-b border-gray-200 mb-4 items-center">
-              <div>
-                <label className="mr-2 font-medium">Agent:</label>
-                <select
-                  className="border rounded px-2 py-1 text-sm"
-                  value={selectedAgent}
-                  onChange={e => {
-                    setSelectedAgent(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <option value="All">All</option>
-                  {agentOptions.map(agent => (
-                    <option key={agent} value={agent}>{agent}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="mr-2 font-medium">Severity:</label>
-                <select
-                  className="border rounded px-2 py-1 text-sm"
-                  value={selectedSeverity}
-                  onChange={e => {
-                    setSelectedSeverity(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <option value="All">All</option>
-                  {severityOptions.map(sev => (
-                    <option key={sev} value={sev}>{sev}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="mr-2 font-medium">Sort:</label>
-                <select
-                  className="border rounded px-2 py-1 text-sm"
-                  value={sortOrder}
-                  onChange={e => {
-                    setSortOrder(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <option value="default">Default</option>
-                  <option value="scoreAsc">Score: Low to High</option>
-                  <option value="scoreDesc">Score: High to Low</option>
-                </select>
-              </div>
-            </div>
             <div className="flex justify-between items-center mt-4 mb-3">
               <h3 className="text-lg font-semibold text-gray-700">Alert Details</h3>
             </div>
@@ -640,7 +677,7 @@ const Vulnerabilities = () => {
                 <div className="flex items-center space-x-2">
                   <label className="text-sm">Rows per page:</label>
                   <select
-                    className="border rounded px-2 py-1 text-sm"
+                    className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1"
                     value={itemsPerPage}
                     onChange={(e) => {
                       setItemsPerPage(Number(e.target.value));

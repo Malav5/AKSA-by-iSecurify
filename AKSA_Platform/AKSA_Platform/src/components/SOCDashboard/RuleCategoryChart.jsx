@@ -140,22 +140,22 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
   );
 
   return (
-    <div className="bg-white rounded-xl shadow p-6 mb-8 border border-gray-200">
+    <div className="bg-white rounded-xl shadow p-4 sm:p-6 mb-8 border border-gray-200">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Rule Category Analysis</h2>
           <p className="text-gray-500">Visual and card breakdown of rule-based alerts</p>
         </div>
-        <div className="bg-primary-50 text-primary px-4 py-1.5 rounded-full text-sm font-medium">
+        <div className="bg-primary-50 text-primary px-4 py-1.5 rounded-full text-sm font-medium mt-2 sm:mt-0">
           Total Alerts: <span className="font-semibold">{total.toLocaleString()}</span>
         </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Chart */}
-        <div className="w-full lg:w-1/3">
-          <div className="bg-gray-50 rounded-xl p-6 h-full flex flex-col items-center justify-center">
+        <div className="w-full max-w-md mx-auto lg:mx-0 lg:w-1/3">
+          <div className="bg-gray-50 rounded-xl p-4 sm:p-6 h-full flex flex-col items-center justify-center">
             <div className="relative w-full h-64">
               <Doughnut data={chartData} options={chartOptions} />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -211,7 +211,7 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
       {/* Filtered Alerts */}
       {selectedRule && (
         <div className="mt-8">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
             <h3 className="text-xl font-semibold text-gray-800">
               Alerts for: <span className="text-primary">{selectedRule}</span>
             </h3>

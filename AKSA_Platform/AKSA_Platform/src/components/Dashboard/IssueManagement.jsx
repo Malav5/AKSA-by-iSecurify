@@ -54,22 +54,71 @@ const IssueManagement = ({ hideViewAll = false }) => {
     const grouped = {};
     alerts.forEach((alert) => {
       const date = new Date(alert.timestamp);
-      let label;
+      let label, sortKey;
       if (mode === "weeks") {
         const year = date.getFullYear();
         const week = Math.ceil(((date - new Date(year, 0, 1)) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
         label = `W${week}`;
+        sortKey = `${year}-W${week.toString().padStart(2, '0')}`;
       } else {
+        const year = date.getFullYear();
+        const month = date.getMonth();
         label = date.toLocaleString("default", { month: "short" });
+        sortKey = `${year}-${month.toString().padStart(2, '0')}`;
       }
-      if (!grouped[label]) grouped[label] = { label, low: 0, medium: 0 };
-
+      if (!grouped[sortKey]) grouped[sortKey] = { label, low: 0, medium: 0, high: 0, critical: 0, sortKey };
       const level = alert.rule?.level || 0;
-      if (level >= 0 && level <= 2) grouped[label].low++;
-      if (level >= 3 && level <= 4) grouped[label].medium++;
+      if (level >= 0 && level <= 4) grouped[sortKey].low++;
+      else if (level >= 5 && level <= 8) grouped[sortKey].medium++;
+      else if (level >= 9 && level <= 12) grouped[sortKey].high++;
+      else if (level >= 13) grouped[sortKey].critical++;
     });
-
-    return Object.values(grouped).sort((a, b) => a.label.localeCompare(b.label));
+    // Sort by sortKey (chronologically)
+    let arr = Object.values(grouped).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+    // If only one data point, add a previous empty period for line visibility
+    if (arr.length === 1) {
+      const only = arr[0];
+      let prevLabel, prevSortKey;
+      if (mode === "weeks") {
+        // Extract week and year
+        const match = only.sortKey.match(/(\d+)-W(\d+)/);
+        if (match) {
+          let prevWeek = parseInt(match[2], 10) - 1;
+          let prevYear = parseInt(match[1], 10);
+          if (prevWeek < 1) {
+            prevWeek = 52;
+            prevYear -= 1;
+          }
+          prevLabel = `W${prevWeek}`;
+          prevSortKey = `${prevYear}-W${prevWeek.toString().padStart(2, '0')}`;
+        } else {
+          prevLabel = 'W0';
+          prevSortKey = '0000-W00';
+        }
+      } else {
+        // Extract month and year
+        const match = only.sortKey.match(/(\d+)-(\d+)/);
+        if (match) {
+          let prevMonth = parseInt(match[2], 10) - 1;
+          let prevYear = parseInt(match[1], 10);
+          if (prevMonth < 0) {
+            prevMonth = 11;
+            prevYear -= 1;
+          }
+          const date = new Date(prevYear, prevMonth, 1);
+          prevLabel = date.toLocaleString("default", { month: "short" });
+          prevSortKey = `${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
+        } else {
+          prevLabel = 'Prev';
+          prevSortKey = '0000-00';
+        }
+      }
+      arr = [
+        { label: prevLabel, low: 0, medium: 0, high: 0, critical: 0, sortKey: prevSortKey },
+        only
+      ];
+    }
+    return arr;
   };
 
   const trendData = groupAlertsByWeekOrMonth(viewMode);
@@ -169,8 +218,10 @@ const IssueManagement = ({ hideViewAll = false }) => {
                 <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="low" stroke="#10B981" />
-                <Line type="monotone" dataKey="medium" stroke="#FACC15" />
+                <Line type="monotone" dataKey="low" stroke="#10B981" name="Low" />
+                <Line type="monotone" dataKey="medium" stroke="#FACC15" name="Medium" />
+                <Line type="monotone" dataKey="high" stroke="#F97316" name="High" />
+                <Line type="monotone" dataKey="critical" stroke="#EF4444" name="Critical" />
               </LineChart>
             </ResponsiveContainer>
             <div className="mt-2 md:mt-3 text-xs md:text-sm bg-white border-custom rounded-lg p-2 text-primary cursor-pointer">
