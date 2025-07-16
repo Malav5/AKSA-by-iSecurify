@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { Send } from 'lucide-react';
 import VulnerabilityDetail from './VulnerabilityDetail';
 import { fetchVulnerabilities, fetchAssignedAgents } from '../../services/SOCservices';
 import ReactMarkdown from 'react-markdown';
@@ -791,11 +792,11 @@ const Vulnerabilities = () => {
                     disabled={isLoading || !threadId}
                   />
                   <button
-                    className="bg-primary text-white px-6 py-2 rounded-2xl font-semibold shadow hover:from-blue-700 hover:to-purple-700 transition-colors disabled:opacity-60"
+                    className="bg-primary text-white px-3 py-2 rounded-2xl font-semibold shadow hover:from-blue-700 hover:to-purple-700 transition-colors disabled:opacity-60"
                     onClick={handleSend}
                     disabled={isLoading || !threadId}
                   >
-                    Send
+                    <Send className="w-5 h-5" />
                   </button>
                 </div>
               </div>
