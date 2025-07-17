@@ -21,6 +21,7 @@ import UserDashboard from "./components/Pages/UserDashboard";
 import AssignAgent from "./components/SOCDashboard/AssignAgent";
 import Policies from "./components/Dashboard/Policies";
 import SOC from "./components/Pages/SOC";
+
 const AppRoutes = () => {
   // Role-based dashboard selection
   const role = localStorage.getItem('role');

@@ -99,8 +99,6 @@ const AlertsAndMetrics = ({
     }
   };
 
-
-
   useEffect(() => {
     const loadData = async () => {
       try {

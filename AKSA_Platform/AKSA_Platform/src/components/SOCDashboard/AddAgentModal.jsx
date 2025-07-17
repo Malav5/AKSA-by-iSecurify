@@ -90,7 +90,7 @@ const AddAgentModal = ({ visible, onClose }) => {
           <button className="text-gray-500 hover:text-primary text-2xl font-bold" onClick={onClose}>×</button>
         </div>
         {/* Scrollable Content */}
-        <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
+        <div className="p-6 overflow-y-auto space-y-6  scrollbar-hide">
           {/* Step 1: OS/Package */}
           <div className="mb-6">
             <div className="font-semibold mb-2">1. Select the package to download and install on your system:</div>
