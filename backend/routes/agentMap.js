@@ -8,6 +8,8 @@ const { getWazuhToken } = require("../wazuh/tokenService");
 const apiBaseUrl = process.env.WAZUH_API_URL;
 const AgentUserAssignment = require("../models/AgentUserAssignment");
 const bcrypt = require('bcryptjs');
+const Manager = require("../models/Manager");
+const SubadminManagerAssignment = require("../models/SubadminManagerAssignment");
 
 // Register agent mapping
 router.post("/register-agent", async (req, res) => {
@@ -266,6 +268,67 @@ router.get("/assigned-agents-details", async (req, res) => {
     res.json({ agents });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch assigned agent details", details: err.message });
+  }
+});
+
+// Test endpoint to add a sample Manager document
+router.post("/test-add-manager", async (req, res) => {
+  try {
+    const manager = await Manager.create({
+      name: "Test Manager",
+      ip: "127.0.0.1",
+      apiUrl: "http://127.0.0.1/api",
+      baseUrl: "http://127.0.0.1"
+    });
+    res.status(201).json({ message: "Test manager added", manager });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to add test manager", details: err.message });
+  }
+});
+
+// Assign a manager to a subadmin
+router.post("/assign-manager-to-subadmin", async (req, res) => {
+  const { subadminId, managerId } = req.body;
+  if (!subadminId || !managerId) {
+    return res.status(400).json({ error: "subadminId and managerId are required" });
+  }
+  try {
+    const subadmin = await User.findById(subadminId);
+    const manager = await Manager.findById(managerId);
+    if (!subadmin || subadmin.role !== "subadmin") {
+      return res.status(404).json({ error: "Subadmin not found or not a subadmin" });
+    }
+    if (!manager) {
+      return res.status(404).json({ error: "Manager not found" });
+    }
+    let assignment = await SubadminManagerAssignment.findOne({ subadminId, managerId });
+    if (!assignment) {
+      assignment = new SubadminManagerAssignment({ subadminId, managerId });
+      await assignment.save();
+    }
+    res.status(201).json({ message: "Manager assigned to subadmin", assignment });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to assign manager", details: err.message });
+  }
+});
+
+// Get managers assigned to a subadmin
+router.get("/subadmin-managers/:subadminId", async (req, res) => {
+  try {
+    const assignments = await SubadminManagerAssignment.find({ subadminId: req.params.subadminId }).populate("managerId");
+    res.json({ assignments });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch assignments", details: err.message });
+  }
+});
+
+// Get subadmins assigned to a manager
+router.get("/manager-subadmins/:managerId", async (req, res) => {
+  try {
+    const assignments = await SubadminManagerAssignment.find({ managerId: req.params.managerId }).populate("subadminId");
+    res.json({ assignments });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch assignments", details: err.message });
   }
 });
 
