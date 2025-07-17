@@ -83,7 +83,7 @@ const AddAgentModal = ({ visible, onClose }) => {
 
   return (
     <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-fade-in-fast">
-      <div className="bg-white rounded-xl shadow-2xl  max-w-4xl min-w-[600px] min-h-[500px] w-full relative max-h-[95vh] flex flex-col animate-zoom-in">
+      <div className="bg-white rounded-xl shadow-2xl  max-w-4xl min-w-[600px] border-2 border-custom   min-h-[500px] w-full relative max-h-[95vh] flex flex-col animate-zoom-in">
         {/* Fixed Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 flex justify-between items-start rounded-t-xl">
           <h2 className="text-2xl font-bold text-primary">Deploy new agent</h2>
