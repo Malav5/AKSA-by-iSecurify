@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Listbox } from '@headlessui/react';
+
+const pageSizes = [10, 20, 50];
 
 const VulnerabilitiesTable = ({
   currentItems,
@@ -25,6 +28,26 @@ const VulnerabilitiesTable = ({
   setCurrentPage,
   totalPages
 }) => {
+  const listboxButtonRef = useRef(null);
+  const [dropUp, setDropUp] = useState(false);
+
+  useEffect(() => {
+    const handlePosition = () => {
+      if (!listboxButtonRef.current) return;
+      const rect = listboxButtonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setDropUp(spaceBelow < 250 && spaceAbove > 250);
+    };
+    handlePosition();
+    window.addEventListener('resize', handlePosition);
+    window.addEventListener('scroll', handlePosition, true);
+    return () => {
+      window.removeEventListener('resize', handlePosition);
+      window.removeEventListener('scroll', handlePosition, true);
+    };
+  }, []);
+
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200/80 mb-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
       <div className="flex justify-between items-center mt-4 mb-3">
@@ -146,18 +169,40 @@ const VulnerabilitiesTable = ({
         <div className="flex justify-between items-center mt-4">
           <div className="flex items-center space-x-2">
             <label className="text-sm">Rows per page:</label>
-            <select
-              className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1"
-              value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
+            <Listbox value={itemsPerPage} onChange={value => { setItemsPerPage(Number(value)); setCurrentPage(1); }}>
+              <div className="relative w-24">
+                <Listbox.Button ref={listboxButtonRef} className="relative w-full cursor-pointer rounded-md border border-gray-300 bg-white py-1 pl-3 pr-8 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">
+                  {itemsPerPage}
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </span>
+                </Listbox.Button>
+                <Listbox.Options className={`absolute z-10 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base focus:outline-none sm:text-sm ${dropUp ? 'bottom-full mb-1' : 'mt-1'}`}>
+                  {pageSizes.map((size) => (
+                    <Listbox.Option
+                      key={size}
+                      value={size}
+                      className={({ active }) =>
+                        `cursor-pointer select-none relative py-2 pl-10 pr-4 ${
+                          active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                        }`
+                      }
+                    >
+                      {({ selected }) => (
+                        <>
+                          <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>{size}</span>
+                          {selected ? (
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            </span>
+                          ) : null}
+                        </>
+                      )}
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
+              </div>
+            </Listbox>
           </div>
           <div className="flex space-x-2">
             <button
