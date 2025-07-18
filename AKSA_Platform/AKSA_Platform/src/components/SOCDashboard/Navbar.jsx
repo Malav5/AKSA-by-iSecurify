@@ -89,7 +89,7 @@ const Navbar = () => {
       {/* Logo + Title */}
       <div className="flex items-center gap-3 min-w-[200px] flex-shrink-0">
         <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center shadow">
-          <Users2 className="text-white" size={28} />
+          <Shield className="text-white" size={28} />
         </div>
         <span className="ml-2 text-2xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">SOC Dashboard</span>
       </div>

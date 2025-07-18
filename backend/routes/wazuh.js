@@ -144,15 +144,17 @@ router.delete("/delete-agent", async (req, res) => {
   }
 });
 
-const ELASTICSEARCH_URL = 'https://192.168.1.198:9200';
-const AUTH = {
-  username: 'admin',
-  password: 'admin'
-};
+const ELASTICSEARCH_URL = process.env.ELASTICSEARCH_URL;
+const ELASTICSEARCH_USER = process.env.ELASTICSEARCH_USER;
+const ELASTICSEARCH_PASS = process.env.ELASTICSEARCH_PASS;
 const HEADERS = {
   'Content-Type': 'application/json'
 };
 const HTTPS_AGENT = new https.Agent({ rejectUnauthorized: false });
+const AUTH = ELASTICSEARCH_USER && ELASTICSEARCH_PASS ? {
+  username: ELASTICSEARCH_USER,
+  password: ELASTICSEARCH_PASS
+} : undefined;
 
 router.post('/alerts', async (req, res) => {
   try {
