@@ -101,9 +101,9 @@ const Navbar = () => {
             <Link
               key={path}
               to={path}
-              className={`flex items-center text-lg px-3 py-2 rounded-lg transition font-medium ${
+              className={`flex items-center text-lg px-3 py-1 transition font-medium ${
                 location.pathname === path
-                  ? 'text-primary bg-secondary font-semibold shadow'
+                  ? 'text-primary border-b-2 font-semibold'
                   : 'text-gray-500 hover:text-primary hover:bg-secondary'
               }`}
             >
