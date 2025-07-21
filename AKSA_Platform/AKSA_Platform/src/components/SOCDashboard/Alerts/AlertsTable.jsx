@@ -36,11 +36,11 @@ const AlertsTable = ({ paginatedFilteredAlerts, filteredAlerts, pageSize, handle
       </div>
       <div className="overflow-x-auto">
         <div className="max-h-[400px] overflow-y-auto scrollbar-hide">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="w-full table-fixed divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">ID</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[40%]">Title</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Severity</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
@@ -54,8 +54,8 @@ const AlertsTable = ({ paginatedFilteredAlerts, filteredAlerts, pageSize, handle
                     className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => setSelectedAlert(alert)}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{alert.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{alert.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 overflow-hidden truncate max-w-[8rem]" title={alert.id}>{alert.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 overflow-hidden truncate max-w-[20rem]" title={alert.title}>{alert.title}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${severityConfig[alert.severity].color}`}>{alert.severity}</span>
                     </td>

@@ -56,62 +56,56 @@ const AlertDetail = ({ alert, onClose }) => {
   const portChanges = getPortChanges();
 
   const severityColor = {
-    critical: 'bg-pink-100 text-pink-800',
-    high: 'bg-red-100 text-red-800',
-    medium: 'bg-yellow-100 text-yellow-800',
-    low: 'bg-green-100 text-green-800',
+    critical: 'bg-pink-100 text-pink-800 border-pink-300',
+    high: 'bg-red-100 text-red-800 border-red-300',
+    medium: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+    low: 'bg-green-100 text-green-800 border-green-300',
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-gray-900/50 bg-opacity-40 flex justify-center items-center p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-hide">
-        
+    <div className="fixed inset-0 z-50 flex justify-center items-center p-4 bg-gradient-to-br from-gray-900/60 to-blue-200/30 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-5xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-hide animate-fade-in-up">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b px-6 py-4 flex justify-between items-center shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-          <button onClick={onClose} className="text-gray-600 hover:text-red-600 text-3xl font-bold leading-none">×</button>
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-50 to-white border-b px-8 py-5 flex justify-between items-center shadow-sm rounded-t-2xl">
+          <h2 className="text-2xl font-extrabold text-primary tracking-tight flex items-center gap-3">
+            <span className={`inline-block px-3 py-1 rounded-full border font-semibold text-sm uppercase ${severityColor[severity] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>{severity}</span>
+            <span className="truncate max-w-[60vw]">{title}</span>
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-red-600 bg-gray-100 hover:bg-red-100 rounded-full w-10 h-10 flex items-center justify-center text-3xl font-bold leading-none shadow transition-all duration-200">
+            ×
+          </button>
         </div>
 
-        <div className="p-6 space-y-6">
-
-          {/* Grid Info Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+        <div className="p-8 space-y-8">
+          {/* Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Alert Info */}
-            <Section title="Alert Information">
-              <Info label="Alert ID" value={id} />
-              <Info label="Severity" value={
-                <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${severityColor[severity] || 'bg-gray-100 text-gray-800'}`}>
-                  {severity}
-                </span>
-              } />
-              <Info label="Time" value={time} />
+            <Section title="Alert Information" icon="⚡">
+              <Info label="Alert ID" value={<Badge>{id}</Badge>} />
+              <Info label="Time" value={<Badge color="bg-blue-100 text-blue-800 border-blue-300">{time}</Badge>} />
               <Info label="Location" value={location} />
               <Info label="Decoder" value={decoder?.name} />
             </Section>
-
             {/* Agent Info */}
-            <Section title="Agent Information">
-              <Info label="Agent Name" value={agentName} />
-              <Info label="Agent ID" value={agent.id} />
+            <Section title="Agent Information" icon="🖥️">
+              <Info label="Agent Name" value={<Badge color="bg-indigo-100 text-indigo-800 border-indigo-300">{agentName}</Badge>} />
+              <Info label="Agent ID" value={<Badge>{agent.id}</Badge>} />
               <Info label="Agent IP" value={agent.ip} />
               <Info label="Manager" value={manager.name} />
             </Section>
-
             {/* Rule Info */}
-            <Section title="Rule Information">
-              <Info label="Rule ID" value={rule.id} />
-              <Info label="Level" value={rule.level} />
+            <Section title="Rule Information" icon="📜">
+              <Info label="Rule ID" value={<Badge>{rule.id}</Badge>} />
+              <Info label="Level" value={<Badge color="bg-yellow-100 text-yellow-800 border-yellow-300">{rule.level}</Badge>} />
               <Info label="Groups" value={rule.groups?.join(', ')} />
               <Info label="Fired Times" value={rule.firedtimes} />
-              <Info label="Mail Alert" value={rule.mail ? 'Yes' : 'No'} />
+              <Info label="Mail Alert" value={rule.mail ? <Badge color="bg-green-100 text-green-800 border-green-300">Yes</Badge> : <Badge color="bg-gray-100 text-gray-800 border-gray-200">No</Badge>} />
             </Section>
-
             {/* Compliance Info */}
             {Object.values(ruleCompliance).some(Boolean) && (
-              <Section title="Compliance Mappings" textColor="text-blue-800">
+              <Section title="Compliance Mappings" icon="✅" textColor="text-blue-800" bgColor="bg-blue-50">
                 {Object.entries(ruleCompliance).map(([key, value]) => (
-                  value ? <Info key={key} label={key.toUpperCase()} value={Array.isArray(value) ? value.join(', ') : value} /> : null
+                  value ? <Info key={key} label={key.toUpperCase()} value={<Badge color="bg-blue-100 text-blue-800 border-blue-300">{Array.isArray(value) ? value.join(', ') : value}</Badge>} /> : null
                 ))}
               </Section>
             )}
@@ -119,23 +113,23 @@ const AlertDetail = ({ alert, onClose }) => {
 
           {/* Port Changes */}
           {(portChanges.added.length > 0 || portChanges.removed.length > 0) && (
-            <Section title="Port Changes Detected" bgColor="bg-red-50" textColor="text-red-800">
+            <Section title="Port Changes Detected" icon="🔌" bgColor="bg-red-50" textColor="text-red-800">
               {portChanges.added.length > 0 && (
                 <div>
-                  <strong className="text-green-700 block">Newly Opened Ports:</strong>
+                  <strong className="text-green-700 block mb-1">Newly Opened Ports:</strong>
                   <div className="mt-2 space-y-1 text-sm">
                     {portChanges.added.map((p, i) => (
-                      <div key={i} className="bg-green-100 rounded p-1 text-xs">{p.protocol} → {p.address}:{p.port}</div>
+                      <div key={i} className="bg-green-100 rounded p-1 text-xs font-mono border border-green-200">{p.protocol} → {p.address}:{p.port}</div>
                     ))}
                   </div>
                 </div>
               )}
               {portChanges.removed.length > 0 && (
                 <div className="mt-3">
-                  <strong className="text-red-700 block">Recently Closed Ports:</strong>
+                  <strong className="text-red-700 block mb-1">Recently Closed Ports:</strong>
                   <div className="mt-2 space-y-1 text-sm">
                     {portChanges.removed.map((p, i) => (
-                      <div key={i} className="bg-red-100 rounded p-1 text-xs">{p.protocol} → {p.address}:{p.port}</div>
+                      <div key={i} className="bg-red-100 rounded p-1 text-xs font-mono border border-red-200">{p.protocol} → {p.address}:{p.port}</div>
                     ))}
                   </div>
                 </div>
@@ -145,45 +139,45 @@ const AlertDetail = ({ alert, onClose }) => {
 
           {/* SCA Check */}
           {scaCheck && (
-            <Section title="SCA Check Details" bgColor="bg-green-50" textColor="text-green-800">
+            <Section title="SCA Check Details" icon="🔍" bgColor="bg-green-50" textColor="text-green-800">
               <Info label="Check Title" value={scaCheck.title} />
-              <Info label="Result" value={scaCheck.result} />
+              <Info label="Result" value={<Badge color="bg-blue-100 text-blue-800 border-blue-300">{scaCheck.result}</Badge>} />
               <Info label="Policy" value={data?.sca?.policy} />
               <Info label="Rationale" value={scaCheck.rationale} />
               {scaCheck.command && (
-                <Info label="Command" value={<pre className="bg-white p-2 rounded text-xs">{scaCheck.command.join('\n')}</pre>} />
+                <Info label="Command" value={<pre className="bg-white p-2 rounded text-xs font-mono border border-gray-200">{scaCheck.command.join('\n')}</pre>} />
               )}
               {scaCheck.remediation && (
-                <Info label="Remediation" value={<pre className="bg-white p-2 rounded text-xs whitespace-pre-wrap">{scaCheck.remediation}</pre>} />
+                <Info label="Remediation" value={<pre className="bg-white p-2 rounded text-xs font-mono border border-gray-200 whitespace-pre-wrap">{scaCheck.remediation}</pre>} />
               )}
             </Section>
           )}
 
           {/* MITRE Info */}
           {(rule.mitre_tactics || rule.mitre_techniques || rule.mitre_mitigations) && (
-            <Section title="MITRE ATT&CK" bgColor="bg-purple-50" textColor="text-purple-800">
-              {rule.mitre_tactics && <Info label="Tactics" value={rule.mitre_tactics.join(', ')} />}
-              {rule.mitre_techniques && <Info label="Techniques" value={rule.mitre_techniques.join(', ')} />}
-              {rule.mitre_mitigations && <Info label="Mitigations" value={rule.mitre_mitigations.join(', ')} />}
+            <Section title="MITRE ATT&CK" icon="🛡️" bgColor="bg-purple-50" textColor="text-purple-800">
+              {rule.mitre_tactics && <Info label="Tactics" value={<Badge color="bg-purple-100 text-purple-800 border-purple-300">{rule.mitre_tactics.join(', ')}</Badge>} />}
+              {rule.mitre_techniques && <Info label="Techniques" value={<Badge color="bg-purple-100 text-purple-800 border-purple-300">{rule.mitre_techniques.join(', ')}</Badge>} />}
+              {rule.mitre_mitigations && <Info label="Mitigations" value={<Badge color="bg-purple-100 text-purple-800 border-purple-300">{rule.mitre_mitigations.join(', ')}</Badge>} />}
             </Section>
           )}
 
           {/* Description */}
-          <Section title="Current Port Status">
-            <pre className="bg-white p-3 rounded text-sm whitespace-pre-wrap overflow-x-auto">{description}</pre>
+          <Section title="Current Port Status" icon="📄">
+            <pre className="bg-white p-3 rounded text-sm whitespace-pre-wrap overflow-x-auto border border-gray-200">{description}</pre>
           </Section>
 
           {/* Previous Output */}
           {previous_output && (
-            <Section title="Previous Output" bgColor="bg-yellow-50" textColor="text-yellow-800">
-              <pre className="bg-white p-3 rounded text-sm whitespace-pre-wrap overflow-x-auto">{previous_output}</pre>
+            <Section title="Previous Output" icon="🕒" bgColor="bg-yellow-50" textColor="text-yellow-800">
+              <pre className="bg-white p-3 rounded text-sm whitespace-pre-wrap overflow-x-auto border border-gray-200">{previous_output}</pre>
             </Section>
           )}
 
           {/* Previous Log */}
           {previous_log && (
-            <Section title="Previous Port Status" bgColor="bg-orange-50" textColor="text-orange-800">
-              <pre className="bg-white p-3 rounded text-sm whitespace-pre-wrap overflow-x-auto">{previous_log}</pre>
+            <Section title="Previous Port Status" icon="📝" bgColor="bg-orange-50" textColor="text-orange-800">
+              <pre className="bg-white p-3 rounded text-sm whitespace-pre-wrap overflow-x-auto border border-gray-200">{previous_log}</pre>
             </Section>
           )}
         </div>
@@ -193,15 +187,22 @@ const AlertDetail = ({ alert, onClose }) => {
 };
 
 // Components
-const Section = ({ title, children, bgColor = 'bg-gray-50', textColor = 'text-gray-800' }) => (
-  <section className={`${bgColor} p-4 rounded-lg shadow-sm`}>
-    <h3 className={`text-lg font-semibold mb-3 ${textColor}`}>{title}</h3>
+const Section = ({ title, icon, children, bgColor = 'bg-gray-50', textColor = 'text-gray-800' }) => (
+  <section className={`${bgColor} p-6 rounded-xl shadow-sm border border-gray-100 mb-2`}> 
+    <h3 className={`text-lg font-bold mb-4 flex items-center gap-2 ${textColor}`}>
+      {icon && <span className="text-xl">{icon}</span>}
+      {title}
+    </h3>
     <div className="space-y-2 text-sm">{children}</div>
   </section>
 );
 
 const Info = ({ label, value }) => (
-  <p><strong className="text-gray-700">{label}:</strong> <span className="text-gray-900">{value || 'N/A'}</span></p>
+  <p className="flex items-center gap-2"><strong className="text-gray-700 min-w-[110px] inline-block">{label}:</strong> <span className="text-gray-900 break-all">{value || 'N/A'}</span></p>
+);
+
+const Badge = ({ children, color = 'bg-gray-100 text-gray-800 border-gray-200' }) => (
+  <span className={`inline-block px-2 py-1 rounded border text-xs font-semibold ${color}`}>{children}</span>
 );
 
 export default AlertDetail;
