@@ -1,3 +1,9 @@
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -39,7 +45,7 @@ const limits = [
 // Construct a message to be returned if the user has been rate-limited
 const makeLimiterResponseMsg = (retryAfter) => {
   const why = 'This keeps the service running smoothly for everyone. '
-  + 'You can get around these limits by running your own instance of Web Check.';
+    + 'You can get around these limits by running your own instance of Web Check.';
   return `You've been rate-limited, please try again in ${retryAfter} seconds.\n${why}`;
 };
 
@@ -81,16 +87,16 @@ fs.readdirSync(dirPath, { withFileTypes: true })
 const renderPlaceholderPage = async (res, msgId, logs) => {
   const errorMessages = {
     notCompiled: 'Looks like the GUI app has not yet been compiled.<br />'
-    + 'Run <code>yarn build</code> to continue, then restart the server.',
+      + 'Run <code>yarn build</code> to continue, then restart the server.',
     notCompiledSsrHandler: 'Server-side rendering failed to initiate, as SSR handler not found.<br />'
-    + 'This can be fixed by running <code>yarn build</code>, then restarting the server.<br />',
-    disabledGui:  'Web-Check API is up and running!<br />Access the endpoints at '
-    + `<a href="${API_DIR}"><code>${API_DIR}</code></a>`,
+      + 'This can be fixed by running <code>yarn build</code>, then restarting the server.<br />',
+    disabledGui: 'Web-Check API is up and running!<br />Access the endpoints at '
+      + `<a href="${API_DIR}"><code>${API_DIR}</code></a>`,
   };
   const logOutput = logs ? `<div class="logs"><code>${logs}</code></div>` : '';
   const errorMessage = (errorMessages[msgId] || 'An mystery error occurred.') + logOutput;
   const placeholderContent = await fs.promises.readFile(placeholderFilePath, 'utf-8');
-  const htmlContent = placeholderContent.replace('<!-- CONTENT -->', errorMessage );
+  const htmlContent = placeholderContent.replace('<!-- CONTENT -->', errorMessage);
   res.status(500).send(htmlContent);
 };
 
@@ -118,7 +124,7 @@ app.get(API_DIR, async (req, res) => {
     return new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error(
-          `Timed out after ${ms/1000} seconds${jobName ? `, when executing ${jobName}` : ''}`
+          `Timed out after ${ms / 1000} seconds${jobName ? `, when executing ${jobName}` : ''}`
         ));
       }, ms);
     });
@@ -168,7 +174,7 @@ if (process.env.DISABLE_GUI && process.env.DISABLE_GUI !== 'false') {
     }).catch(async err => {
       renderPlaceholderPage(res, 'notCompiledSsrHandler', err.message);
     });
-  });  
+  });
 }
 
 // Handle SPA routing

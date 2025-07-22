@@ -271,14 +271,14 @@ const DeadDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen overflow-hidden ">
       {/* Sidebar */}
       <div className="sticky top-0 h-screen">
         <Sidebar />
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-red-500">
         <div className="sticky top-0 z-10 bg-white">
           <Header />
         </div>
