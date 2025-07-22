@@ -137,7 +137,7 @@ const ShowMetrices = ({ onCancel, domain = "" }) => {
   };
 
   const processActivityData = (diagnostics) => {
-    const counts = { error: 0,  warning: 0, info: 0 };
+    const counts = { error: 0, warning: 0, info: 0 };
 
     diagnostics.forEach((d) => {
       if (counts[d.level] !== undefined) counts[d.level]++;
@@ -189,13 +189,6 @@ const ShowMetrices = ({ onCancel, domain = "" }) => {
 
         <ActivityLog activityLogData={activityLogData} />
 
-        {/* Removed: Winlogbeat Events Section */}
-        {/*
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold text-primary mb-6">Device Monitoring</h2>
-          <WinlogbeatEvents />
-        </div>
-        */}
       </main>
     </div>
   );

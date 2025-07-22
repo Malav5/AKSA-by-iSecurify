@@ -15,7 +15,6 @@ import TaskManagement from "../Dashboard/TaskManagement";
 import RiskMangement from "../Dashboard/RiskManagement";
 import OptionsMenu from "../Dashboard/OptionsMenu";
 import BlankRiskDashboard from "../Dashboard/BlankRiskDashboard";
-import { getWinlogbeatStats } from "../../services/winlogbeatService";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -83,11 +82,6 @@ const Dashboard = () => {
       return localStorage.getItem(getUserKey("domainCheckResult")) || "";
     }
   );
-
-  // State for Winlogbeat Stats
-  const [winlogbeatStats, setWinlogbeatStats] = useState(null);
-  const [winlogbeatStatsLoading, setWinlogbeatStatsLoading] = useState(true);
-  const [winlogbeatStatsError, setWinlogbeatStatsError] = useState(null);
 
   // ✅ Handle first load or coming from signup or signin
   useEffect(() => {
@@ -242,25 +236,6 @@ const Dashboard = () => {
     };
   }, [domainName, isDomainChecked, questionnaireSubmitted]);
 
-  // Fetch Winlogbeat Stats on component mount
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setWinlogbeatStatsLoading(true);
-        const stats = await getWinlogbeatStats(); // Fetch stats
-        console.log("Winlogbeat Stats fetched:", stats); // Log fetched stats
-        setWinlogbeatStats(stats);
-      } catch (err) {
-        console.error("Error fetching Winlogbeat stats:", err);
-        setWinlogbeatStatsError(err.message || "Failed to fetch Winlogbeat stats.");
-      } finally {
-        setWinlogbeatStatsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []); // Empty dependency array to fetch only on mount
-
   const goToIssueManager = () => {
     navigate("/issues");
   };
@@ -390,7 +365,7 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Action Buttons - Stacked on mobile, side by side on larger screens */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button

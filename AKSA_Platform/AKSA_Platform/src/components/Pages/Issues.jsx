@@ -5,7 +5,6 @@ import FiltersBar from "../IssuePage/FiltersBar";
 import IssuesTable from "../IssuePage/IssuesTable";
 import IssueManagement from "../Dashboard/IssueManagement";
 import CreateIssue from "../IssuePage/CreateIssue";
-import WinlogbeatEvents from "../Issues/WinlogbeatEvents";
 
 export default function IssuesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);

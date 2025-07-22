@@ -4,7 +4,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import Sidebar from "../Dashboard/Sidebar";
 import Header from "../Dashboard/Header";
 import QueAns from "../Dashboard/QueAns";
-import {  fetchRiskData } from "../../services/DashboardServices";
+import { fetchRiskData } from "../../services/DashboardServices";
 import { ComplianceScore } from "../Dashboard/ComplianceScore";
 import { ComplianceScoreCard } from "../Dashboard/ComplianceScoreCard";
 import AksaSecurityServices from "../Dashboard/Services";
@@ -15,7 +15,6 @@ import TaskManagement from "../Dashboard/TaskManagement";
 import RiskMangement from "../Dashboard/RiskManagement";
 import OptionsMenu from "../Dashboard/OptionsMenu";
 import BlankRiskDashboard from "../Dashboard/BlankRiskDashboard";
-import { getWinlogbeatStats } from "../../services/winlogbeatService";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -197,25 +196,6 @@ const DeadDashboard = () => {
     getData();
   }, [domainName, isDomainChecked, questionnaireSubmitted]);
 
-  // Fetch Winlogbeat Stats on component mount
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setWinlogbeatStatsLoading(true);
-        const stats = await getWinlogbeatStats(); // Fetch stats
-        console.log("Winlogbeat Stats fetched:", stats); // Log fetched stats
-        setWinlogbeatStats(stats);
-      } catch (err) {
-        console.error("Error fetching Winlogbeat stats:", err);
-        setWinlogbeatStatsError(err.message || "Failed to fetch Winlogbeat stats.");
-      } finally {
-        setWinlogbeatStatsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []); // Empty dependency array to fetch only on mount
-
   const goToIssueManager = () => {
     navigate("/issues");
   };
@@ -368,29 +348,29 @@ const DeadDashboard = () => {
               <BlankRiskDashboard />
             </div>
           )}
-    <div className="my-6 space-y-6 bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 mb-10">
-            {questionnaireSubmitted && domainName ? (
-              <ComplianceScoreCard
-                domain={domainName}
-                questionnaireSubmitted={questionnaireSubmitted}
-                questionnaireVersion={questionnaireVersion}
-              />
-            ) : (
-              <ComplianceScore domain={domainName} />
-            )}
+          <div className="my-6 space-y-6 bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 mb-10">
+              {questionnaireSubmitted && domainName ? (
+                <ComplianceScoreCard
+                  domain={domainName}
+                  questionnaireSubmitted={questionnaireSubmitted}
+                  questionnaireVersion={questionnaireVersion}
+                />
+              ) : (
+                <ComplianceScore domain={domainName} />
+              )}
 
-            {isDomainChecked ? (
-              <div className="col-span-2">
-                <SuggestedProducts domain={domainName} />
-              </div>
-            ) : (
-              <div className="col-span-2">
-                <AksaSecurityServices />
-              </div>
-            )}
+              {isDomainChecked ? (
+                <div className="col-span-2">
+                  <SuggestedProducts domain={domainName} />
+                </div>
+              ) : (
+                <div className="col-span-2">
+                  <AksaSecurityServices />
+                </div>
+              )}
+            </div>
           </div>
-    </div>
           {/* {isDomainChecked && <DomainDetail domain={domainName} />} */}
           {isDomainChecked && (
             <>
