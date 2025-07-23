@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { domainServices } from "../../services/domainServices"; // adjust path if needed
 
 const DomainsInline = ({ setShowDomainsInline }) => {
   const [domains, setDomains] = useState([]);
@@ -8,12 +11,41 @@ const DomainsInline = ({ setShowDomainsInline }) => {
 
   const fetchDomains = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/domains");
-      const data = await res.json();
+      const data = await domainServices.fetchDomains();
       setDomains(data || []);
     } catch (err) {
       console.error("Failed to fetch domains", err);
+      toast.error("Failed to fetch domains.");
       setDomains([]);
+    }
+  };
+
+  const handleDelete = async (id, name) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete the domain "${name}"?`);
+    if (!confirmDelete) return;
+
+    try {
+      await domainServices.deleteDomain(id);
+      toast.success("Domain deleted successfully");
+      fetchDomains();
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error(err?.response?.data?.error || "Failed to delete domain");
+    }
+  };
+
+  const handleAddDomain = async () => {
+    const name = prompt("Enter domain name:");
+    if (!name) return;
+
+    try {
+      const payload = { name, userEmail };
+      await domainServices.addDomain(payload);
+      toast.success("Domain added successfully");
+      fetchDomains();
+    } catch (err) {
+      console.error("Add error:", err);
+      toast.error(err?.response?.data?.error || "Failed to add domain");
     }
   };
 
@@ -31,12 +63,23 @@ const DomainsInline = ({ setShowDomainsInline }) => {
 
   return (
     <div>
-      <button
-        className="mb-6 px-4 py-2 bg-primary text-white rounded hover:bg-[#800080] text-sm font-semibold"
-        onClick={() => setShowDomainsInline(false)}
-      >
-        &larr; Back to Profile
-      </button>
+      <ToastContainer position="top-right" />
+
+      <div className="flex justify-between items-center mb-6">
+        <button
+          className="px-4 py-2 bg-primary text-white rounded hover:bg-[#800080] text-sm font-semibold"
+          onClick={() => setShowDomainsInline(false)}
+        >
+          &larr; Back to Profile
+        </button>
+
+        <button
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-semibold"
+          onClick={handleAddDomain}
+        >
+          + Add Domain
+        </button>
+      </div>
 
       <div className="mb-4">
         <span className="text-gray-500 text-sm">Members / My domains</span>
@@ -91,7 +134,11 @@ const DomainsInline = ({ setShowDomainsInline }) => {
                       />
                     </svg>
                   </button>
-                  <button title="Delete" className="text-red-400 hover:text-red-600">
+                  <button
+                    title="Delete"
+                    className="text-red-400 hover:text-red-600"
+                    onClick={() => handleDelete(domain._id, domain.name)}
+                  >
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
                       <path
                         d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2 2v2H8V5a2 2 0 0 1 2-2z"

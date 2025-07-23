@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Bell, Search, Menu } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useNotifications } from "../../context/NotificationContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const Header = () => {
@@ -14,6 +14,16 @@ const Header = () => {
   const notificationButtonRef = useRef();
   const { notifications, clearNotifications } = useNotifications();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Map path to title
+  const routeToTitle = {
+    "/dashboard": "Dashboard",
+    "/domain": "Domain Detail",
+    "/soc-login": "SOC",
+    "/settings": "Settings",
+  };
+  const currentPage = routeToTitle[location.pathname] || "Dashboard";
 
   // Fetch user info
   useEffect(() => {
@@ -47,38 +57,27 @@ const Header = () => {
     setShowNotifications(false);
   };
 
-  // Enhanced click outside handler
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Check if click is outside notifications dropdown and button
-      const isOutsideNotifications = 
-        panelRef.current && 
+      const isOutsideNotifications =
+        panelRef.current &&
         !panelRef.current.contains(event.target) &&
         notificationButtonRef.current &&
         !notificationButtonRef.current.contains(event.target);
 
-      // Check if click is outside user dropdown and button
-      const isOutsideUserMenu = 
-        userMenuRef.current && 
+      const isOutsideUserMenu =
+        userMenuRef.current &&
         !userMenuRef.current.contains(event.target) &&
         userButtonRef.current &&
         !userButtonRef.current.contains(event.target);
 
-      // Close dropdowns if clicking outside
-      if (isOutsideNotifications) {
-        setShowNotifications(false);
-      }
-      
-      if (isOutsideUserMenu) {
-        setShowUserMenu(false);
-      }
+      if (isOutsideNotifications) setShowNotifications(false);
+      if (isOutsideUserMenu) setShowUserMenu(false);
     };
 
-    // Add event listener
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("touchstart", handleClickOutside);
 
-    // Cleanup
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
@@ -87,18 +86,16 @@ const Header = () => {
 
   return (
     <div className="relative flex items-center justify-between px-3 sm:px-4 lg:px-6 py-3 sm:py-4 bg-white border-b border-gray-200">
-      {/* Left Section - Search and Title */}
+      {/* Left Section - Title */}
       <div className="flex items-center space-x-3 sm:space-x-4">
-        {/* Mobile Menu Button - Only show on mobile since sidebar has its own */}
         <div className="lg:hidden">
-          <div className="w-8 h-8 flex items-center justify-center">
-            {/* This space is reserved for potential mobile menu button */}
-          </div>
+          <div className="w-8 h-8 flex items-center justify-center"></div>
         </div>
 
-        {/* Page Title */}
         <div className="hidden sm:block">
-          <h1 className="text-lg sm:text-xl font-semibold text-gray-800">Dashboard</h1>
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-800">
+            {currentPage}
+          </h1>
         </div>
       </div>
 
@@ -114,12 +111,11 @@ const Header = () => {
             <Bell className="w-8 h-8 sm:w-9 sm:h-9 text-gray-600" />
             {notifications.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                {notifications.length > 9 ? '9+' : notifications.length}
+                {notifications.length > 9 ? "9+" : notifications.length}
               </span>
             )}
           </button>
 
-          {/* Notifications Dropdown */}
           {showNotifications && (
             <div
               ref={panelRef}
@@ -148,9 +144,7 @@ const Header = () => {
                         <span className="text-lg flex-shrink-0">{note.icon}</span>
                         <div className="min-w-0 flex-1">
                           <p className="font-medium text-sm sm:text-base truncate">{note.message}</p>
-                          <span className="text-xs text-gray-400">
-                            {note.time}
-                          </span>
+                          <span className="text-xs text-gray-400">{note.time}</span>
                         </div>
                       </li>
                     ))}
@@ -183,12 +177,8 @@ const Header = () => {
                 <span className="text-sm sm:text-base font-medium text-gray-700">U</span>
               </div>
             )}
-            {/* <span className="hidden sm:block text-xl font-medium text-gray-700">
-              {user ? `${user.firstName}` : "User"}
-            </span> */}
           </button>
 
-          {/* User Dropdown */}
           {showUserMenu && (
             <div
               ref={userMenuRef}
@@ -198,8 +188,8 @@ const Header = () => {
                 <p className="text-2xl font-medium text-gray-900">
                   {user ? `${user.firstName} ${user.lastName}` : "User Name"}
                 </p>
-                <p className="text-sm text-gray-500 ">{user?.email || "user@example.com"}</p>
-                <p className="text-sm text-gray-500 ">{user?.companyName || ""}</p>
+                <p className="text-sm text-gray-500">{user?.email || "user@example.com"}</p>
+                <p className="text-sm text-gray-500">{user?.companyName || ""}</p>
               </div>
               <div className="p-1">
                 <button
