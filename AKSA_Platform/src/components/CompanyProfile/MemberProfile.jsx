@@ -11,6 +11,7 @@ const MemberProfile = ({
   handleAttachmentChange
 }) => {
   const [domainCount, setDomainCount] = useState(0);
+  const [companyName, setCompanyName] = useState(profileData.name || "");
 
   useEffect(() => {
     const fetchDomains = async () => {
@@ -25,6 +26,28 @@ const MemberProfile = ({
       }
     };
     fetchDomains();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserCompany = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const res = await fetch("http://localhost:3000/api/auth/user", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Failed to fetch user");
+        const data = await res.json();
+        if (data.user && data.user.companyName) {
+          setCompanyName(data.user.companyName);
+        }
+      } catch (err) {
+        // fallback to profileData.name
+        setCompanyName(profileData.name || "");
+      }
+    };
+    fetchUserCompany();
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -64,7 +87,7 @@ const MemberProfile = ({
           <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
             <div>
               <div className="text-xs text-gray-500 mb-1">Company name</div>
-              <div className="text-lg font-bold text-gray-900">{profileData.name}</div>
+              <div className="text-lg font-bold text-gray-900">{companyName}</div>
             </div>
             <div>
               <div className="text-xs text-gray-500 mb-1">Customer code</div>
