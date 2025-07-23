@@ -18,7 +18,11 @@ async function getWazuhToken() {
       httpsAgent: new https.Agent({ rejectUnauthorized: false })
     });
 
-    // console.log("✅ Token received:", response.data);
+//     console.log("✅ Token received:", response.data);
+//     console.log("Auth URL:", authUrl);
+// console.log("Username:", username);
+// console.log("Password:", password);
+
     return response.data;
 
   } catch (error) {

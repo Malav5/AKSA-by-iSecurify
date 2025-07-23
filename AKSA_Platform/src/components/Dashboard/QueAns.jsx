@@ -109,7 +109,7 @@ export const questions = [
     { label: "A. Yes (10 pts)", value: 10 },
     { label: "B. Partially (5 pts)", value: 5 },
     { label: "C. No (0 pts)", value: 0 },
-    { label: "D. Not Applicable (N/A)", value: -1 } // Unique value to fix the issue
+    // { label: "D. Not Applicable (N/A)", value: -1 } 
   ]
 }));
 
