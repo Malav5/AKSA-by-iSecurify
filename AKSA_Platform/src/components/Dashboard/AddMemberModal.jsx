@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { Listbox } from "@headlessui/react";
 import { Check, ChevronDown } from "lucide-react";
+import { toast } from "react-toastify";
 
-const AddMemberModal = ({ onClose }) => {
+export const showSuccess = (message) => toast.success(message);
+export const showError = (message) => toast.error(message);
+export const showInfo = (message) => toast.info(message);
+export const showWarning = (message) => toast.warning(message);
+
+const AddMemberModal = ({ onClose, onSuccess }) => {
   const [memberData, setMemberData] = useState({
     name: "",
     email: "",
@@ -14,7 +20,7 @@ const AddMemberModal = ({ onClose }) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const roles = ["admin", "manager", "analyst", "user"];
+  const roles = ["admin", "manager", "user"];
   const departments = ["it", "security", "operations", "compliance"];
 
   const handleSubmit = async (e) => {
@@ -33,12 +39,16 @@ const AddMemberModal = ({ onClose }) => {
       });
 
       if (!response.ok) {
+        showError("Failed to add member. Please check the server.");
         throw new Error("Failed to add member. Please check the server.");
       }
 
       const result = await response.json();
-      setSuccess(result.message || "Member added successfully!");
+      showSuccess(result.message || "Member added successfully!");
       setMemberData({ name: "", email: "", role: "", department: "" });
+
+      // Show toast
+      if (onSuccess) onSuccess();
 
       setTimeout(() => {
         onClose();
