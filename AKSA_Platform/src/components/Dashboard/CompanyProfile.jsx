@@ -2,8 +2,24 @@ import Sidebar from "./Sidebar";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
+import AddMemberModal from "./AddMemberModal";
+import DomainsInline from "../CompanyProfile/DomainsInline";
+import MemberProfile from "../CompanyProfile/MemberProfile";
+import SecuritySettings from "../CompanyProfile/SecuritySettings";
+import Settings from "../CompanyProfile/Settings";
+import UserManagement from "../CompanyProfile/UserManagement";
+import NotificationSettings from "../CompanyProfile/NotificationSettings";
+
+const TABS = [
+  { label: "Member Profile", key: "member" },
+  { label: "Security Settings", key: "security" },
+  { label: "Notification Settings", key: "notification" },
+  { label: "Settings", key: "settings" },
+  { label: "User Management", key: "user-management" },
+];
 
 const CompanyProfile = () => {
+  const [activeTab, setActiveTab] = useState("member");
   const [profileData, setProfileData] = useState({
     logo: "/logo2.png",
     name: "Allianz Cloud",
@@ -33,6 +49,11 @@ const CompanyProfile = () => {
 
   const [loadingMembers, setLoadingMembers] = useState(true);
   const [membersError, setMembersError] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [attachmentFile, setAttachmentFile] = useState(null);
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showDomainsModal, setShowDomainsModal] = useState(false);
+  const [showDomainsInline, setShowDomainsInline] = useState(false);
 
   const navigate = useNavigate();
 
@@ -93,220 +114,143 @@ const CompanyProfile = () => {
     navigate("/dashboard");
   };
 
+  // Handle logo image upload
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.match(/^image\/(jpeg|png|gif|svg\+xml|webp)$/)) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setProfileData((prev) => ({ ...prev, logo: ev.target.result }));
+        setLogoFile(file);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert("Please select a valid image file (jpg, jpeg, png, gif, svg, webp)");
+    }
+  };
+
+  // Handle attachment upload (image only for now)
+  const handleAttachmentChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.match(/^image\/(jpeg|png|gif|svg\+xml|webp)$/)) {
+      setAttachmentFile(file);
+      // You can add logic to show preview or upload to server here
+    } else {
+      alert("Please select a valid image file (jpg, jpeg, png, gif, svg, webp)");
+    }
+  };
+
+  // Light theme classes
+  const mainBg = "bg-gray-50 min-h-screen";
+  const cardBg = "bg-white";
+  const border = "border border-gray-200";
+  const textPrimary = "text-gray-900";
+  const textSecondary = "text-gray-600";
+  const tabActive = "border-b-2 border-[#800080] text-primary font-semibold";
+  const tabInactive = "text-gray-500";
+
   return (
-    <div className="flex h-screen font-sans overflow-hidden">
+    <div className={`flex h-screen font-sans overflow-hidden ${mainBg}`}>
       <aside className="sticky top-0 h-screen">
         <Sidebar />
       </aside>
 
-      <div className="flex-1 flex flex-col h-screen">
-        <header className="sticky top-0 z-10">
+      <div className="flex-1 flex flex-col h-screen my-4">
+        {/* <header className="sticky top-0 z-10">
           <Header />
-        </header>
+        </header> */}
 
         <main className="flex-1 p-6 overflow-y-auto">
-          {/* Profile Header */}
-          <section className="bg-white rounded-lg shadow p-8 mb-8">
-            <div className="flex items-center mb-8 pb-4 border-b border-gray-100">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-md mr-6">
-                <img
-                  src={profileData.logo}
-                  alt="Company Logo"
-                  className="w-16 h-16 rounded-xl"
-                />
-              </div>
-              <div className="flex flex-col w-full">
-                <input
-                  type="text"
-                  name="name"
-                  value={profileData.name}
-                  onChange={handleChange}
-                  className="text-3xl font-bold text-gray-800 bg-transparent focus:outline-none"
-                />
-                <input
-                  type="text"
-                  name="industry"
-                  value={profileData.industry}
-                  onChange={handleChange}
-                  className="text-lg text-primary bg-transparent focus:outline-none mt-1"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Company Description
-              </label>
-              <textarea
-                name="description"
-                value={profileData.description}
-                onChange={handleChange}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 focus:outline-none"
-                rows="3"
+          {/* Tabs */}
+          <nav className="flex space-x-8 border-b mb-8 bg-white px-4 py-2 rounded-t-lg shadow-sm">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                className={`pb-2 px-1 transition-colors duration-150 focus:outline-none ${activeTab === tab.key ? tabActive : tabInactive}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Tab Content */}
+          {activeTab === "member" && (
+            showDomainsInline ? (
+              <DomainsInline setShowDomainsInline={setShowDomainsInline} />
+            ) : (
+              <MemberProfile
+                profileData={profileData}
+                cardBg={cardBg}
+                border={border}
+                handleLogoChange={handleLogoChange}
+                setShowDomainsInline={setShowDomainsInline}
+                handleAttachmentChange={handleAttachmentChange}
               />
-            </div>
-          </section>
+            )
+          )}
 
-          {/* Company Information */}
-          <section className="bg-white rounded-lg shadow p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { label: "Founding Year", name: "foundingYear", type: "number" },
-                { label: "Headquarters", name: "headquarters", type: "text" },
-                { label: "Employee Count", name: "employeeCount", type: "number" },
-                { label: "Annual Revenue", name: "annualRevenue", type: "text" },
-                { label: "Primary Markets", name: "primaryMarkets", type: "text" },
-                { label: "Security Certifications", name: "securityCertifications", type: "text" },
-              ].map((field) => (
-                <div key={field.name} className="bg-gray-50 p-4 rounded-lg border  border-gray-200">
-                  <label className="block text-sm font-semibold mb-1">{field.label}</label>
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    value={profileData[field.name]}
-                    onChange={handleChange}
-                    className="w-full p-2 border  border-gray-200 rounded-lg focus:outline-none"
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
+{activeTab === "security" && <SecuritySettings />}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Leadership Team */}
-            <section className="col-span-1 bg-white rounded-lg shadow p-6">
-              <h3 className="text-xl font-bold mb-4">Leadership Team</h3>
-              {loadingMembers ? (
-                <p className="text-blue-600 text-center py-4">Loading members...</p>
-              ) : membersError ? (
-                <p className="text-red-600 text-center py-4">{membersError}</p>
-              ) : (
-                <>
-                  <textarea
-                    value={profileData.teamMembers.join("\n")}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        teamMembers: e.target.value.split("\n").filter(Boolean),
-                      }))
-                    }
-                    className="w-full bg-gray-50 border  border-gray-200 rounded-lg p-3 focus:outline-none"
-                    rows="6"
-                  />
-                  <div className="mt-6 space-y-3">
-                    {profileData.teamMembers.map((member, i) => (
-                      <div key={i} className="bg-indigo-50 p-4 rounded-lg">
-                        <input
-                          value={member}
-                          onChange={(e) => handleArrayChange("teamMembers", i, e.target.value)}
-                          className="w-full bg-transparent border-b pb-1"
-                        />
-                        <span className="text-xs text-primary">
-                          {member.split(" - ")[1] || ""}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </section>
+{activeTab === "notification" && <NotificationSettings />}
+{activeTab === "settings" && <Settings />}
 
-            <div className="col-span-2 space-y-8">
-              {/* Priorities */}
-              <section className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-bold mb-4">Technology Priorities</h3>
-                <textarea
-                  value={profileData.priorities.join("\n")}
-                  onChange={(e) =>
-                    setProfileData((prev) => ({
-                      ...prev,
-                      priorities: e.target.value.split("\n").filter(Boolean),
-                    }))
-                  }
-                  className="w-full bg-gray-50 border  border-gray-200 rounded-lg p-3 focus:outline-none"
-                  rows="4"
-                />
-                <div className="mt-6 space-y-3">
-                  {profileData.priorities.map((p, i) => (
-                    <input
-                      key={i}
-                      value={p}
-                      onChange={(e) => handleArrayChange("priorities", i, e.target.value)}
-                      className="w-full bg-green-50 p-3 rounded-lg border  border-gray-200"
-                    />
-                  ))}
-                </div>
-              </section>
-
-              {/* Metrics */}
-              <section className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-bold mb-6">Company Metrics</h3>
-                <div className="flex justify-around">
-                  {Object.entries(profileData.metrics).map(([key, val]) => (
-                    <div key={key} className="text-center bg-indigo-50 p-4 rounded-lg">
-                      <input
-                        type="number"
-                        value={val}
-                        onChange={(e) => handleMetricChange(key, e.target.value)}
-                        className="text-3xl font-bold w-16 bg-transparent text-center"
-                      />
-                      <p className="capitalize mt-2">{key}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </div>
-          </div>
-
-          {/* Service Providers */}
-          <section className="bg-white rounded-lg shadow p-6 mt-8">
-            <h3 className="text-xl font-bold mb-6">Service Providers</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <textarea
-                name="info"
-                value={profileData.serviceProviders.info}
-                onChange={handleServiceProviderChange}
-                className="bg-purple-50 p-4 rounded-lg border  border-gray-200 focus:outline-none"
-                rows="4"
-              />
-              <input
-                name="primary"
-                value={profileData.serviceProviders.primary}
-                onChange={handleServiceProviderChange}
-                className="bg-white rounded-lg border  border-gray-200 p-2 focus:outline-none"
-              />
-              <input
-                name="secondary"
-                value={profileData.serviceProviders.secondary}
-                onChange={handleServiceProviderChange}
-                className="bg-white rounded-lg border border-gray-200 p-2 focus:outline-none"
-              />
-              <textarea
-                name="additionalText"
-                value={profileData.serviceProviders.additionalText}
-                onChange={handleServiceProviderChange}
-                className="bg-white rounded-lg border border-gray-200 p-3 focus:outline-none"
-                rows="4"
-              />
-            </div>
-          </section>
-
-          {/* Save & Cancel Buttons */}
-          <div className="mt-8 text-center">
-            <button
-              onClick={handleSubmit}
-              className="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-600 mr-4"
-            >
-              Save Changes
-            </button>
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="bg-white text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-100 border"
-            >
-              Cancel
-            </button>
-          </div>
+{activeTab === "user-management" && (
+            <UserManagement
+              showAddMemberModal={showAddMemberModal}
+              setShowAddMemberModal={setShowAddMemberModal}
+              // ...other props as needed
+            />
+          )}
         </main>
       </div>
+
+      {/* Domains Modal */}
+      {showDomainsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full p-8 relative">
+            <button className="absolute top-4 right-4 text-gray-500 hover:text-primary text-2xl font-bold" onClick={() => setShowDomainsModal(false)}>&times;</button>
+            <div className="mb-4">
+              <span className="text-gray-500 text-sm">Members / My domains</span>
+              <h2 className="text-xl font-bold mt-2 mb-1 text-primary">Listing all domains <span className="font-normal text-gray-700">1 domains</span></h2>
+            </div>
+            <div className="mb-4 flex items-center gap-2">
+              <input type="text" placeholder="Search" className="w-64 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none bg-gray-50" />
+            </div>
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="min-w-full text-sm text-left">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold text-gray-700"><input type="checkbox" /></th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Domain</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Actions</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Schedule</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Last scan</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Status</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Error code</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Scan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3"><input type="checkbox" /></td>
+                    <td className="px-4 py-3 text-gray-900 font-medium">allianzcloud.com</td>
+                    <td className="px-4 py-3 flex gap-2 items-center">
+                      <button title="Favorite" className="text-gray-400 hover:text-primary"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" stroke="currentColor" strokeWidth="1.5"/></svg></button>
+                      <button title="Delete" className="text-red-400 hover:text-red-600"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2 2v2H8V5a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="1.5"/></svg></button>
+                    </td>
+                    <td className="px-4 py-3">12 Feb, 2024 at 10:00</td>
+                    <td className="px-4 py-3">12 Jul, 2025 at 10:35</td>
+                    <td className="px-4 py-3"><span className="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-xs font-semibold">Complete</span></td>
+                    <td className="px-4 py-3">-</td>
+                    <td className="px-4 py-3"><label className="inline-flex items-center cursor-pointer"><input type="checkbox" className="sr-only peer" defaultChecked /><div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-teal-400 transition"></div></label></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
