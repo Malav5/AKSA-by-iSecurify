@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { domainServices } from "../../services/domainServices"; // adjust path if needed
@@ -6,6 +6,8 @@ import { domainServices } from "../../services/domainServices"; // adjust path i
 const DomainsInline = ({ setShowDomainsInline }) => {
   const [domains, setDomains] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRows, setSelectedRows] = useState([]);
+  const selectAllRef = useRef();
 
   const userEmail = localStorage.getItem("currentUser");
 
@@ -61,6 +63,34 @@ const DomainsInline = ({ setShowDomainsInline }) => {
       domain.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    if (!selectAllRef.current) return;
+    if (selectedRows.length === 0) {
+      selectAllRef.current.indeterminate = false;
+      selectAllRef.current.checked = false;
+    } else if (selectedRows.length === filteredDomains.length) {
+      selectAllRef.current.indeterminate = false;
+      selectAllRef.current.checked = true;
+    } else {
+      selectAllRef.current.indeterminate = true;
+      selectAllRef.current.checked = false;
+    }
+  }, [selectedRows, filteredDomains]);
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedRows(filteredDomains.map((_, idx) => idx));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleSelectRow = (idx) => {
+    setSelectedRows((prev) =>
+      prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
+    );
+  };
+
   return (
     <div>
       <ToastContainer position="top-right" />
@@ -106,7 +136,12 @@ const DomainsInline = ({ setShowDomainsInline }) => {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-3 font-semibold text-gray-700">
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  ref={selectAllRef}
+                  onChange={handleSelectAll}
+                  aria-label="Select all domains"
+                />
               </th>
               <th className="px-4 py-3 font-semibold text-gray-700">Domain</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Actions</th>
@@ -121,7 +156,12 @@ const DomainsInline = ({ setShowDomainsInline }) => {
             {filteredDomains.map((domain, idx) => (
               <tr key={domain._id || idx} className="hover:bg-gray-50">
                 <td className="px-4 py-3">
-                  <input type="checkbox" />
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.includes(idx)}
+                    onChange={() => handleSelectRow(idx)}
+                    aria-label={`Select domain ${domain.name}`}
+                  />
                 </td>
                 <td className="px-4 py-3 text-gray-900 font-medium">{domain.name}</td>
                 <td className="px-4 py-3 flex gap-2 items-center">
@@ -141,7 +181,7 @@ const DomainsInline = ({ setShowDomainsInline }) => {
                   >
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
                       <path
-                        d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2 2v2H8V5a2 2 0 0 1 2-2z"
+                        d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2-2z"
                         stroke="currentColor"
                         strokeWidth="1.5"
                       />

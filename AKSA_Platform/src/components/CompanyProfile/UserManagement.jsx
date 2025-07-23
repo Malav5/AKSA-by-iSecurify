@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AddMemberModal from "../Dashboard/AddMemberModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,13 +10,14 @@ const UserManagement = ({
 }) => {
   const [members, setMembers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const selectAllRef = useRef();
 
   // Fetch members from backend
   const fetchMembers = async () => {
     try {
       const res = await fetch("http://localhost:3000/api/member/get-members");
       const data = await res.json();
-      // You may need to adjust this depending on your backend response
       setMembers(data.members || []);
     } catch (err) {
       setMembers([]);
@@ -25,14 +26,38 @@ const UserManagement = ({
 
   useEffect(() => {
     fetchMembers();
-    // Example: fetch user from localStorage or API
-    const user = JSON.parse(localStorage.getItem("user")); // or fetch from API
+    const user = JSON.parse(localStorage.getItem("user"));
     setCurrentUser(user);
   }, []);
 
   useEffect(() => {
-    console.log("Fetched members:", members);
-  }, [members]);
+    // Update indeterminate state
+    if (!selectAllRef.current) return;
+    if (selectedRows.length === 0) {
+      selectAllRef.current.indeterminate = false;
+      selectAllRef.current.checked = false;
+    } else if (selectedRows.length === members.length) {
+      selectAllRef.current.indeterminate = false;
+      selectAllRef.current.checked = true;
+    } else {
+      selectAllRef.current.indeterminate = true;
+      selectAllRef.current.checked = false;
+    }
+  }, [selectedRows, members]);
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedRows(members.map((_, idx) => idx));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleSelectRow = (idx) => {
+    setSelectedRows((prev) =>
+      prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
+    );
+  };
 
   // When AddMemberModal closes, refresh the list
   const handleModalClose = () => {
@@ -54,22 +79,36 @@ const UserManagement = ({
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="w-full px-2 ">
       <ToastContainer position="top-right" autoClose={2000} />
-      <div className="flex justify-end mb-4">
-        <button
-          className="bg-primary text-white font-semibold px-6 py-3 rounded-lg text-lg flex items-center gap-2 shadow"
-          onClick={() => setShowAddMemberModal(true)}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-          Add new member
-        </button>
+      {/* Title, description, and add button */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-primary mb-1">User Management</h1>
+          <p className="text-gray-500">Manage your organization's members, roles, and permissions.</p>
+        </div>
+        <div>
+          <button
+            className="bg-primary text-white font-semibold px-6 py-3 rounded-lg text-lg flex items-center gap-2 shadow"
+            onClick={() => setShowAddMemberModal(true)}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Add new member
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <table className="min-w-full text-sm text-left">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-3 font-semibold text-gray-700"><input type="checkbox" /></th>
+              <th className="px-4 py-3 font-semibold text-gray-700">
+                <input
+                  type="checkbox"
+                  ref={selectAllRef}
+                  onChange={handleSelectAll}
+                  aria-label="Select all members"
+                />
+              </th>
               <th className="px-4 py-3 font-semibold text-gray-700">Member name</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Email</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Role</th>
@@ -92,7 +131,14 @@ const UserManagement = ({
               }
               return (
                 <tr key={idx}>
-                  <td className="px-4 py-3"><input type="checkbox" /></td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(idx)}
+                      onChange={() => handleSelectRow(idx)}
+                      aria-label={`Select member ${name}`}
+                    />
+                  </td>
                   <td className="px-4 py-3 flex items-center gap-3">
                     <span className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-lg bg-cyan-400">
                       {name ? name.split(" ").map(n => n[0]).join("").toUpperCase() : ""}
