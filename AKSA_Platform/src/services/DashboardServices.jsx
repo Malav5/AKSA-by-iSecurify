@@ -1,8 +1,6 @@
 import axios from "axios";
 import BASE_URL from "./api"
 
-
-
 export const fetchWhoisData = async (domain) => {
   try {
     const res = await axios.get(`${BASE_URL}/whois`, {
