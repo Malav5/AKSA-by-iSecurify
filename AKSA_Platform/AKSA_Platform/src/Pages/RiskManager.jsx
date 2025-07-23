@@ -1,9 +1,9 @@
 import { useState } from "react";
-import Sidebar from "../Dashboard/Sidebar";
-import RiskManagement from "../Dashboard/RiskManagement";
-import RisksTable from "../RiskManager/RiskTable";
-import RiskFiltersBar from "../RiskManager/RiskFilterBar";
-import CreateRisk from "../RiskManager/CreateRisk";
+import Sidebar from "../components/Dashboard/Sidebar";
+import RiskManagement from "../components/Dashboard/RiskManagement";
+import RisksTable from "../components/RiskManager/RiskTable";
+import RiskFiltersBar from "../components/RiskManager/RiskFilterBar";
+import CreateRisk from "../components/RiskManager/CreateRisk";
 
 const RisksManager = () => {
   const [filters, setFilters] = useState({});

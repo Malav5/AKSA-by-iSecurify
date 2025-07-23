@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import Navbar from "../SOCDashboard/Navbar";
-import DeviceManagement from "../SOCDashboard/DeviceManagement";
-import AgentStatusSummary from "../SOCDashboard/AgentStatusSummary";
-import AlertsAndMetrics from "../SOCDashboard/AlertsAndMetrics";
-import LatestAlerts from "../SOCDashboard/LatestAlerts";
-import SeverityBreakdown from "../SOCDashboard/SeverityBreakdown";
-import ComplianceStatus from "../SOCDashboard/ComplianceStatus";
-import RuleCategoryChart from "../SOCDashboard/RuleCategoryChart";
-import MITREAttackMap from "../SOCDashboard/MITREAttackMap";
-import { fetchAllAlerts, fetchAgents } from "../../services/SOCservices";
-import ScanComponent from "../SOCDashboard/ScanComponent";
+import Navbar from "../components/SOCDashboard/Navbar";
+import DeviceManagement from "../components/SOCDashboard/DeviceManagement";
+import AgentStatusSummary from "../components/SOCDashboard/AgentStatusSummary";
+import AlertsAndMetrics from "../components/SOCDashboard/AlertsAndMetrics";
+import LatestAlerts from "../components/SOCDashboard/LatestAlerts";
+import SeverityBreakdown from "../components/SOCDashboard/SeverityBreakdown";
+import ComplianceStatus from "../components/SOCDashboard/ComplianceStatus";
+import RuleCategoryChart from "../components/SOCDashboard/RuleCategoryChart";
+import MITREAttackMap from "../components/SOCDashboard/MITREAttackMap";
+import { fetchAllAlerts, fetchAgents } from "../services/SOCservices";
+import ScanComponent from "../components/SOCDashboard/ScanComponent";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ const UserDashboard = () => {
             topRules={alertSummary.topRules}
           />
           {/* ScanComponent can be reused here if needed */}
-          <ScanComponent/>
+          <ScanComponent />
           <LatestAlerts latestAlerts={alertSummary.latestAlerts} />
           <SeverityBreakdown alerts={allAlerts} />
           <ComplianceStatus alertSummary={alertSummary} />
