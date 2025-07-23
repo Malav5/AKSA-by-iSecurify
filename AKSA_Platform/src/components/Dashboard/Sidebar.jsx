@@ -67,16 +67,15 @@ const Sidebar = () => {
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar - Mobile and Desktop */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 lg:w-56 xl:w-64 bg-white border-r border-gray-200 flex flex-col h-screen transform transition-transform duration-300 ease-in-out ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      }`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 lg:w-56 xl:w-64 bg-white border-r border-gray-200 flex flex-col h-screen transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
         {/* Top Section */}
         <div className="mr-2 md:mr-4 flex-1">
           <div className="flex items-center justify-center mb-4 md:mb-6 mt-2 md:mt-3 bg-white">
@@ -93,9 +92,8 @@ const Sidebar = () => {
           <div className="flex flex-col items-center my-4 md:my-6">
             {user ? (
               <img
-                src={`https://api.dicebear.com/7.x/initials/svg?seed=${
-                  user.companyName || "User"
-                }`}
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.companyName || "User"
+                  }`}
                 alt="Profile"
                 className="w-16 h-16 md:w-20 md:h-20 rounded-full"
               />
@@ -114,11 +112,10 @@ const Sidebar = () => {
               <div
                 key={idx}
                 onClick={() => handleNavClick(item)}
-                className={`flex items-center space-x-2 cursor-pointer px-3 md:px-4 py-2 rounded-md transition-all duration-200 text-sm md:text-base ${
-                  isActive(item.path) 
-                    ? "bg-secondary text-primary hover:bg-secondary/80" 
-                    : "text-gray-700 hover:bg-[#fff3ff]"
-                }`}
+                className={`flex items-center space-x-2 cursor-pointer px-3 md:px-4 py-2 rounded-md transition-all duration-200 text-sm md:text-base ${isActive(item.path)
+                  ? "bg-secondary text-primary hover:bg-secondary/80"
+                  : "text-gray-700 hover:bg-[#fff3ff]"
+                  }`}
               >
                 <item.Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
                 <span>{item.label}</span>
