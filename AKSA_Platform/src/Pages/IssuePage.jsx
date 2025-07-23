@@ -1,10 +1,10 @@
 // IssuesPage.jsx
 import { useState, useEffect } from "react";
-import Sidebar from "../Dashboard/Sidebar";
-import FiltersBar from "../IssuePage/FiltersBar";
-import IssuesTable from "../IssuePage/IssuesTable";
-import IssueManagement from "../Dashboard/IssueManagement";
-import CreateIssue from "../IssuePage/CreateIssue";
+import Sidebar from "../components/Dashboard/Sidebar";  
+import FiltersBar from "../components/IssuePage/FiltersBar";  
+import IssuesTable from "../components/IssuePage/IssuesTable";
+import IssueManagement from "../components/Dashboard/IssueManagement";
+import CreateIssue from "../components/IssuePage/CreateIssue";
 
 export default function IssuesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);

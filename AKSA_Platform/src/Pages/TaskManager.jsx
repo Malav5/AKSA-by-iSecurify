@@ -1,9 +1,9 @@
-import Sidebar from "../Dashboard/Sidebar";
-import TaskManagement from "../Dashboard/TaskManagement";
-import TaskFiltersBar from "../TaskManager/TaskFilterBar";
-import TasksTable from "../TaskManager/TasksTable";
+import Sidebar from "../components/Dashboard/Sidebar";
+import TaskManagement from "../components/Dashboard/TaskManagement";
+import TaskFiltersBar from "../components/TaskManager/TaskFilterBar";
+import TasksTable from "../components/TaskManager/TasksTable";
 import { useState } from "react";
-import CreateTask from "../TaskManager/CreateTask";
+import CreateTask from "../components/TaskManager/CreateTask";
 
 export default function TaskManager() {
   const [showCreateTask, setShowCreateTask] = useState(false);

@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertCircle, Loader2 } from "lucide-react";
-import Sidebar from "../Dashboard/Sidebar";
-import Header from "../Dashboard/Header";
-import QueAns from "../Dashboard/QueAns";
-import { fetchRiskData } from "../../services/DashboardServices";
-import { ComplianceScore } from "../Dashboard/ComplianceScore";
-import { ComplianceScoreCard } from "../Dashboard/ComplianceScoreCard";
-import AksaSecurityServices from "../Dashboard/Services";
-import SuggestedProducts from "../Dashboard/SuggestedProducts";
-import RiskDashboard from "../Dashboard/RiskDashboard";
-import IssueManagement from "../Dashboard/IssueManagement";
-import TaskManagement from "../Dashboard/TaskManagement";
-import RiskMangement from "../Dashboard/RiskManagement";
-import OptionsMenu from "../Dashboard/OptionsMenu";
-import BlankRiskDashboard from "../Dashboard/BlankRiskDashboard";
+import Sidebar from "../components/Dashboard/Sidebar";
+import Header from "../components/Dashboard/Header";
+import QueAns from "../components/Dashboard/QueAns";
+import { fetchRiskData } from "../services/DashboardServices";
+import { ComplianceScore } from "../components/Dashboard/ComplianceScore";
+import { ComplianceScoreCard } from "../components/Dashboard/ComplianceScoreCard";
+import AksaSecurityServices from "../components/Dashboard/Services";
+import SuggestedProducts from "../components/Dashboard/SuggestedProducts";
+import RiskDashboard from "../components/Dashboard/RiskDashboard";
+import IssueManagement from "../components/Dashboard/IssueManagement";
+import TaskManagement from "../components/Dashboard/TaskManagement";
+import RiskMangement from "../components/Dashboard/RiskManagement";
+import OptionsMenu from "../components/Dashboard/OptionsMenu";
+import BlankRiskDashboard from "../components/Dashboard/BlankRiskDashboard";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -271,7 +271,7 @@ const DeadDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen overflow-hidden ">
       {/* Sidebar */}
       <div className="sticky top-0 h-screen">
         <Sidebar />

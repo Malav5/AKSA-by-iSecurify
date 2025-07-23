@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import { fetchWhoisData, fetchSSLDetails, fetchDNSDetails, fetchHttpHeaders, fetchHttpSecurity, fetchTlsInfo, fetchLinkedPages, fetchCarbonData, fetchSocialTags } from "../../services/DashboardServices";
-import { domainServices } from "../../services/domainServices";
+import { fetchWhoisData, fetchSSLDetails, fetchDNSDetails, fetchHttpHeaders, fetchHttpSecurity, fetchTlsInfo, fetchLinkedPages, fetchCarbonData, fetchSocialTags } from "../services/DashboardServices";
+import { domainServices } from "../services/domainServices";
 import {
     Globe,
     Lock,
@@ -18,8 +18,8 @@ import {
     Copy
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Sidebar from "../Dashboard/Sidebar";
-import Header from "../Dashboard/Header";
+import Sidebar from "../components/Dashboard/Sidebar";
+import Header from "../components/Dashboard/Header";
 
 // Use a separate key for Domain Details page
 const DOMAIN_DETAIL_KEY = "domainDetailSelectedDomain";

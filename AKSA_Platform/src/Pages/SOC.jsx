@@ -13,22 +13,21 @@ import {
   ArcElement,
 } from 'chart.js';
 import moment from 'moment';
-import Navbar from "../SOCDashboard/Navbar";
-import DeviceManagement from "../SOCDashboard/DeviceManagement";
-import AgentStatusSummary from "../SOCDashboard/AgentStatusSummary";
-import AlertsAndMetrics from "../SOCDashboard/AlertsAndMetrics";
-import LatestAlerts from "../SOCDashboard/LatestAlerts";
-import SeverityBreakdown from "../SOCDashboard/SeverityBreakdown";
-import ComplianceStatus from "../SOCDashboard/ComplianceStatus";
-import RuleCategoryChart from "../SOCDashboard/RuleCategoryChart";
-import MITREAttackMap from "../SOCDashboard/MITREAttackMap";
-import Vulnerabilities from "../SOCDashboard/Vulnerabilities";
-import AddAgentModal from "../SOCDashboard/AddAgentModal";
-import RemoveAgentModal from "../SOCDashboard/RemoveAgentModal";
-import ScanComponent from "../SOCDashboard/ScanComponent";
-import { fetchAllAlerts, runFimScan, getFimResults, clearFimResults, getLastFimScanDatetime, fetchAgents } from "../../services/SOCservices";
+import Navbar from "../components/SOCDashboard/Navbar";
+import DeviceManagement from "../components/SOCDashboard/DeviceManagement";  
+import AgentStatusSummary from "../components/SOCDashboard/AgentStatusSummary";
+import AlertsAndMetrics from "../components/SOCDashboard/AlertsAndMetrics";
+import LatestAlerts from "../components/SOCDashboard/LatestAlerts";
+import SeverityBreakdown from "../components/SOCDashboard/SeverityBreakdown";
+import ComplianceStatus from "../components/SOCDashboard/ComplianceStatus";
+import RuleCategoryChart from "../components/SOCDashboard/RuleCategoryChart";
+import MITREAttackMap from "../components/SOCDashboard/MITREAttackMap";
+import Vulnerabilities from "../components/SOCDashboard/Vulnerabilities";
+import AddAgentModal from "../components/SOCDashboard/AddAgentModal";
+import RemoveAgentModal from "../components/SOCDashboard/RemoveAgentModal";
+import { fetchAllAlerts, runFimScan, getFimResults, clearFimResults, getLastFimScanDatetime, fetchAgents } from "../services/SOCservices";
 import axios from 'axios'; // Added for OpenAI API integration
-import { getOpenAIApiKey } from '../../utils/apiKey';
+import { getOpenAIApiKey } from '../utils/apiKey';
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -113,8 +112,191 @@ function trimFimResult(data, depth = 0) {
   return data;
 }
 
+// ScanComponent for FIM scan actions
+const ScanComponent = () => {
+  const [agentId, setAgentId] = useState('');
+  const [agents, setAgents] = useState([]);
+  const [scanResult, setScanResult] = useState(null);
+  const [lastScan, setLastScan] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [activeTab, setActiveTab] = useState('result');
+  const [fimThreadId, setFimThreadId] = useState(null);
+  const [fimAssistantReply, setFimAssistantReply] = useState('');
+  const [agentThreads, setAgentThreads] = useState({});
 
-const SOCDashboard = () => {
+  useEffect(() => {
+    const loadAgents = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/api/wazuh/agents');
+        const wazuhAgents = res.data.data.affected_items || [];
+        setAgents(wazuhAgents);
+        if (wazuhAgents.length > 0) setAgentId(wazuhAgents[0].id);
+      } catch (err) {
+        console.error('Failed to fetch agents from Wazuh:', err);
+        setAgents([]);
+      }
+    };
+    loadAgents();
+  }, []);
+
+  useEffect(() => {
+    if (!fimThreadId) {
+      createThread().then(setFimThreadId);
+    }
+  }, [fimThreadId]);
+
+  useEffect(() => {
+    setFimAssistantReply('');
+    setScanResult(null);
+  }, [agentId]);
+
+  const getOrCreateThreadForAgent = async (agentId) => {
+    if (agentThreads[agentId]) return agentThreads[agentId];
+    const newThreadId = await createThread();
+    setAgentThreads((prev) => ({ ...prev, [agentId]: newThreadId }));
+    return newThreadId;
+  };
+
+  const handleAction = async (action) => {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    setFimAssistantReply('');
+    try {
+      const threadIdToUse = await getOrCreateThreadForAgent(agentId);
+      if (action === 'scan') {
+        await runFimScan();
+      } else if (action === 'get') {
+        const res = await getFimResults(agentId);
+        setScanResult(res);
+        setActiveTab('result');
+        if (threadIdToUse && res) {
+          setFimAssistantReply('Loading...');
+          try {
+            const msgToSend = `Summarize the following FIM scan result in simple terms:\n\n${JSON.stringify(trimFimResult(res), null, 2)}`;
+            await createMessage(threadIdToUse, msgToSend);
+            const runId = await createRun(threadIdToUse, ASSISTANT_ID);
+            let runStatus = 'queued';
+            while (runStatus !== 'completed' && runStatus !== 'failed') {
+              await new Promise((res) => setTimeout(res, 1500));
+              const run = await getRun(threadIdToUse, runId);
+              runStatus = run.status;
+            }
+            const allMsgs = await getMessages(threadIdToUse);
+            const assistantMsgs = allMsgs.filter((m) => m.role === 'assistant');
+            const lastMsg = assistantMsgs.sort((a, b) => b.created_at - a.created_at)[0];
+            if (lastMsg) setFimAssistantReply(lastMsg.content[0].text.value);
+            else setFimAssistantReply('No assistant reply received.');
+          } catch (err) {
+            setFimAssistantReply('Assistant error: ' + (err?.response?.data?.error?.message || err.message || 'Unknown error'));
+          }
+        }
+      } else if (action === 'clear') {
+        await clearFimResults(agentId);
+        setScanResult(null);
+      } else if (action === 'last') {
+        const res = await getLastFimScanDatetime(agentId);
+        if (threadIdToUse && res) {
+          setFimAssistantReply('Loading...');
+          try {
+            const msgToSend = `Summarize the following FIM last scan datetime:\n\n${JSON.stringify(trimFimResult(res), null, 2)}`;
+            await createMessage(threadIdToUse, msgToSend);
+            const runId = await createRun(threadIdToUse, ASSISTANT_ID);
+            let runStatus = 'queued';
+            while (runStatus !== 'completed' && runStatus !== 'failed') {
+              await new Promise((res) => setTimeout(res, 1500));
+              const run = await getRun(threadIdToUse, runId);
+              runStatus = run.status;
+            }
+            const allMsgs = await getMessages(threadIdToUse);
+            const assistantMsgs = allMsgs.filter((m) => m.role === 'assistant');
+            const lastMsg = assistantMsgs.sort((a, b) => b.created_at - a.created_at)[0];
+            if (lastMsg) setFimAssistantReply(lastMsg.content[0].text.value);
+            else setFimAssistantReply('No assistant reply received.');
+          } catch (err) {
+            setFimAssistantReply('Assistant error: ' + (err?.response?.data?.error?.message || err.message || 'Unknown error'));
+          }
+        }
+      }
+    } catch (err) {
+      setError('Action failed: ' + (err?.response?.data?.error?.message || err.message || 'Unknown error'));
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-md p-6 mb-8 space-y-6">
+      <h2 className="text-3xl font-bold text-gray-800">FIM Scan Manager</h2>
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <select
+          value={agentId}
+          onChange={(e) => setAgentId(e.target.value)}
+          className="border rounded-lg px-4 py-2 text-lg w-150"
+          disabled={loading}
+        >
+          {agents.length === 0 && <option>Loading agents...</option>}
+          {agents.map((agent) => (
+            <option key={agent.id} value={agent.id}>
+              {agent.name ? `${agent.name} (${agent.id})` : agent.id}
+            </option>
+          ))}
+        </select>
+
+        <div className="flex flex-wrap gap-2 sm:gap-3">
+          <button
+            onClick={() => handleAction('scan')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow text-sm"
+            disabled={loading}
+          >
+            Run Scan
+          </button>
+          <button
+            onClick={() => handleAction('get')}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow text-sm"
+            disabled={loading || !agentId}
+          >
+            Get Result
+          </button>
+          <button
+            onClick={() => handleAction('clear')}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow text-sm"
+            disabled={loading || !agentId}
+          >
+            Clear Result
+          </button>
+          <button
+            onClick={() => handleAction('last')}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow text-sm"
+            disabled={loading || !agentId}
+          >
+            Last Scan Time
+          </button>
+        </div>
+      </div>
+
+      {(error || success) && (
+        <div className={`rounded px-4 py-2 text-sm ${error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+          {error || success}
+        </div>
+      )}
+
+      <div>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">Assistant Summary</h3>
+        <div className="bg-gray-100 text-gray-800 rounded-lg p-4 shadow-inner min-h-[80px] whitespace-pre-line text-base">
+          {fimAssistantReply || 'No FIM result loaded.'}
+        </div>
+      </div>
+
+     
+    </div>
+  );
+};
+
+
+const SOC = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState(localStorage.getItem("soc_username") || "");
   const [fullname, setFullname] = useState(localStorage.getItem("soc_fullname") || "");
@@ -351,12 +533,12 @@ const SOCDashboard = () => {
   if (loading) return (
     <div className="bg-white p-6 mb-8 flex justify-center items-center h-full">
       <div className="flex flex-col items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#800080] border-t-transparent mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-400 border-t-transparent mb-4"></div>
         <p className="text-gray-600 text-sm">Loading rule category data...</p>
       </div>
     </div>
   );
-
+  
 
   if (allAlerts.length > 0) {
     const getLevel = a => a.rule?.level ?? a.level ?? 0;
@@ -372,7 +554,7 @@ const SOCDashboard = () => {
   return (
     <div className="h-screen flex flex-col bg-gray-100 text-gray-800 relative overflow-hidden scrollbar-hide">
       <Navbar username={username} fullname={fullname} />
-      <div className=" px-4 mx-40 sm:px-6 lg:px-8 py-8 relative scrollbar-hide pt-20 flex-1 overflow-y-auto">
+      <div className=" px-4 sm:px-6 lg:px-8 py-8 relative scrollbar-hide pt-20 flex-1 overflow-y-auto">
         {/* Device Management */}
         <DeviceManagement onAddAgent={() => setShowAddAgentModal(true)} onRemoveAgent={() => setShowRemoveAgentModal(true)} />
 
@@ -425,4 +607,4 @@ const SOCDashboard = () => {
   );
 };
 
-export default SOCDashboard; 
+export default SOC; 

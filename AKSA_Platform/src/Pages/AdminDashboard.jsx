@@ -1,9 +1,9 @@
 import React from "react";
-import Navbar from "../SOCDashboard/Navbar";
-import AgentStatusSummary from "../SOCDashboard/AgentStatusSummary";
-import AlertsAndMetrics from "../SOCDashboard/AlertsAndMetrics";
-import LatestAlerts from "../SOCDashboard/LatestAlerts";
-import DeviceManagement from "../SOCDashboard/DeviceManagement";
+import Navbar from "../components/SOCDashboard/Navbar";
+import AgentStatusSummary from "../components/SOCDashboard/AgentStatusSummary";
+import AlertsAndMetrics from "../components/SOCDashboard/AlertsAndMetrics";
+import LatestAlerts from "../components/SOCDashboard/LatestAlerts";
+import DeviceManagement from "../components/SOCDashboard/DeviceManagement";
 
 const AdminDashboard = () => {
   return (

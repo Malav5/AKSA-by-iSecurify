@@ -1,14 +1,14 @@
 import React from "react";
-import Navbar from "../Home/Navbar";
-import Hero from "../Home/Hero";
-import Services from "../Home/Services";
-import About from "../Home/About";
-import HowItWorks from "../Home/HowItWorks";
-import Pricing from "../Home/Pricing";
-import Footer from "../Home/Footer";
-import AnimatedBackground from "../Home/AnimatedBackground";
-import Slider from "../Home/Slider";
-import PhotoSlider from "../Home/PhotoSlider";
+import Navbar from "../components/Home/Navbar";
+import Hero from "../components/Home/Hero";
+import Services from "../components/Home/Services";
+import About from "../components/Home/About";
+import HowItWorks from "../components/Home/HowItWorks";
+import Pricing from "../components/Home/Pricing";
+import Footer from "../components/Home/Footer";
+import AnimatedBackground from "../components/Home/AnimatedBackground";
+import Slider from "../components/Home/Slider";
+import PhotoSlider from "../components/Home/PhotoSlider";
 const Home = () => {
   return (
     <div className="min-h-screen">
