@@ -42,6 +42,12 @@ const UserManagement = ({
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this member?")) return;
+<<<<<<< HEAD
+    await fetch(`http://localhost:3000/api/member/delete-member/${id}`, {
+      method: "DELETE",
+    });
+    fetchMembers();
+=======
     const res = await fetch(`http://localhost:3000/api/member/delete-member/${id}`, {
       method: "DELETE",
     });
@@ -51,11 +57,15 @@ const UserManagement = ({
     } else {
       showError("Failed to delete member");
     }
+>>>>>>> a68d21e0be53a1ca1fefab92a0e04cd6e276fb9e
   };
 
   return (
     <div className="max-w-6xl mx-auto">
+<<<<<<< HEAD
+=======
       <ToastContainer position="top-right" autoClose={2000}/>
+>>>>>>> a68d21e0be53a1ca1fefab92a0e04cd6e276fb9e
       <div className="flex justify-end mb-4">
         <button
           className="bg-primary text-white font-semibold px-6 py-3 rounded-lg text-lg flex items-center gap-2 shadow"
@@ -128,7 +138,11 @@ const UserManagement = ({
         </table>
       </div>
       {showAddMemberModal && (
+<<<<<<< HEAD
+        <AddMemberModal onClose={handleModalClose} />
+=======
         <AddMemberModal onClose={handleModalClose}  />
+>>>>>>> a68d21e0be53a1ca1fefab92a0e04cd6e276fb9e
       )}
     </div>
   );
