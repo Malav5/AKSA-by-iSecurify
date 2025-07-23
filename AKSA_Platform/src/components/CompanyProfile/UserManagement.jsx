@@ -42,12 +42,6 @@ const UserManagement = ({
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this member?")) return;
-<<<<<<< HEAD
-    await fetch(`http://localhost:3000/api/member/delete-member/${id}`, {
-      method: "DELETE",
-    });
-    fetchMembers();
-=======
     const res = await fetch(`http://localhost:3000/api/member/delete-member/${id}`, {
       method: "DELETE",
     });
@@ -57,21 +51,17 @@ const UserManagement = ({
     } else {
       showError("Failed to delete member");
     }
->>>>>>> a68d21e0be53a1ca1fefab92a0e04cd6e276fb9e
   };
 
   return (
     <div className="max-w-6xl mx-auto">
-<<<<<<< HEAD
-=======
-      <ToastContainer position="top-right" autoClose={2000}/>
->>>>>>> a68d21e0be53a1ca1fefab92a0e04cd6e276fb9e
+      <ToastContainer position="top-right" autoClose={2000} />
       <div className="flex justify-end mb-4">
         <button
           className="bg-primary text-white font-semibold px-6 py-3 rounded-lg text-lg flex items-center gap-2 shadow"
           onClick={() => setShowAddMemberModal(true)}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
           Add new member
         </button>
       </div>
@@ -121,14 +111,14 @@ const UserManagement = ({
                   </td>
                   <td className="px-4 py-3">
                     {/* {currentUser?.role === "admin" && ( */}
-                      <button
-                        className="text-red-500 hover:text-red-700"
-                        title="Delete"
-                        onClick={() => handleDelete(member._id)}
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2-2z"/></svg>
-                      </button>
-                    
+                    <button
+                      className="text-red-500 hover:text-red-700"
+                      title="Delete"
+                      onClick={() => handleDelete(member._id)}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2-2z" /></svg>
+                    </button>
+                    {/* ) */}
                   </td>
                   <td className="px-4 py-3 text-gray-700">{new Date(createdAt).toLocaleString()}</td>
                 </tr>
@@ -138,11 +128,7 @@ const UserManagement = ({
         </table>
       </div>
       {showAddMemberModal && (
-<<<<<<< HEAD
         <AddMemberModal onClose={handleModalClose} />
-=======
-        <AddMemberModal onClose={handleModalClose}  />
->>>>>>> a68d21e0be53a1ca1fefab92a0e04cd6e276fb9e
       )}
     </div>
   );
