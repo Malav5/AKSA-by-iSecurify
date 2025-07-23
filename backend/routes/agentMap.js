@@ -226,8 +226,9 @@ router.post("/add-user", async (req, res) => {
 // Get all users with role 'user'
 router.get("/users-with-role-user", async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }, "email firstName lastName");
+    const users = await User.find({ role: "user" }, "_id email firstName lastName");
     const formatted = users.map(u => ({
+      _id: u._id,
       email: u.email,
       name: `${u.firstName} ${u.lastName}`.trim()
     }));
@@ -329,6 +330,15 @@ router.get("/manager-subadmins/:managerId", async (req, res) => {
     res.json({ assignments });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch assignments", details: err.message });
+  }
+});
+
+router.delete("/delete-user/:id", async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete user" });
   }
 });
 

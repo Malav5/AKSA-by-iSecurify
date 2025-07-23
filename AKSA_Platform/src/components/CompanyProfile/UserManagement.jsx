@@ -13,12 +13,12 @@ const UserManagement = ({
   const [selectedRows, setSelectedRows] = useState([]);
   const selectAllRef = useRef();
 
-  // Fetch members from backend
+  // Fetch users from backend
   const fetchMembers = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/member/get-members");
+      const res = await fetch("http://localhost:3000/api/agentMap/users-with-role-user");
       const data = await res.json();
-      setMembers(data.members || []);
+      setMembers(data.users || []);
     } catch (err) {
       setMembers([]);
     }
@@ -66,15 +66,15 @@ const UserManagement = ({
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this member?")) return;
-    const res = await fetch(`http://localhost:3000/api/member/delete-member/${id}`, {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    const res = await fetch(`http://localhost:3000/api/agentMap/delete-user/${id}`, {
       method: "DELETE",
     });
     if (res.ok) {
-      showSuccess("Member deleted successfully");
+      showSuccess("User deleted successfully");
       fetchMembers();
     } else {
-      showError("Failed to delete member");
+      showError("Failed to delete user");
     }
   };
 
@@ -119,16 +119,11 @@ const UserManagement = ({
           </thead>
           <tbody className="divide-y divide-gray-100">
             {members.map((member, idx) => {
-              // If member is a string, parse it
-              let name = "", role = "", email = "", createdAt = "";
-              if (typeof member === "string") {
-                [name, role] = member.split(" - ");
-              } else {
-                name = member.name;
-                role = member.role;
-                email = member.email;
-                createdAt = member.createdAt;
-              }
+              // member: { email, name, _id, role, createdAt }
+              let name = member.name || `${member.firstName || ""} ${member.lastName || ""}`;
+              let role = member.role || "user";
+              let email = member.email;
+              let createdAt = member.createdAt;
               return (
                 <tr key={idx}>
                   <td className="px-4 py-3">
@@ -136,7 +131,7 @@ const UserManagement = ({
                       type="checkbox"
                       checked={selectedRows.includes(idx)}
                       onChange={() => handleSelectRow(idx)}
-                      aria-label={`Select member ${name}`}
+                      aria-label={`Select user ${name}`}
                     />
                   </td>
                   <td className="px-4 py-3 flex items-center gap-3">
@@ -166,7 +161,7 @@ const UserManagement = ({
                     </button>
                     {/* ) */}
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{new Date(createdAt).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-gray-700">{createdAt ? new Date(createdAt).toLocaleString() : ""}</td>
                 </tr>
               );
             })}
