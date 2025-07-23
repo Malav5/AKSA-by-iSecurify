@@ -23,7 +23,26 @@ const CreateTask = ({ onClose }) => {
 
   const statusOptions = ["To Do", "In Progress", "Completed", "Blocked"];
   const priorityOptions = ["Low", "Medium", "High", "Urgent"];
-  const assigneeOptions = ["Alice", "Bob", "Charlie", "Dana"];
+  const [assigneeOptions, setAssigneeOptions] = useState([]);
+
+useEffect(() => {
+  setVisible(true);
+  fetchMembers();
+}, []);
+
+const fetchMembers = async () => {
+  try {
+    const res = await fetch("http://localhost:3000/api/member/get-members");
+    const data = await res.json();
+    if (data.members) {
+      const names = data.members.map((member) => `${member.name} (${member.role})`);
+      setAssigneeOptions(names);
+    }
+  } catch (error) {
+    console.error("Failed to fetch members", error);
+  }
+};
+
   const categoryOptions = ["Development", "Design", "Testing", "Documentation"];
   const criticalityOptions = ["Informational", "Low", "Medium", "High", "Critical"];
 
