@@ -2,12 +2,7 @@ import React from "react";
 
 const DomainsInline = ({ setShowDomainsInline }) => (
   <div>
-    <button
-      className="mb-6 px-4 py-2 bg-primary text-white rounded hover:bg-[#800080] text-sm font-semibold"
-      onClick={() => setShowDomainsInline(false)}
-    >
-      &larr; Back to Profile
-    </button>
+    
      <div>
                 <button className="mb-6 px-4 py-2 bg-primary text-white rounded hover:bg-[#800080] text-sm font-semibold" onClick={() => setShowDomainsInline(false)}>
                   &larr; Back to Profile
