@@ -1,7 +1,7 @@
 // src/components/AddUserModal.jsx
 import React, { useState } from 'react';
 import { X } from 'lucide-react'; // icon for close button
-import axios from 'axios';
+import { userServices } from '../../services/UserServices';
 
 const AddUserModal = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const AddUserModal = ({ onClose, onSubmit }) => {
   const handleSubmit = async () => {
     if (formData.firstName && formData.lastName && formData.email && formData.password) { // Require password
       try {
-        await axios.post('/api/agentMap/add-user', {
+        await userServices.addUser({
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,

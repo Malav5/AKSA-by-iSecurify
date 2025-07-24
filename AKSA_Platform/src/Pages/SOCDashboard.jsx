@@ -21,8 +21,7 @@ import LatestAlerts from "../components/SOCDashboard/LatestAlerts";
 import SeverityBreakdown from "../components/SOCDashboard/SeverityBreakdown";
 import ComplianceStatus from "../components/SOCDashboard/ComplianceStatus";
 import RuleCategoryChart from "../components/SOCDashboard/RuleCategoryChart";
-import MITREAttackMap from "../components/SOCDashboard/MITREAttackMap";
-import Vulnerabilities from "../components/SOCDashboard/Vulnerabilities";
+import MITREAttackMap from "../components/SOCDashboard/MITREAttackMap"
 import AddAgentModal from "../components/SOCDashboard/AddAgentModal";
 import RemoveAgentModal from "../components/SOCDashboard/RemoveAgentModal";
 import { fetchAllAlerts, runFimScan, getFimResults, clearFimResults, getLastFimScanDatetime, fetchAgents } from "../services/SOCservices";

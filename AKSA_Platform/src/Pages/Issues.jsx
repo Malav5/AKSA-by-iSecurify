@@ -4,7 +4,7 @@ import Sidebar from "../components/Dashboard/Sidebar";
 import FiltersBar from "../components/IssuePage/FiltersBar";
 import IssuesTable from "../components/IssuePage/IssuesTable";
 import IssueManagement from "../components/Dashboard/IssueManagement";
-import CreateIssue from "../components/IssuePage/CreateIssue";   
+import CreateIssue from "../components/IssuePage/CreateIssue";
 
 export default function IssuesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -48,11 +48,7 @@ export default function IssuesPage() {
 
           <IssuesTable />
 
-          {/* Winlogbeat Events Section - Moved */}
-          {/* <div className="mt-8">
-            <h2 className="text-2xl font-semibold text-primary mb-6">Device Monitoring</h2>
-            <WinlogbeatEvents />
-          </div> */}
+
         </div>
       </div>
 
