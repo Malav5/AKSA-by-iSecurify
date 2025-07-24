@@ -12,6 +12,7 @@ const Sidebar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Fetch user info
   useEffect(() => {
@@ -46,7 +47,11 @@ const Sidebar = () => {
 
   const handleNavClick = (item) => {
     if (item.label === "SOC") {
-      window.open("/soc-login", "_blank");
+      if (user?.plan === "Freemium") {
+        setShowUpgradeModal(true);
+      } else {
+        window.open("/soc-login", "_blank");
+      }
     } else if (item.forceReload) {
       window.open(item.path, item.openInNewTab ? "_blank" : "_self");
     } else {
@@ -148,6 +153,36 @@ const Sidebar = () => {
                   className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
                 >
                   View Plans
+                </button>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+
+      {showUpgradeModal && (
+        <ModalPortal>
+          <div className="fixed inset-0 bg-gray-900/50 bg-opacity-40 flex items-center justify-center z-[9999]">
+            <div className="bg-white rounded-xl shadow-xl p-6 w-[90%] max-w-md">
+              <h2 className="text-xl font-semibold mb-2">Upgrade Required</h2>
+              <p className="text-gray-700 mb-4">
+                Upgrade your plan to access SOC services.
+              </p>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowUpgradeModal(false);
+                    navigate("/upgrade-plan");
+                  }}
+                  className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Upgrade Plan
                 </button>
               </div>
             </div>
