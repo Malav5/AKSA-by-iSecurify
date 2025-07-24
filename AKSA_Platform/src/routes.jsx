@@ -6,7 +6,7 @@ import Dashboard from "./Pages/Dashboard";
 import Issues from "./Pages/Issues";
 import CompanyProfile from "./components/Dashboard/CompanyProfile"
 import Settings from "./components/Dashboard/Settings";
-import IssuesPage from "./Pages/IssuePage";
+// import IssuesPage from "./Pages/IssuePage";
 import TaskManager from "./Pages/TaskManager";
 import RiskManager from "./Pages/RiskManager";
 import Home from "./Pages/Home";
@@ -35,7 +35,7 @@ const AppRoutes = () => {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/issues" element={<Issues />} />
-      <Route path="/issuePage" element={<IssuesPage />} />
+      {/* <Route path="/issuePage" element={<IssuesPage />} /> */}
       <Route path="/company-profile" element={<CompanyProfile />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/settings1" element={<Settings1 />} />
@@ -49,7 +49,7 @@ const AppRoutes = () => {
       <Route path="/assign-agent" element={<AssignAgent />} />
       <Route path="/policies" element={<Policies />} />
       <Route path="/soc-dashboard" element={<SOC />} />
-      <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/upgrade-plan" element={<UpgradePlan />} />
     </Routes>
   );
