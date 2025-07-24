@@ -1,7 +1,8 @@
 
 // MemberProfile.jsx
 import React, { useEffect, useState } from "react";
-import {userServices} from "../../services/UserServices"
+import { userServices } from "../../services/UserServices";
+import { domainServices } from "../../services/domainServices";
 const MemberProfile = ({
   profileData,
   cardBg,
@@ -15,18 +16,19 @@ const MemberProfile = ({
   const [companyName, setCompanyName] = useState(profileData.name || "");
 
   useEffect(() => {
-    const fetchDomains = async () => {
+    const fetchDomainCount = async () => {
       try {
         const userEmail = localStorage.getItem("currentUser");
-        const res = await fetch("http://localhost:3000/api/domains");
-        const data = await res.json();
-        const filtered = data.filter(domain => domain.userEmail === userEmail);
-        setDomainCount(filtered.length);
-      } catch (err) {
+        const domains = await domainServices.fetchDomains();
+        const userDomains = domains.filter(domain => domain.userEmail === userEmail);
+        setDomainCount(userDomains.length);
+      } catch (error) {
+        console.error("Error fetching domains:", error);
         setDomainCount(0);
       }
     };
-    fetchDomains();
+
+    fetchDomainCount();
   }, []);
 
   useEffect(() => {
@@ -40,7 +42,7 @@ const MemberProfile = ({
     };
     fetchUserCompany();
   }, []);
-  
+
 
   return (
     <div>
