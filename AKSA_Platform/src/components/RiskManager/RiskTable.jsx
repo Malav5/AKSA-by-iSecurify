@@ -1,17 +1,11 @@
 import React, { useState } from "react";
-import { BadgeCheck, Filter, Search, MoreHorizontal } from "lucide-react";
+import { BadgeCheck, Filter, Search } from "lucide-react";
 import Pagination from "../Pagination";
+import DropdownSelect from "../ui/DropdownSelect";
 
 const levelOptions = ["Critical", "High", "Medium", "Low"];
 const treatmentOptions = ["Mitigate", "Accept", "Transfer", "Avoid"];
 
-
-const getImpactColor = () =>
-  "rounded-md border border-gray-300 bg-white text-black text-xs font-medium px-2 py-1";
-const getLikelihoodColor = () =>
-  "rounded-md border border-gray-300 bg-white text-black text-xs font-medium px-2 py-1";
-
-// Static sample data matching the UI screenshots
 const staticRisks = [
   {
     id: "R18",
@@ -104,12 +98,13 @@ export default function RisksTable() {
       risk.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       risk.owner.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   const totalPages = Math.ceil(filteredRisks.length / rowsPerPage);
   const paginatedRisks = filteredRisks.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
-  
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 max-w-full overflow-hidden">
       {/* Search */}
@@ -148,67 +143,54 @@ export default function RisksTable() {
               <th className="px-4 py-5">Initial Risk Score</th>
               <th className="px-4 py-5">Risk Treatment</th>
               <th className="px-4 py-5">Control Description</th>
-              <th className="px-4 py-5">Impact</th>
-              <th className="px-4 py-5">Likelihood</th>
+              <th className="px-4 py-5">Residual Impact</th>
+              <th className="px-4 py-5">Residual Likelihood</th>
               <th className="px-4 py-5">Residual Score</th>
               <th className="px-4 py-5">Owner</th>
-              <th className="px-4 py-5">Last action</th>
+              <th className="px-4 py-5">Last Action</th>
             </tr>
           </thead>
           <tbody>
             {paginatedRisks.map((risk) => (
-              <tr
-                key={risk.id}
-                className="border-t border-gray-200 hover:bg-gray-50 transition-colors"
-              >
+              <tr key={risk.id} className="border-t border-gray-200 hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium flex items-center gap-2">
                   <BadgeCheck className="w-4 h-4 text-primary" />
                   {risk.id}
                 </td>
                 <td className="px-4 py-3 font-medium">{risk.name}</td>
+                
                 <td className="px-4 py-3">
-                  <select
+                  <DropdownSelect
+                    options={levelOptions}
                     value={risk.impact}
-                    onChange={(e) =>
-                      handleSelectChange(risk.id, "impact", e.target.value)
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "impact", val)
                     }
-                    className={getImpactColor()}
-                  >
-                    <option value="">Select</option>
-                    {levelOptions.map((option) => (
-                      <option key={option}>{option}</option>
-                    ))}
-                  </select>
+                  />
                 </td>
+
                 <td className="px-4 py-3">
-                  <select
+                  <DropdownSelect
+                    options={levelOptions}
                     value={risk.likelihood}
-                    onChange={(e) =>
-                      handleSelectChange(risk.id, "likelihood", e.target.value)
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "likelihood", val)
                     }
-                    className={getLikelihoodColor()}
-                  >
-                    <option value="">Select</option>
-                    {levelOptions.map((option) => (
-                      <option key={option}>{option}</option>
-                    ))}
-                  </select>
+                  />
                 </td>
+
                 <td className="px-4 py-3">{risk.initialScore}</td>
+
                 <td className="px-4 py-3">
-                  <select
+                  <DropdownSelect
+                    options={treatmentOptions}
                     value={risk.treatment}
-                    onChange={(e) =>
-                      handleSelectChange(risk.id, "treatment", e.target.value)
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "treatment", val)
                     }
-                    className="rounded-md border border-gray-300 bg-white text-gray-800 text-xs font-medium px-2 py-1"
-                  >
-                    <option value="">Select</option>
-                    {treatmentOptions.map((option) => (
-                      <option key={option}>{option}</option>
-                    ))}
-                  </select>
+                  />
                 </td>
+
                 <td className="px-4 py-3">
                   <input
                     type="text"
@@ -220,34 +202,27 @@ export default function RisksTable() {
                     className="w-full text-xs border border-gray-300 rounded-md px-2 py-1"
                   />
                 </td>
+
                 <td className="px-4 py-3">
-                  <select
+                  <DropdownSelect
+                    options={levelOptions}
                     value={risk.residualImpact}
-                    onChange={(e) =>
-                      handleSelectChange(risk.id, "residualImpact", e.target.value)
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "residualImpact", val)
                     }
-                    className={getImpactColor()}
-                  >
-                    <option value="">Select</option>
-                    {levelOptions.map((option) => (
-                      <option key={option}>{option}</option>
-                    ))}
-                  </select>
+                  />
                 </td>
+
                 <td className="px-4 py-3">
-                  <select
+                  <DropdownSelect
+                    options={levelOptions}
                     value={risk.residualLikelihood}
-                    onChange={(e) =>
-                      handleSelectChange(risk.id, "residualLikelihood", e.target.value)
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "residualLikelihood", val)
                     }
-                    className={getLikelihoodColor()}
-                  >
-                    <option value="">Select</option>
-                    {levelOptions.map((option) => (
-                      <option key={option}>{option}</option>
-                    ))}
-                  </select>
+                  />
                 </td>
+
                 <td className="px-4 py-3">{risk.residualScore}</td>
                 <td className="px-4 py-3">{risk.owner}</td>
                 <td className="px-4 py-3">{risk.lastAction}</td>
@@ -256,7 +231,7 @@ export default function RisksTable() {
             {filteredRisks.length === 0 && (
               <tr>
                 <td colSpan="12" className="px-4 py-8 text-center text-gray-500">
-                  No risks found matching your search criteria
+                  No risks found matching your search criteria.
                 </td>
               </tr>
             )}
@@ -265,17 +240,16 @@ export default function RisksTable() {
       </div>
 
       <Pagination
-  currentPage={currentPage}
-  totalPages={totalPages}
-  onPageChange={setCurrentPage}
-  rowsPerPage={rowsPerPage}
-  onRowsPerPageChange={(val) => {
-    setRowsPerPage(val);
-    setCurrentPage(1); // reset to page 1
-  }}
-  totalItems={filteredRisks.length}
-/>
-
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(val) => {
+          setRowsPerPage(val);
+          setCurrentPage(1);
+        }}
+        totalItems={filteredRisks.length}
+      />
     </div>
   );
 }

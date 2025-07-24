@@ -1,42 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { PieChart } from "react-minimal-pie-chart";
 import { Link } from "react-router-dom";
-import { fetchVulnerabilities } from "../../services/SOCservices";
 
 const RiskManagement = ({ hideViewAll = false }) => {
-  const [summary, setSummary] = useState({
-    total: 0,
-    low: 0,
-    medium: 0,
-    high: 0,
-  });
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchVulnerabilities();
-        const counts = { low: 0, medium: 0, high: 0 };
-
-        data.forEach((vuln) => {
-          const severity = vuln._source?.vulnerability?.severity?.toLowerCase();
-          if (severity === "low") counts.low += 1;
-          else if (severity === "medium") counts.medium += 1;
-          else if (severity === "high" || severity === "critical") counts.high += 1;
-        });
-
-        setSummary({
-          low: counts.low,
-          medium: counts.medium,
-          high: counts.high,
-          total: counts.low + counts.medium + counts.high,
-        });
-      } catch (error) {
-        console.error("Error fetching vulnerability summary:", error);
-      }
-    };
-
-    loadData();
-  }, []);
+  const summary = {
+    total: 25,
+    low: 12,
+    medium: 8,
+    high: 5,
+  };
 
   return (
     <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl text-gray-800 space-y-3 md:space-y-4">
@@ -51,64 +23,49 @@ const RiskManagement = ({ hideViewAll = false }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        {/* Donut Chart - 1/3 */}
+        {/* Donut Chart */}
         <div className="bg-white shadow-sm rounded-lg p-4 md:p-6 flex flex-col items-center lg:col-span-1">
           <h3 className="mb-3 md:mb-4 font-semibold text-base md:text-lg">Risk Statement Status</h3>
 
           <div className="w-28 h-28 md:w-36 md:h-36 relative">
-          <PieChart
-  data={[
-    summary.high > 0 && {
-      title: "High",
-      value: summary.high,
-      color: "#EF4444",
-    },
-    summary.medium > 0 && {
-      title: "Medium",
-      value: summary.medium,
-      color: "#FACC15",
-    },
-    summary.low > 0 && {
-      title: "Low",
-      value: summary.low,
-      color: "#10B981",
-    },
-  ].filter(Boolean)}
-  lineWidth={16}
-  paddingAngle={2}
-  label={({ dataEntry }) => `${Math.round(dataEntry.percentage)}%`}
-  labelStyle={{
-    fontSize: "5px",
-    fontWeight: 600,
-    fill: "#374151",
-  }}
-  labelPosition={70}
-  animate
-  segmentsStyle={{ cursor: "pointer" }}
-  segmentsShift={(index) => (index === 0 ? 2 : 0)}
-/>
+            <PieChart
+              data={[
+                { title: "High", value: 5, color: "#EF4444" },
+                { title: "Medium", value: 8, color: "#FACC15" },
+                { title: "Low", value: 12, color: "#10B981" },
+              ]}
+              lineWidth={16}
+              paddingAngle={2}
+              label={({ dataEntry }) => `${Math.round(dataEntry.percentage)}%`}
+              labelStyle={{
+                fontSize: "5px",
+                fontWeight: 600,
+                fill: "#374151",
+              }}
+              labelPosition={70}
+              animate
+              segmentsStyle={{ cursor: "pointer" }}
+              segmentsShift={(index) => (index === 0 ? 2 : 0)}
+            />
 
-
-            {/* Centered Total */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-700">
-              <div className="text-lg md:text-xl font-bold">{summary.total}</div>
+              <div className="text-lg md:text-xl font-bold">25</div>
               <div className="text-xs">Total</div>
             </div>
           </div>
 
           {/* Legend */}
           <div className="mt-4 md:mt-6 text-xs md:text-sm space-y-1 text-gray-700">
-            <p><span className="text-red-500">●</span> {summary.high} High</p>
-            <p><span className="text-yellow-400">●</span> {summary.medium} Medium</p>
-            <p><span className="text-green-500">●</span> {summary.low} Low</p>
+            <p><span className="text-red-500">●</span> 5 High</p>
+            <p><span className="text-yellow-400">●</span> 8 Medium</p>
+            <p><span className="text-green-500">●</span> 12 Low</p>
           </div>
         </div>
 
-        {/* Heatmap - 2/3 */}
+        {/* Heatmap */}
         <div className="bg-white shadow-sm rounded-lg p-4 md:p-6 lg:col-span-2 relative">
           <h3 className="mb-2 font-semibold text-base md:text-lg">Risk Manager</h3>
           <div className="relative w-full h-48 md:h-64 rounded overflow-hidden">
-            {/* Heatmap Background */}
             <div
               className="absolute inset-0"
               style={{
@@ -116,12 +73,24 @@ const RiskManagement = ({ hideViewAll = false }) => {
               }}
             />
 
-            {/* Example Data Point */}
+            {/* Static data points (example positioning) */}
             <div
-              className="absolute top-[15%] right-[10%] bg-white text-gray-800 text-xs font-bold border-2 border-gray-800 rounded-full w-6 h-6 md:w-8 md:h-8 flex items-center justify-center shadow"
+              className="absolute top-[20%] left-[75%] bg-white text-gray-800 text-xs font-bold border-2 border-gray-800 rounded-full w-6 h-6 md:w-8 md:h-8 flex items-center justify-center shadow"
               title="Low Risk"
             >
-              {summary.low}
+              12
+            </div>
+            <div
+              className="absolute top-[45%] left-[45%] bg-white text-gray-800 text-xs font-bold border-2 border-gray-800 rounded-full w-6 h-6 md:w-8 md:h-8 flex items-center justify-center shadow"
+              title="Medium Risk"
+            >
+              8
+            </div>
+            <div
+              className="absolute top-[70%] left-[15%] bg-white text-gray-800 text-xs font-bold border-2 border-gray-800 rounded-full w-6 h-6 md:w-8 md:h-8 flex items-center justify-center shadow"
+              title="High Risk"
+            >
+              5
             </div>
 
             {/* Axis Labels */}

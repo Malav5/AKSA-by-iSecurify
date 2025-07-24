@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { BadgeCheck, Filter, Search, MoreHorizontal } from "lucide-react";
+import React, { useState, Fragment } from "react";
+import { BadgeCheck, Filter, Search, MoreHorizontal, Check, ChevronsUpDown } from "lucide-react";
+import { Listbox, Transition } from "@headlessui/react";
 import IssueDetail from "./IssueDetail";
 import Pagination from "../Pagination";
-
+import UserAssignmentDropdown from "../ui/UserAssignmentDropdown";
 const users = ["Unassigned", "Alice", "Bob", "Charlie", "David"];
 
 const staticAlerts = [
@@ -43,43 +44,54 @@ const staticAlerts = [
     lastAction: "2025-07-18"
   },
   {
-    id: "ALL-73",
-    agent: "Google Cloud",
-    title: "Apache Version Disclosure",
-    level: "Low",
-    group: "GCP Default",
-    policy: "Free",
-    timestamp: "2025-06-25T00:00:00Z",
-    devicesAffected: "3 devices affected",
-    assignedTo: "Charlie",
-    lastAction: "2025-07-21"
-  },
-  {
-    id: "ALL-74",
-    agent: "On-prem Server",
-    title: "SMB Signing Not Required",
+    id: "ALL-71",
+    agent: "Azure VM",
+    title: "Weak SSL Cipher Detected",
     level: "Medium",
-    group: "InternalAudit",
+    group: "TenableFreemium",
     policy: "Free",
-    timestamp: "2025-06-30T00:00:00Z",
-    devicesAffected: "5 devices affected",
-    assignedTo: "David",
-    lastAction: "2025-07-22"
+    timestamp: "2025-06-18T00:00:00Z",
+    devicesAffected: "2 devices affected",
+    assignedTo: "Alice",
+    lastAction: "2025-07-20"
   },
   {
-    id: "ALL-75",
-    agent: "Kubernetes Cluster",
-    title: "Anonymous Bind in LDAP Allowed",
+    id: "ALL-72",
+    agent: "AWS EC2",
+    title: "Open FTP Port Detected",
     level: "High",
-    group: "KubeSecOps",
-    policy: "Enterprise",
-    timestamp: "2025-07-01T00:00:00Z",
-    devicesAffected: "4 devices affected",
-    assignedTo: "Unassigned",
-    lastAction: "2025-07-23"
-  }
+    group: "AWSInfra",
+    policy: "Paid",
+    timestamp: "2025-06-20T00:00:00Z",
+    devicesAffected: "1 device affected",
+    assignedTo: "Bob",
+    lastAction: "2025-07-18"
+  },
+  {
+    id: "ALL-71",
+    agent: "Azure VM",
+    title: "Weak SSL Cipher Detected",
+    level: "Medium",
+    group: "TenableFreemium",
+    policy: "Free",
+    timestamp: "2025-06-18T00:00:00Z",
+    devicesAffected: "2 devices affected",
+    assignedTo: "Alice",
+    lastAction: "2025-07-20"
+  },
+  {
+    id: "ALL-72",
+    agent: "AWS EC2",
+    title: "Open FTP Port Detected",
+    level: "High",
+    group: "AWSInfra",
+    policy: "Paid",
+    timestamp: "2025-06-20T00:00:00Z",
+    devicesAffected: "1 device affected",
+    assignedTo: "Bob",
+    lastAction: "2025-07-18"
+  },
 ];
-
 
 const getLevelColor = (level) => {
   if (level === "Low") return "bg-green-100 text-green-800";
@@ -107,6 +119,7 @@ export default function IssuesTable() {
       [alertId]: user,
     }));
   };
+
   const totalPages = Math.ceil(filteredAlerts.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
@@ -153,7 +166,7 @@ export default function IssuesTable() {
             </tr>
           </thead>
           <tbody>
-            {filteredAlerts.map((alert) => (
+            {currentAlerts.map((alert) => (
               <tr
                 key={alert.id}
                 className="border-t border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
@@ -178,20 +191,16 @@ export default function IssuesTable() {
                 <td className="px-4 py-3 text-gray-600">{alert.devicesAffected}</td>
                 <td className="px-4 py-3 text-gray-600">{alert.policy}</td>
                 <td className="px-4 py-3 text-gray-600">{alert.group}</td>
-                <td className="px-4 py-3">
-                  <select
-                    className="text-sm bg-white border border-gray-300 rounded-lg px-2 py-1"
+
+                {/* Headless UI Dropdown */}
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <UserAssignmentDropdown
+                    users={users}
                     value={assignments[alert.id] || alert.assignedTo}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => handleAssignUser(alert.id, e.target.value)}
-                  >
-                    {users.map((user) => (
-                      <option key={user} value={user}>
-                        {user}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => handleAssignUser(alert.id, val)}
+                  />
                 </td>
+
                 <td className="px-4 py-3 text-gray-600">
                   {new Date(alert.timestamp).toLocaleDateString("en-GB", {
                     day: "2-digit",
@@ -224,7 +233,6 @@ export default function IssuesTable() {
         totalItems={filteredAlerts.length}
       />
 
-      {/* Alert Detail Modal (Optional if needed) */}
       {selectedAlert && (
         <IssueDetail risk={selectedAlert} onClose={() => setSelectedAlert(null)} />
       )}
