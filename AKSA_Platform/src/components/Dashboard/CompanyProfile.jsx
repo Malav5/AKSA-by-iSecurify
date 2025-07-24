@@ -9,13 +9,14 @@ import SecuritySettings from "../CompanyProfile/SecuritySettings";
 import Settings from "../CompanyProfile/Settings";
 import UserManagement from "../CompanyProfile/UserManagement";
 import NotificationSettings from "../CompanyProfile/NotificationSettings";
+import axios from "axios";
 
 const TABS = [
   { label: "Member Profile", key: "member" },
   { label: "Security Settings", key: "security" },
   { label: "Notification Settings", key: "notification" },
   { label: "Settings", key: "settings" },
-  { label: "User Management", key: "user-management" },
+  // User Management tab will be conditionally added below
 ];
 
 const CompanyProfile = () => {
@@ -54,6 +55,7 @@ const CompanyProfile = () => {
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showDomainsModal, setShowDomainsModal] = useState(false);
   const [showDomainsInline, setShowDomainsInline] = useState(false);
+  const [role, setRole] = useState(null);
 
   const navigate = useNavigate();
 
@@ -76,6 +78,29 @@ const CompanyProfile = () => {
         setMembersError(err.message);
         setLoadingMembers(false);
       });
+  }, []);
+
+  useEffect(() => {
+    // Fetch user info from backend for accurate role
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:3000/api/auth/user",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setRole(response.data.user?.role || null);
+      } catch (err) {
+        // fallback to localStorage if backend fails
+        const user = JSON.parse(localStorage.getItem("user"));
+        setRole(user?.role || null);
+      }
+    };
+    fetchUser();
   }, []);
 
   // Generic handlers
@@ -149,6 +174,17 @@ const CompanyProfile = () => {
   const tabActive = "border-b-2 border-[#800080] text-primary font-semibold";
   const tabInactive = "text-gray-500";
 
+  // Tabs to render (add User Management only for admin)
+  const visibleTabs = [
+    { label: "Member Profile", key: "member" },
+    { label: "Security Settings", key: "security" },
+    { label: "Notification Settings", key: "notification" },
+    { label: "Settings", key: "settings" },
+  ];
+  if (role === "admin") {
+    visibleTabs.push({ label: "User Management", key: "user-management" });
+  }
+
   return (
     <div className={`flex h-screen font-sans overflow-hidden ${mainBg}`}>
       <aside className="sticky top-0 h-screen">
@@ -163,7 +199,7 @@ const CompanyProfile = () => {
         <main className="flex-1 p-6 overflow-y-auto">
           {/* Tabs */}
           <nav className="flex space-x-8 border-b mb-8 bg-white px-4 py-2 rounded-t-lg shadow-sm">
-            {TABS.map((tab) => (
+            {visibleTabs.map((tab) => (
               <button
                 key={tab.key}
                 className={`pb-2 px-1 transition-colors duration-150 focus:outline-none ${activeTab === tab.key ? tabActive : tabInactive}`}
@@ -190,16 +226,16 @@ const CompanyProfile = () => {
             )
           )}
 
-{activeTab === "security" && <SecuritySettings />}
+          {activeTab === "security" && <SecuritySettings />}
 
-{activeTab === "notification" && <NotificationSettings />}
-{activeTab === "settings" && <Settings />}
+          {activeTab === "notification" && <NotificationSettings />}
+          {activeTab === "settings" && <Settings />}
 
-{activeTab === "user-management" && (
+          {activeTab === "user-management" && role === "admin" && (
             <UserManagement
               showAddMemberModal={showAddMemberModal}
               setShowAddMemberModal={setShowAddMemberModal}
-              // ...other props as needed
+            // ...other props as needed
             />
           )}
         </main>
@@ -236,8 +272,8 @@ const CompanyProfile = () => {
                     <td className="px-4 py-3"><input type="checkbox" /></td>
                     <td className="px-4 py-3 text-gray-900 font-medium">allianzcloud.com</td>
                     <td className="px-4 py-3 flex gap-2 items-center">
-                      <button title="Favorite" className="text-gray-400 hover:text-primary"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" stroke="currentColor" strokeWidth="1.5"/></svg></button>
-                      <button title="Delete" className="text-red-400 hover:text-red-600"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2 2v2H8V5a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="1.5"/></svg></button>
+                      <button title="Favorite" className="text-gray-400 hover:text-primary"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" stroke="currentColor" strokeWidth="1.5" /></svg></button>
+                      <button title="Delete" className="text-red-400 hover:text-red-600"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2 2v2H8V5a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="1.5" /></svg></button>
                     </td>
                     <td className="px-4 py-3">12 Feb, 2024 at 10:00</td>
                     <td className="px-4 py-3">12 Jul, 2025 at 10:35</td>
