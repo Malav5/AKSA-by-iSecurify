@@ -22,6 +22,7 @@ const Header = () => {
     "/domain": "Domain Detail",
     "/soc-login": "SOC",
     "/settings": "Settings",
+    "/company-profile": " ",
   };
   const currentPage = routeToTitle[location.pathname] || "Dashboard";
 

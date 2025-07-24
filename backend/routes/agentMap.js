@@ -78,7 +78,7 @@ router.get("/agents", async (req, res) => {
   const user = req.user;
   try {
     let agents;
-    if (user && user.role === "admin") {
+    if (user && user.role === "subadmin") {
       agents = await Agent.find();
     } else if (user) {
       agents = await Agent.find({ user_id: user._id });
@@ -94,7 +94,7 @@ router.get("/agents", async (req, res) => {
 // Assign agent to user (admin only)
 router.patch("/agents/:id/assign", async (req, res) => {
   const user = req.user;
-  if (!user || user.role !== "admin") {
+  if (!user || user.role !== "subadmin") {
     return res.status(403).json({ error: "Not authorized" });
   }
   const { user_id } = req.body;
@@ -185,7 +185,7 @@ router.get("/sync-wazuh-agents", async (req, res) => {
 // Get all users (for admin assignment UI)
 router.get("/users", async (req, res) => {
   const user = req.user;
-  if (!user || user.role !== "admin") {
+  if (!user || user.role !== "subadmin") {
     return res.status(403).json({ error: "Not authorized" });
   }
   try {

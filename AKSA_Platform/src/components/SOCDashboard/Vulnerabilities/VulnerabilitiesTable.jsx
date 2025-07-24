@@ -26,7 +26,9 @@ const VulnerabilitiesTable = ({
   setItemsPerPage,
   currentPage,
   setCurrentPage,
-  totalPages
+  totalPages,
+  vulnThreads,
+  setVulnThreads
 }) => {
   const listboxButtonRef = useRef(null);
   const [dropUp, setDropUp] = useState(false);
@@ -111,36 +113,54 @@ const VulnerabilitiesTable = ({
                           setTimeout(async () => {
                             setMessages([]);
                             setChatInput("");
-                            setThreadId(null);
                             setShownMessageIds([]);
                             setShowChatbox(true);
-                            setChatboxVulnId(item._source?.vulnerability?.id || null);
-                            latestThreadIdRef.current = null;
+                            const vulnId = item._source?.vulnerability?.id || null;
+                            setChatboxVulnId(vulnId);
+                            let threadIdToUse = vulnThreads[vulnId];
+                            if (!threadIdToUse) {
+                              // Create a new thread for this vulnerability
+                              threadIdToUse = await createThread();
+                              setVulnThreads(prev => ({ ...prev, [vulnId]: threadIdToUse }));
+                            }
+                            setThreadId(threadIdToUse);
+                            latestThreadIdRef.current = threadIdToUse;
                             const logJson = JSON.stringify(item, null, 2);
                             setMessages(prev => [...prev, { text: logJson, isUser: true }]);
                             setIsLoading(true);
                             try {
-                              const newThreadId = await createThread();
-                              setThreadId(newThreadId);
-                              latestThreadIdRef.current = newThreadId;
                               const prompt = `Summarize the following log in simple terms, and reply in a clear, official style. Use Markdown formatting (bold, lists, etc.) only when it helps clarity, not for every label or section. Avoid excessive bold, headings, or stars.\n\n${logJson}`;
-                              await createMessage(newThreadId, prompt);
-                              const runId = await createRun(newThreadId, ASSISTANT_ID);
+                              await createMessage(threadIdToUse, prompt);
+                              const runId = await createRun(threadIdToUse, ASSISTANT_ID);
                               let runStatus = 'queued';
                               while (runStatus !== 'completed' && runStatus !== 'failed') {
                                 await new Promise(res => setTimeout(res, 1500));
-                                const run = await getRun(newThreadId, runId);
+                                const run = await getRun(threadIdToUse, runId);
                                 runStatus = run.status;
                               }
-                              const allMsgs = await getMessages(newThreadId);
+                              const allMsgs = await getMessages(threadIdToUse);
                               const newAssistantMsgs = allMsgs
-                                .filter(m => m.role === 'assistant' && !shownMessageIds.includes(m.id))
-                                .sort((a, b) => a.created_at - b.created_at);
-                              if (latestThreadIdRef.current === newThreadId && newAssistantMsgs.length > 0) {
-                                setMessages(prev => [
-                                  ...prev,
-                                  ...newAssistantMsgs.map(m => ({ text: m.content[0].text.value, isUser: false }))
-                                ]);
+                                .filter(m => m.role === 'assistant')
+                                .sort((a, b) => a.created_at - b.created_at)
+                                .slice(-1); // Only the latest
+                              if (latestThreadIdRef.current === threadIdToUse && newAssistantMsgs.length > 0) {
+                                setMessages(prev => {
+                                  const updated = [
+                                    ...prev,
+                                    ...newAssistantMsgs.map(m => {
+                                      let reply = '';
+                                      if (Array.isArray(m.content) && m.content.length > 0 && m.content[0].type === 'text' && m.content[0].text && typeof m.content[0].text.value === 'string') {
+                                        reply = m.content[0].text.value;
+                                      } else if (typeof m.content === 'string') {
+                                        reply = m.content;
+                                      } else {
+                                        reply = 'Error: Could not parse assistant response.';
+                                      }
+                                      return { text: reply, isUser: false };
+                                    })
+                                  ];
+                                  return updated;
+                                });
                                 setShownMessageIds(prev => [
                                   ...prev,
                                   ...newAssistantMsgs.map(m => m.id)
@@ -174,7 +194,7 @@ const VulnerabilitiesTable = ({
                 <Listbox.Button ref={listboxButtonRef} className="relative w-full cursor-pointer rounded-md border border-gray-300 bg-white py-1 pl-3 pr-8 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">
                   {itemsPerPage}
                   <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                    <svg className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <svg className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </span>
                 </Listbox.Button>
                 <Listbox.Options className={`absolute z-10 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base focus:outline-none sm:text-sm ${dropUp ? 'bottom-full mb-1' : 'mt-1'}`}>
@@ -183,8 +203,7 @@ const VulnerabilitiesTable = ({
                       key={size}
                       value={size}
                       className={({ active }) =>
-                        `cursor-pointer select-none relative py-2 pl-10 pr-4 ${
-                          active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                        `cursor-pointer select-none relative py-2 pl-10 pr-4 ${active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
                         }`
                       }
                     >

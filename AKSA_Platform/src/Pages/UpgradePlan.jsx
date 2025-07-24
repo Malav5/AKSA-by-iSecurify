@@ -1,6 +1,7 @@
-import { Check, Zap, Shield, Globe, Lock, Server, Code, Users, Mail, BarChart2, Clock, ShieldCheck, Download, Settings, Cpu, Database, LifeBuoy } from "lucide-react";
-import { useEffect } from "react";
+import { Check } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const plans = [
     {
@@ -172,8 +173,23 @@ const FeatureComparison = () => (
 
 const UpgradePlan = () => {
     const navigate = useNavigate();
+    const [currentPlan, setCurrentPlan] = useState("Freemium");
 
     useEffect(() => {
+        // Fetch the user's current plan from the backend
+        const fetchUserPlan = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get("/api/auth/user", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setCurrentPlan(res.data.user.plan || "Freemium");
+            } catch (err) {
+                setCurrentPlan("Freemium");
+            }
+        };
+        fetchUserPlan();
+
         const cards = document.querySelectorAll(".price-card");
         cards.forEach((card, index) => {
             card.style.opacity = "0";
@@ -186,7 +202,7 @@ const UpgradePlan = () => {
     }, []);
 
     const handleCardClick = (planName) => {
-        if (planName !== "Freemium") {
+        if (planName !== currentPlan) {
             navigate("/payment-portal", { state: { plan: planName } });
         }
     };
@@ -254,15 +270,10 @@ const UpgradePlan = () => {
                             </div>
 
                             <button
-                                className={`mt-auto w-full py-3 rounded-lg transition-all duration-200 font-medium 
-                                    ${plan.name === "Freemium" 
-                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-                                        : plan.popular
-                                            ? "bg-primary hover:bg-primary-dark text-white hover:shadow-md"
-                                            : "bg-gray-900 hover:bg-gray-800 text-white hover:shadow-md"}`}
-                                disabled={plan.name === "Freemium"}
+                                className={`w-full py-2 sm:py-3 rounded-lg transition-all duration-300 text-sm sm:text-base font-medium ${plan.name === currentPlan ? "bg-gray-300 text-gray-400 cursor-not-allowed" : "bg-primary text-white hover:bg-[#700070] hover:scale-105 transform"}`}
+                                disabled={plan.name === currentPlan}
                             >
-                                {plan.name === "Freemium" ? "Current Plan" : "Get Started"}
+                                {plan.name === currentPlan ? "Current Plan" : "Upgrade"}
                             </button>
                         </div>
                     ))}

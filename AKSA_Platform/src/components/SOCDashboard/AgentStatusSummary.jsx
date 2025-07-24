@@ -27,7 +27,7 @@ const AgentStatusSummary = () => {
       const token = localStorage.getItem('token');
       const userRole = localStorage.getItem('role');
       let agents = [];
-      if (userRole === 'admin') {
+      if (userRole === 'subadmin') {
         // Admin: fetch all agents
         const wazuhRes = await axios.get(`${baseURL}/api/wazuh/agents`, {
           headers: { Authorization: `Bearer ${token}` },

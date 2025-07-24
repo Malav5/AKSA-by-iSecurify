@@ -39,7 +39,7 @@ const Sidebar = () => {
   const navItems = [
     { Icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { Icon: AlertCircle, label: "Domain Detail", path: "/domain" },
-    { Icon: ShieldCheck, label: "SOC", path: "/soc-login", forceReload: true, openInNewTab: true },
+    { Icon: ShieldCheck, label: "SOC", path: "/soc" }, // Changed from /soc-login
     { Icon: Settings, label: "Settings", path: "/settings" },
   ];
 
@@ -50,7 +50,14 @@ const Sidebar = () => {
       if (user?.plan === "Freemium") {
         setShowUpgradeModal(true);
       } else {
-        window.open("/soc-login", "_blank");
+        // Set SOC user info for the SOC dashboard
+        if (user) {
+          localStorage.setItem('soc_email', user.email);
+          localStorage.setItem('soc_username', user.firstName + ' ' + user.lastName);
+          localStorage.setItem('soc_fullname', user.firstName + ' ' + user.lastName);
+          localStorage.setItem('role', user.role);
+        }
+        navigate("/soc");
       }
     } else if (item.forceReload) {
       window.open(item.path, item.openInNewTab ? "_blank" : "_self");

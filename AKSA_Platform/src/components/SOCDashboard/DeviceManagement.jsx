@@ -22,7 +22,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
       try {
         const token = localStorage.getItem("token");
         const userRole = localStorage.getItem("role");
-        if (userRole === "admin") {
+        if (userRole === "subadmin") {
           // Admin: fetch all agents
           const res = await axios.get('/api/wazuh/agents', {
             headers: { Authorization: `Bearer ${token}` }
@@ -111,7 +111,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
 
         <div className="flex justify-between items-center mb-4 relative z-10">
           <h3 className="text-2xl font-bold text-gray-800">Added Devices</h3>
-          {userRole === "admin" && !isAssignPage && (
+          {userRole === "subadmin" && !isAssignPage && (
             <button
               className="flex items-center gap-2 px-6 py-2 rounded-xl bg-primary text-white text-lg font-bold shadow-lg hover:from-blue-600 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-200 transform hover:scale-105 active:scale-95"
               onClick={onAddAgent}
@@ -149,16 +149,15 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
                     {agents.map((agent, index) => (
                       <tr key={index} className="hover:bg-blue-50 transition">
                         <td className="px-6 py-4 flex items-center gap-2 text-gray-900 font-medium">
-                           {agent.agentName || agent.name || agent.id}
+                          {agent.agentName || agent.name || agent.id}
                         </td>
                         <td className="px-6 py-4 text-gray-700">{agent.agentIp || agent.ip || 'N/A'}</td>
                         <td className="px-6 py-4">
                           <span
-                            className={`px-3 py-1 rounded-full text-sm font-semibold shadow-sm ${
-                              agent.status === 'active'
+                            className={`px-3 py-1 rounded-full text-sm font-semibold shadow-sm ${agent.status === 'active'
                                 ? 'bg-green-100 text-green-700'
                                 : 'bg-gray-200 text-gray-800'
-                            }`}
+                              }`}
                           >
                             {agent.status || 'Unknown'}
                           </span>
@@ -182,7 +181,7 @@ const DeviceManagement = ({ onAddAgent, onRemoveAgent }) => {
           )}
         </div>
 
-        {userRole === "admin" && !isAssignPage && (
+        {userRole === "subadmin" && !isAssignPage && (
           <div className="flex justify-end mt-6 relative z-10">
             <button
               className="flex items-center gap-2 px-6 py-2 rounded-xl bg-secondary text-primary text-lg font-bold shadow-lg hover:from-red-600 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-300 transition-all duration-200 transform hover:scale-105 active:scale-95"

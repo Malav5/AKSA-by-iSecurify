@@ -93,7 +93,7 @@ const CompanyProfile = () => {
         setUserPlan(user?.plan || null);
       }
     };
-  
+
     fetchUser();
   }, []);
 
@@ -175,7 +175,7 @@ const CompanyProfile = () => {
     { label: "Notification Settings", key: "notification" },
     { label: "Settings", key: "settings" },
   ];
-  if (role === "admin") {
+  if (role === "subadmin") {
     visibleTabs.push({ label: "User Management", key: "user-management" });
   }
 
@@ -226,7 +226,7 @@ const CompanyProfile = () => {
           {activeTab === "notification" && <NotificationSettings />}
           {activeTab === "settings" && <Settings />}
 
-          {activeTab === "user-management" && role === "admin" && (
+          {activeTab === "user-management" && role === "subadmin" && (
             <UserManagement
               showAddMemberModal={showAddMemberModal}
               setShowAddMemberModal={setShowAddMemberModal}

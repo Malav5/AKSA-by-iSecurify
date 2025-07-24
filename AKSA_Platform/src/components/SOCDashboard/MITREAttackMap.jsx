@@ -16,30 +16,30 @@ const MITREAttackMap = ({ topRules }) => {
 
   // Enhanced tactic mapping with better visual hierarchy
   const tacticMap = {
-    ssh: { 
-      name: 'Initial Access', 
+    ssh: {
+      name: 'Initial Access',
       color: 'bg-primary/10 border border-primary/20 text-primary',
-      icon: <LogIn size={18} className="text-primary" /> 
+      icon: <LogIn size={18} className="text-primary" />
     },
-    login: { 
-      name: 'Credential Access', 
+    login: {
+      name: 'Credential Access',
       color: 'bg-amber-50 border border-amber-100 text-amber-700',
-      icon: <Lock size={18} className="text-amber-500" /> 
+      icon: <Lock size={18} className="text-amber-500" />
     },
-    brute: { 
-      name: 'Brute Force', 
+    brute: {
+      name: 'Brute Force',
       color: 'bg-orange-50 border border-orange-100 text-orange-700',
-      icon: <Zap size={18} className="text-orange-500" /> 
+      icon: <Zap size={18} className="text-orange-500" />
     },
-    privilege: { 
-      name: 'Privilege Escalation', 
+    privilege: {
+      name: 'Privilege Escalation',
       color: 'bg-red-50 border border-red-100 text-red-700',
-      icon: <ShieldAlert size={18} className="text-red-500" /> 
+      icon: <ShieldAlert size={18} className="text-red-500" />
     },
-    default: { 
-      name: 'Other Tactics', 
+    default: {
+      name: 'Other Tactics',
       color: 'bg-gray-50 border border-gray-100 text-gray-700',
-      icon: <HelpCircle size={18} className="text-gray-500" /> 
+      icon: <HelpCircle size={18} className="text-gray-500" />
     },
   };
 
@@ -64,7 +64,7 @@ const MITREAttackMap = ({ topRules }) => {
       const token = localStorage.getItem('token');
       const role = localStorage.getItem('role');
       setUserRole(role);
-      if (role === 'admin') {
+      if (role === 'subadmin') {
         setAssignedAgents([]); // Admin sees all
       } else {
         const userEmail = localStorage.getItem('soc_email');
@@ -78,7 +78,7 @@ const MITREAttackMap = ({ topRules }) => {
     };
     fetchAgents();
   }, []);
-  
+
 
   // Extract MITRE IDs from alert descriptions
   const extractMitreIds = () => {
@@ -92,11 +92,11 @@ const MITREAttackMap = ({ topRules }) => {
   };
 
   // Filter topRules for assigned agents (if not admin)
-  const filteredTopRules = userRole === 'admin'
+  const filteredTopRules = userRole === 'subadmin'
     ? topRules
     : topRules.filter(([desc, count, agentName]) =>
-        assignedAgents.length === 0 || assignedAgents.includes(agentName)
-      );
+      assignedAgents.length === 0 || assignedAgents.includes(agentName)
+    );
 
   // Extract MITRE IDs from filtered topRules
   const alertMitreIds = (() => {
@@ -110,7 +110,7 @@ const MITREAttackMap = ({ topRules }) => {
   })();
 
   // Filter MITRE data by found IDs
-  const filterMitreData = (arr) => (arr || []).filter(item => 
+  const filterMitreData = (arr) => (arr || []).filter(item =>
     alertMitreIds.has(item.id?.toUpperCase())
   );
 
@@ -147,10 +147,10 @@ const MITREAttackMap = ({ topRules }) => {
   const CollapsibleSection = ({ title, items, icon, fields = ['id', 'name'] }) => {
     const isExpanded = expanded === title;
     const hasItems = items?.length > 0;
-    
+
     return (
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4">
-        <div 
+        <div
           className={`flex justify-between items-center p-4 cursor-pointer ${isExpanded ? 'bg-gray-50' : ''}`}
           onClick={() => setExpanded(isExpanded ? null : title)}
         >
@@ -162,7 +162,7 @@ const MITREAttackMap = ({ topRules }) => {
           </div>
           {isExpanded ? <ChevronUp className="text-gray-500" /> : <ChevronDown className="text-gray-500" />}
         </div>
-        
+
         {isExpanded && (
           <div className="p-4 border-t border-gray-200">
             {hasItems ? (
@@ -251,7 +251,7 @@ const MITREAttackMap = ({ topRules }) => {
           <h2 className="text-2xl font-bold text-gray-900">MITRE ATT&CK Mapping</h2>
         </div>
         <p className="text-gray-600">
-          This visualization maps detected security alerts to the MITRE ATT&CK framework, 
+          This visualization maps detected security alerts to the MITRE ATT&CK framework,
           helping identify adversary tactics, techniques, and procedures (TTPs).
         </p>
       </div>
@@ -275,63 +275,63 @@ const MITREAttackMap = ({ topRules }) => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        <SummaryCard 
-          icon={<Zap className="w-5 h-5 text-primary" />} 
-          value={filteredTechniques.length} 
-          label="Techniques" 
+        <SummaryCard
+          icon={<Zap className="w-5 h-5 text-primary" />}
+          value={filteredTechniques.length}
+          label="Techniques"
         />
-        <SummaryCard 
-          icon={<Target className="w-5 h-5 text-primary" />} 
-          value={filteredTactics.length} 
-          label="Tactics" 
+        <SummaryCard
+          icon={<Target className="w-5 h-5 text-primary" />}
+          value={filteredTactics.length}
+          label="Tactics"
         />
-        <SummaryCard 
-          icon={<Shield className="w-5 h-5 text-primary" />} 
-          value={filteredMitigations.length} 
-          label="Mitigations" 
+        <SummaryCard
+          icon={<Shield className="w-5 h-5 text-primary" />}
+          value={filteredMitigations.length}
+          label="Mitigations"
         />
-        <SummaryCard 
-          icon={<Cpu className="w-5 h-5 text-primary" />} 
-          value={filteredSoftware.length} 
-          label="Software" 
+        <SummaryCard
+          icon={<Cpu className="w-5 h-5 text-primary" />}
+          value={filteredSoftware.length}
+          label="Software"
         />
-        <SummaryCard 
-          icon={<Users className="w-5 h-5 text-primary" />} 
-          value={filteredGroups.length} 
-          label="Groups" 
+        <SummaryCard
+          icon={<Users className="w-5 h-5 text-primary" />}
+          value={filteredGroups.length}
+          label="Groups"
         />
       </div>
 
       {/* Detailed Sections */}
-      <CollapsibleSection 
-        title="Techniques" 
-        items={filteredTechniques} 
+      <CollapsibleSection
+        title="Techniques"
+        items={filteredTechniques}
         icon={<Zap className="w-5 h-5" />}
-        fields={['id', 'name', 'description']} 
+        fields={['id', 'name', 'description']}
       />
-      <CollapsibleSection 
-        title="Tactics" 
-        items={filteredTactics} 
+      <CollapsibleSection
+        title="Tactics"
+        items={filteredTactics}
         icon={<Target className="w-5 h-5" />}
-        fields={['id', 'name']} 
+        fields={['id', 'name']}
       />
-      <CollapsibleSection 
-        title="Mitigations" 
-        items={filteredMitigations} 
+      <CollapsibleSection
+        title="Mitigations"
+        items={filteredMitigations}
         icon={<Shield className="w-5 h-5" />}
-        fields={['id', 'name']} 
+        fields={['id', 'name']}
       />
-      <CollapsibleSection 
-        title="Software" 
-        items={filteredSoftware} 
+      <CollapsibleSection
+        title="Software"
+        items={filteredSoftware}
         icon={<Cpu className="w-5 h-5" />}
-        fields={['id', 'name']} 
+        fields={['id', 'name']}
       />
-      <CollapsibleSection 
-        title="Groups" 
-        items={filteredGroups} 
+      <CollapsibleSection
+        title="Groups"
+        items={filteredGroups}
         icon={<Users className="w-5 h-5" />}
-        fields={['id', 'name']} 
+        fields={['id', 'name']}
       />
     </div>
   );

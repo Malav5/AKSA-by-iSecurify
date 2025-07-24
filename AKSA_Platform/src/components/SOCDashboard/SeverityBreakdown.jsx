@@ -17,7 +17,7 @@ const SeverityBreakdown = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       const userRole = localStorage.getItem('role');
-      if (userRole === 'admin') {
+      if (userRole === 'subadmin') {
         // Admin: show all alerts
         const allAlertsData = await fetchAllAlerts();
         const allAlerts = allAlertsData?.hits?.hits?.map(hit => hit._source) || [];

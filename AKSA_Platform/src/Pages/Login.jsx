@@ -58,6 +58,12 @@ const Login = () => {
         // New user logging in, set current user but don't clear data
         localStorage.setItem("currentUser", data.user.email);
       }
+      if (data.user.role) {
+        localStorage.setItem("role", data.user.role);
+      }
+      if (data.user.plan) {
+        localStorage.setItem("plan", data.user.plan);
+      }
       setSuccess("Login successful! Redirecting...");
       setTimeout(() => {
         navigate("/dashboard", { state: { from: "/login", user: data.user } });

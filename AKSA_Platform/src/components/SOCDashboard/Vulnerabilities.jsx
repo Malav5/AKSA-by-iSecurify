@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Send, Filter, X} from 'lucide-react';
+import { Send, Filter, X } from 'lucide-react';
 import VulnerabilityDetail from './VulnerabilityDetail';
 import { fetchVulnerabilities, fetchAssignedAgents } from '../../services/SOCservices';
 import ReactMarkdown from 'react-markdown';
@@ -83,13 +83,15 @@ const Vulnerabilities = () => {
   const [userRole, setUserRole] = useState(localStorage.getItem('role') || 'user');
   const [assignedAgents, setAssignedAgents] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  // Map of vulnerability ID to thread ID
+  const [vulnThreads, setVulnThreads] = useState({});
 
   useEffect(() => {
     const fetchAgentsForFilter = async () => {
       const token = localStorage.getItem('token');
       const role = localStorage.getItem('role');
       setUserRole(role);
-      if (role === 'admin') {
+      if (role === 'subadmin') {
         // Admin: fetch all agents
         const res = await axios.get('/api/wazuh/agents', {
           headers: { Authorization: `Bearer ${token}` }
@@ -189,7 +191,7 @@ const Vulnerabilities = () => {
   const filteredVulnerabilities = vulnerabilities.filter(v => {
     const agent = v._source?.agent?.name || 'Unknown';
     const severity = v._source?.vulnerability?.severity || 'Unknown';
-    if (userRole === 'admin') {
+    if (userRole === 'subadmin') {
       return (selectedAgent === 'All' || agent === selectedAgent) &&
         (selectedSeverity === 'All' || severity === selectedSeverity);
     } else {
@@ -338,13 +340,27 @@ const Vulnerabilities = () => {
       // Get all messages and append only new assistant replies
       const allMsgs = await getMessages(threadId);
       const newAssistantMsgs = allMsgs
-        .filter(m => m.role === 'assistant' && !shownMessageIds.includes(m.id))
-        .sort((a, b) => a.created_at - b.created_at);
+        .filter(m => m.role === 'assistant')
+        .sort((a, b) => a.created_at - b.created_at)
+        .slice(-1); // Only the latest
       if (newAssistantMsgs.length > 0) {
-        setMessages(prev => [
-          ...prev,
-          ...newAssistantMsgs.map(m => ({ text: m.content[0].text.value, isUser: false }))
-        ]);
+        setMessages(prev => {
+          const updated = [
+            ...prev,
+            ...newAssistantMsgs.map(m => {
+              let reply = '';
+              if (Array.isArray(m.content) && m.content.length > 0 && m.content[0].type === 'text' && m.content[0].text && typeof m.content[0].text.value === 'string') {
+                reply = m.content[0].text.value;
+              } else if (typeof m.content === 'string') {
+                reply = m.content;
+              } else {
+                reply = 'Error: Could not parse assistant response.';
+              }
+              return { text: reply, isUser: false };
+            })
+          ];
+          return updated;
+        });
         setShownMessageIds(prev => [
           ...prev,
           ...newAssistantMsgs.map(m => m.id)
@@ -466,7 +482,7 @@ const Vulnerabilities = () => {
             >
               {showFilters ? (
                 <>
-                   <X size={18} />
+                  <X size={18} />
                   Hide Filters
                 </>
               ) : (
@@ -538,6 +554,8 @@ const Vulnerabilities = () => {
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             totalPages={totalPages}
+            vulnThreads={vulnThreads}
+            setVulnThreads={setVulnThreads}
           />
 
         </div>
@@ -629,7 +647,7 @@ const Vulnerabilities = () => {
                   </div>
                 )}
               </div>
-      
+
               {/* Input area: always visible at the bottom */}
               <div className="p-4 bg-white rounded-b-3xl flex flex-col gap-2">
                 {showChatbox && !threadId && (
@@ -674,7 +692,7 @@ const Vulnerabilities = () => {
         {selectedVulnerability && (
           <VulnerabilityDetail
             vulnerability={selectedVulnerability}
-            onClose={() => setSelectedVulnerability(null)}  
+            onClose={() => setSelectedVulnerability(null)}
           />
         )}
       </div>
