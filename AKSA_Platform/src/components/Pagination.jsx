@@ -11,7 +11,7 @@ export default function Pagination({
 }) {
   return (
     <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 px-4 py-4 bg-white rounded-b-xl border-t border-gray-100">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center jusfity-between gap-2">
         <span className="text-gray-700 font-medium">Rows per page:</span>
         <select
           value={rowsPerPage}
