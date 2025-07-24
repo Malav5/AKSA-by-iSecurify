@@ -215,6 +215,15 @@ const UpgradePlan = () => {
     return (
         <div className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white" id="upgrade-plan">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-8">
+        <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-sm text-primary font-medium hover:underline hover:text-[#700070] transition"
+        >
+            ← Back
+        </button>
+    </div>
+
                 <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
                         Choose Your Security Plan

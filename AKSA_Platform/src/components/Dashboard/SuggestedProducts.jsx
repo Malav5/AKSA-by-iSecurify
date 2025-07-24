@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  LabelList,
+  Cell
+} from "recharts";
 import QueAns, { questions as questionnaireQuestions } from "./QueAns";
+import { useNavigate } from "react-router-dom";
 
 const QUESTION_LABELS = Array.from({ length: 20 }, (_, i) => `C${i + 1}`);
 
-// Define grade mapping
 const GRADE_MAPPING = {
-  10: 'A',
-  5: 'B',
-  0: 'C',
-  '-1': 'D'
+  10: "A",
+  5: "B",
+  0: "C",
+  "-1": "D",
 };
 
-// Solution descriptions
 const SOLUTION_DESCRIPTIONS = {
   TVM: "Threat and Vulnerability Management - Comprehensive solution for identifying, assessing, and remediating security vulnerabilities across your infrastructure.",
   MFA: "Multi-Factor Authentication - Adds an extra layer of security to protect against unauthorized access.",
@@ -22,18 +30,16 @@ const SOLUTION_DESCRIPTIONS = {
   IRM: "Incident Response Management - Streamlines the process of handling security incidents.",
   ITAM: "IT Asset Management - Tracks and manages IT assets throughout their lifecycle.",
   MSOAR: "Managed Security Operations and Response - Provides 24/7 security monitoring and response.",
-  CSM: "Configuration Security Management - Ensures secure configuration of systems and applications."
+  CSM: "Configuration Security Management - Ensures secure configuration of systems and applications.",
 };
 
 const getBarColor = (score, index, selectedSolutions) => {
-  // Get related solutions from the imported questions data
   const relatedSolutions = questionnaireQuestions[index]?.relatedSolutions || [];
 
-  if (selectedSolutions.some(sol => relatedSolutions.includes(sol))) {
-    return "#800080"; 
+  if (selectedSolutions.some((sol) => relatedSolutions.includes(sol))) {
+    return "#800080"; // Purple highlight
   }
 
-  // Original color based on score if not highlighted
   if (score >= 8) return "#34d399"; // Green
   if (score >= 6) return "#fbbf24"; // Yellow
   if (score >= 4) return "#f59e42"; // Orange
@@ -45,31 +51,34 @@ const PURCHASE_SOLUTIONS = ["TVM", "MFA", "SEM", "EBM", "SAT", "IRM", "ITAM", "M
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const grade = GRADE_MAPPING[payload[0].value] || 'N/A';
+    const grade = GRADE_MAPPING[payload[0].value] || "N/A";
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-md px-3 md:px-4 py-2">
         <p className="font-semibold text-gray-800 text-xs md:text-sm">{label}</p>
-        <p className="text-gray-600 text-xs md:text-sm">Grade: <span className="font-bold">{grade}</span></p>
+        <p className="text-gray-600 text-xs md:text-sm">
+          Grade: <span className="font-bold">{grade}</span>
+        </p>
       </div>
     );
   }
   return null;
 };
 
-const SolutionTooltip = ({ solution }) => {
-  return (
-    <div className="absolute z-10 bg-white border border-gray-200 rounded-lg shadow-lg p-2 md:p-3 w-40 md:w-50 -top-2 left-full ml-2">
-      <h3 className="font-semibold text-gray-800 mb-1 md:mb-2 text-xs md:text-sm">{solution}</h3>
-      <p className="text-xs md:text-sm text-gray-600">{SOLUTION_DESCRIPTIONS[solution]}</p>
-    </div>
-  );
-};
+const SolutionTooltip = ({ solution }) => (
+  <div className="absolute z-10 bg-white border border-gray-200 rounded-lg shadow-lg p-2 md:p-3 w-40 md:w-50 -top-2 left-full ml-2">
+    <h3 className="font-semibold text-gray-800 mb-1 md:mb-2 text-xs md:text-sm">
+      {solution}
+    </h3>
+    <p className="text-xs md:text-sm text-gray-600">{SOLUTION_DESCRIPTIONS[solution]}</p>
+  </div>
+);
 
 const SuggestedProducts = ({ domain }) => {
-  // Helper to get user-specific key
+  const navigate = useNavigate();
+
   const getUserKey = (key) => {
     const currentUser = localStorage.getItem("currentUser");
-    const userPrefix = currentUser ? currentUser.split('@')[0] : '';
+    const userPrefix = currentUser ? currentUser.split("@")[0] : "";
     return `${userPrefix}_${key}`;
   };
 
@@ -79,7 +88,6 @@ const SuggestedProducts = ({ domain }) => {
   const [selectedSolutions, setSelectedSolutions] = useState([]);
   const [hoveredSolution, setHoveredSolution] = useState(null);
 
-  // Function to load answers and update chart data
   const loadAnswersAndData = () => {
     const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
     if (savedAnswers) {
@@ -92,13 +100,12 @@ const SuggestedProducts = ({ domain }) => {
     }
   };
 
-  // Load initial data and set up storage listener
   useEffect(() => {
     loadAnswersAndData();
 
     const handleStorageChange = (event) => {
       if (event.key === getUserKey("domainHealthAnswers")) {
-        loadAnswersAndData(); // Reload data when answers change in local storage
+        loadAnswersAndData();
       }
     };
 
@@ -107,37 +114,31 @@ const SuggestedProducts = ({ domain }) => {
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, []); 
+  }, []);
 
-  // Prepare data for recharts (derived from answers state)
   const chartData = QUESTION_LABELS.map((label, idx) => {
     const qKey = `q${idx + 1}`;
     const score = answers[qKey] !== undefined ? answers[qKey] : 0;
     return {
       label,
       score,
-      fill: getBarColor(score, idx, selectedSolutions)
+      fill: getBarColor(score, idx, selectedSolutions),
     };
   });
 
-  // Y-axis ticks for grades
   const yTicks = [10, 5, 0, -1];
-  const yTickFormatter = (value) => GRADE_MAPPING[value] || '';
+  const yTickFormatter = (value) => GRADE_MAPPING[value] || "";
 
   const handleSolutionClick = (solution) => {
-    setSelectedSolutions(prevSelected => {
-      if (prevSelected.includes(solution)) {
-        // Deselect if already selected
-        return prevSelected.filter(item => item !== solution);
-      } else {
-        // Select the solution
-        return [...prevSelected, solution];
-      }
-    });
+    setSelectedSolutions((prev) =>
+      prev.includes(solution) ? prev.filter((s) => s !== solution) : [...prev, solution]
+    );
   };
 
-  const handleClearSelection = () => {
-    setSelectedSolutions([]);
+  const handleClearSelection = () => setSelectedSolutions([]);
+
+  const handleBuyClick = () => {
+    navigate("/upgrade-plan");
   };
 
   return (
@@ -145,33 +146,39 @@ const SuggestedProducts = ({ domain }) => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2 sm:gap-4">
         <h2 className="text-xl md:text-2xl font-bold">Score Distribution</h2>
         <button
+          onClick={handleBuyClick}
           className="bg-primary text-white rounded-lg px-4 md:px-6 py-2 font-medium text-sm md:text-lg shadow-md transition hover:bg-primary/90"
         >
           Buy Solutions Now
         </button>
       </div>
+
       <div className="w-full h-64 md:h-80 bg-gray-50 rounded-xl p-3 md:p-6">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart 
-            data={chartData} 
+          <BarChart
+            data={chartData}
             margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
             barSize={16}
           >
-            <XAxis dataKey="label" tick={{ fill: '#4B5563', fontWeight: 600, fontSize: 10 }} tickLine={false} />
+            <XAxis
+              dataKey="label"
+              tick={{ fill: "#4B5563", fontWeight: 600, fontSize: 10 }}
+              tickLine={false}
+            />
             <YAxis
               domain={[-1, 10]}
               ticks={yTicks}
               tickFormatter={yTickFormatter}
-              tick={{ fill: '#4B5563', fontWeight: 600, fontSize: 10 }}
+              tick={{ fill: "#4B5563", fontWeight: 600, fontSize: 10 }}
               tickLine={false}
               width={30}
               interval={0}
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: "#a5b4fc", opacity: 0.15 }} />
-            <Bar 
-              dataKey="score" 
-              radius={[3, 3, 0, 0]} 
-              isAnimationActive 
+            <Bar
+              dataKey="score"
+              radius={[3, 3, 0, 0]}
+              isAnimationActive
               fill="#6366f1"
               minPointSize={2}
             >
@@ -182,7 +189,8 @@ const SuggestedProducts = ({ domain }) => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      {/* Solutions Section */}
+
+      {/* Solutions section */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mt-6 md:mt-8 gap-4 md:gap-8">
         <div className="flex flex-col items-start">
           <div className="font-semibold mb-2 text-sm md:text-base">Your solutions</div>
@@ -214,9 +222,7 @@ const SuggestedProducts = ({ domain }) => {
                 }`}
               >
                 {sol}
-                {hoveredSolution === sol && (
-                  <SolutionTooltip solution={sol} />
-                )}
+                {hoveredSolution === sol && <SolutionTooltip solution={sol} />}
               </button>
             ))}
           </div>
@@ -230,13 +236,14 @@ const SuggestedProducts = ({ domain }) => {
           )}
         </div>
       </div>
+
       {/* Questionnaire Modal */}
       {showQuestionnaire && (
         <QueAns
           onCancel={() => setShowQuestionnaire(false)}
           setQuestionnaireSubmitted={() => {
             setShowQuestionnaire(false);
-            loadAnswersAndData(); // Load updated data after submission
+            loadAnswersAndData();
           }}
         />
       )}
