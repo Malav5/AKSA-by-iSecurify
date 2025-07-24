@@ -162,20 +162,22 @@ export default function RisksTable() {
                 <td className="px-4 py-3">
                   <DropdownSelect
                     options={levelOptions}
-                    value={risk.impact}
+                    value={risk.impact || ""}
                     onChange={(val) =>
                       handleSelectChange(risk.id, "impact", val)
                     }
+                    placeholder="Select impact"
                   />
                 </td>
 
                 <td className="px-4 py-3">
                   <DropdownSelect
                     options={levelOptions}
-                    value={risk.likelihood}
+                    value={risk.likelihood || ""}
                     onChange={(val) =>
                       handleSelectChange(risk.id, "likelihood", val)
                     }
+                    placeholder="Select likelihood"
                   />
                 </td>
 
@@ -184,10 +186,11 @@ export default function RisksTable() {
                 <td className="px-4 py-3">
                   <DropdownSelect
                     options={treatmentOptions}
-                    value={risk.treatment}
+                    value={risk.treatment || ""}
                     onChange={(val) =>
                       handleSelectChange(risk.id, "treatment", val)
                     }
+                    placeholder="Select treatment"
                   />
                 </td>
 
@@ -206,20 +209,22 @@ export default function RisksTable() {
                 <td className="px-4 py-3">
                   <DropdownSelect
                     options={levelOptions}
-                    value={risk.residualImpact}
+                    value={risk.residualImpact || ""}
                     onChange={(val) =>
                       handleSelectChange(risk.id, "residualImpact", val)
                     }
+                    placeholder="Select residual impact"
                   />
                 </td>
 
                 <td className="px-4 py-3">
                   <DropdownSelect
                     options={levelOptions}
-                    value={risk.residualLikelihood}
+                    value={risk.residualLikelihood || ""}
                     onChange={(val) =>
                       handleSelectChange(risk.id, "residualLikelihood", val)
                     }
+                    placeholder="Select residual likelihood"
                   />
                 </td>
 
