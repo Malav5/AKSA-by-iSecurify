@@ -56,6 +56,7 @@ const CompanyProfile = () => {
   const [showDomainsModal, setShowDomainsModal] = useState(false);
   const [showDomainsInline, setShowDomainsInline] = useState(false);
   const [role, setRole] = useState(null);
+  const [userPlan, setUserPlan] = useState(null);
 
   const navigate = useNavigate();
 
@@ -94,10 +95,12 @@ const CompanyProfile = () => {
           }
         );
         setRole(response.data.user?.role || null);
+        setUserPlan(response.data.user?.plan || null);
       } catch (err) {
         // fallback to localStorage if backend fails
         const user = JSON.parse(localStorage.getItem("user"));
         setRole(user?.role || null);
+        setUserPlan(user?.plan || null);
       }
     };
     fetchUser();
@@ -222,6 +225,7 @@ const CompanyProfile = () => {
                 handleLogoChange={handleLogoChange}
                 setShowDomainsInline={setShowDomainsInline}
                 handleAttachmentChange={handleAttachmentChange}
+                userPlan={userPlan}
               />
             )
           )}

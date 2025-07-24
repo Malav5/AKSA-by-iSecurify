@@ -208,12 +208,14 @@ router.post("/add-user", authMiddleware, async (req, res) => {
     if (existing) {
       return res.status(409).json({ error: "User with this email already exists" });
     }
-    // Fetch admin user to get companyName
+    // Fetch admin user to get companyName and plan
     let companyName = undefined;
+    let plan = undefined;
     if (req.userId) {
       const admin = await User.findById(req.userId);
-      if (admin && admin.companyName) {
-        companyName = admin.companyName;
+      if (admin) {
+        if (admin.companyName) companyName = admin.companyName;
+        if (admin.plan) plan = admin.plan;
       }
     }
     // Hash the password
@@ -225,9 +227,10 @@ router.post("/add-user", authMiddleware, async (req, res) => {
       passwordHash: hashed,
       role: 'user',
       companyName, // assign from admin if available
+      plan, // assign plan from admin
     });
     await newUser.save();
-    res.status(201).json({ message: "User added", user: { firstName, lastName, email, companyName } });
+    res.status(201).json({ message: "User added", user: { firstName, lastName, email, companyName, plan } });
   } catch (err) {
     res.status(500).json({ error: "Failed to add user", details: err.message });
   }
