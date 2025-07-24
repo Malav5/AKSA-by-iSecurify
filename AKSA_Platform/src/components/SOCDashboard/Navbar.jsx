@@ -101,11 +101,10 @@ const Navbar = () => {
             <Link
               key={path}
               to={path}
-              className={`flex items-center text-lg px-3 py-1 transition font-medium ${
-                location.pathname === path
+              className={`flex items-center text-lg px-3 py-1 transition font-medium ${location.pathname === path
                   ? 'text-primary border-b-2 font-semibold'
                   : 'text-gray-500 hover:text-primary hover:bg-secondary'
-              }`}
+                }`}
             >
               {icon}
               {label}
@@ -215,7 +214,11 @@ const Navbar = () => {
                 <button
                   onClick={() => {
                     setShowUserMenu(false);
-                    localStorage.clear();
+                    localStorage.removeItem("soc_username");
+                    localStorage.removeItem("soc_fullname");
+                    localStorage.removeItem("soc_email");
+                    localStorage.removeItem("soc_token");
+                    localStorage.removeItem("soc_role");
                     navigate('/soc-login');
                   }}
                   className="w-full text-left px-4 py-2 hover:bg-blue-50 text-sm rounded transition"
