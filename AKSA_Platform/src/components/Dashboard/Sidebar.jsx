@@ -52,7 +52,7 @@ const Sidebar = () => {
     } else {
       navigate(item.path);
     }
-  
+
     // Close mobile menu after navigation
     setIsMobileMenuOpen(false);
   };
@@ -145,7 +145,7 @@ const Sidebar = () => {
                 Cancel
               </button>
               <button
-                onClick={() => {setShowModal(false)}} 
+                onClick={() => { setShowModal(false) }}
                 className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
               >
                 View Plans
