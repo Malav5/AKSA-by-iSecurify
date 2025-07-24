@@ -1,55 +1,89 @@
-import React, { useState, useEffect } from "react";
-import { BadgeCheck, Filter, Search, MoreHorizontal } from "lucide-react";
-import RiskDetail from "./RiskDetail";
+import React, { useState } from "react";
+import { BadgeCheck, Filter, Search } from "lucide-react";
 import Pagination from "../Pagination";
-import {fetchVulnerabilities} from "../../services/SOCservices";
+import DropdownSelect from "../ui/DropdownSelect";
 
 const levelOptions = ["Critical", "High", "Medium", "Low"];
 const treatmentOptions = ["Mitigate", "Accept", "Transfer", "Avoid"];
-const ITEMS_PER_PAGE = 5;
 
-const getImpactColor = () =>
-  "rounded-md border border-gray-300 bg-white text-black text-xs font-medium px-2 py-1";
-const getLikelihoodColor = () =>
-  "rounded-md border border-gray-300 bg-white text-black text-xs font-medium px-2 py-1";
+const staticRisks = [
+  {
+    id: "R18",
+    name: "Hackers, malware utilise open ports or services to gain access to data or sensitive systems.",
+    impact: "High",
+    likelihood: "Low",
+    initialScore: "Medium",
+    treatment: "Mitigate",
+    control: "",
+    residualImpact: "Low",
+    residualLikelihood: "Low",
+    residualScore: "Low",
+    owner: "SOC",
+    lastAction: "09 Feb, 2024",
+  },
+  {
+    id: "R17",
+    name: "Hackers, malware utilise unmonitored ports or services to gain access to data or sensitive systems.",
+    impact: "",
+    likelihood: "",
+    initialScore: "-",
+    treatment: "",
+    control: "",
+    residualImpact: "",
+    residualLikelihood: "",
+    residualScore: "-",
+    owner: "SOC",
+    lastAction: "09 Feb, 2024",
+  },
+  {
+    id: "R16",
+    name: "Hackers gain access or data is encrypted as a result of a failure to detect ransomware or malware on systems.",
+    impact: "",
+    likelihood: "",
+    initialScore: "-",
+    treatment: "",
+    control: "",
+    residualImpact: "",
+    residualLikelihood: "",
+    residualScore: "-",
+    owner: "SOC",
+    lastAction: "09 Feb, 2024",
+  },
+  {
+    id: "R15",
+    name: "Hackers gain access or data is encrypted as a result of malware or ransomware executing on systems.",
+    impact: "",
+    likelihood: "",
+    initialScore: "-",
+    treatment: "",
+    control: "",
+    residualImpact: "",
+    residualLikelihood: "",
+    residualScore: "-",
+    owner: "SOC",
+    lastAction: "09 Feb, 2024",
+  },
+  {
+    id: "R14",
+    name: "Malicious insiders, Hackers or malware gain access to data or systems via a malicious email attachment.",
+    impact: "",
+    likelihood: "",
+    initialScore: "-",
+    treatment: "",
+    control: "",
+    residualImpact: "",
+    residualLikelihood: "",
+    residualScore: "-",
+    owner: "SOC",
+    lastAction: "09 Feb, 2024",
+  },
+];
 
 export default function RisksTable() {
-  const [risks, setRisks] = useState([]);
+  const [risks, setRisks] = useState(staticRisks);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRisk, setSelectedRisk] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchVulnerabilities();
-  
-        const mappedRisks = data.map((vuln, index) => {
-          const source = vuln._source;
-  
-          return {
-            id: vuln._id || `RSK-${index + 1}`,
-            name: `CVE Risk: ${source.vulnerability?.id || 'Unknown Risk'}`,
-            impact: source.vulnerability?.severity || "Medium",
-            likelihood: "Medium", // This can be customized based on your logic
-            initialScore: source.vulnerability?.score?.base || 10,
-            treatment: "Mitigate",
-            control: source.vulnerability?.description || "N/A",
-            owner: source.agent?.name || "Security Team",
-            lastAction: new Date(source.vulnerability?.detected_at || Date.now()).toLocaleDateString(),
-            status: source.vulnerability?.under_evaluation ? "Under Evaluation" : "To Do"
-          };
-        });
-  
-        setRisks(mappedRisks);
-      } catch (error) {
-        console.error("Error loading vulnerabilities:", error);
-      }
-    };
-  
-    fetchData();
-  }, []);
-  
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const handleSelectChange = (id, field, value) => {
     const updatedRisks = risks.map((risk) =>
@@ -65,10 +99,10 @@ export default function RisksTable() {
       risk.owner.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredRisks.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredRisks.length / rowsPerPage);
   const paginatedRisks = filteredRisks.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
   );
 
   return (
@@ -102,127 +136,125 @@ export default function RisksTable() {
         <table className="w-full text-sm text-left">
           <thead className="text-sm uppercase bg-gray-100 text-gray-700">
             <tr>
-              <th className="px-4 py-5">Risk ID</th>
+              <th className="px-4 py-5">Risk Number</th>
               <th className="px-4 py-5">Risk Name</th>
               <th className="px-4 py-5">Impact</th>
               <th className="px-4 py-5">Likelihood</th>
-              <th className="px-4 py-5">Risk Score</th>
-              <th className="px-4 py-5">Treatment</th>
-              <th className="px-4 py-5">Control</th>
+              <th className="px-4 py-5">Initial Risk Score</th>
+              <th className="px-4 py-5">Risk Treatment</th>
+              <th className="px-4 py-5">Control Description</th>
+              <th className="px-4 py-5">Residual Impact</th>
+              <th className="px-4 py-5">Residual Likelihood</th>
+              <th className="px-4 py-5">Residual Score</th>
               <th className="px-4 py-5">Owner</th>
               <th className="px-4 py-5">Last Action</th>
-              <th className="px-4 py-5 sr-only">Actions</th>
             </tr>
           </thead>
           <tbody>
             {paginatedRisks.map((risk) => (
-              <tr
-                key={risk.id}
-                className="border-t border-gray-200 hover:bg-gray-50 transition-colors"
-              >
-                <td
-                  className="px-4 py-3 font-medium text-primary flex items-center gap-2 cursor-pointer"
-                  onClick={() => setSelectedRisk(risk)}
-                >
+              <tr key={risk.id} className="border-t border-gray-200 hover:bg-gray-50">
+                <td className="px-4 py-3 font-medium flex items-center gap-2">
                   <BadgeCheck className="w-4 h-4 text-primary" />
                   {risk.id}
                 </td>
-                <td
-                  className="px-4 py-3 font-medium cursor-pointer"
-                  onClick={() => setSelectedRisk(risk)}
-                >
-                  {risk.name}
-                </td>
+                <td className="px-4 py-3 font-medium">{risk.name}</td>
+                
                 <td className="px-4 py-3">
-                  <select
-                    value={risk.impact}
-                    onChange={(e) =>
-                      handleSelectChange(risk.id, "impact", e.target.value)
+                  <DropdownSelect
+                    options={levelOptions}
+                    value={risk.impact || ""}
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "impact", val)
                     }
-                    className={getImpactColor()}
-                  >
-                    {levelOptions.map((option) => (
-                      <option key={option}>{option}</option>
-                    ))}
-                  </select>
+                    placeholder="Select impact"
+                  />
                 </td>
+
                 <td className="px-4 py-3">
-                  <select
-                    value={risk.likelihood}
-                    onChange={(e) =>
-                      handleSelectChange(risk.id, "likelihood", e.target.value)
+                  <DropdownSelect
+                    options={levelOptions}
+                    value={risk.likelihood || ""}
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "likelihood", val)
                     }
-                    className={getLikelihoodColor()}
-                  >
-                    {levelOptions.map((option) => (
-                      <option key={option}>{option}</option>
-                    ))}
-                  </select>
+                    placeholder="Select likelihood"
+                  />
                 </td>
+
+                <td className="px-4 py-3">{risk.initialScore}</td>
+
                 <td className="px-4 py-3">
-                  <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium border border-gray-300 text-gray-800 bg-white">
-                    {risk.initialScore}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <select
-                    value={risk.treatment}
-                    onChange={(e) =>
-                      handleSelectChange(risk.id, "treatment", e.target.value)
+                  <DropdownSelect
+                    options={treatmentOptions}
+                    value={risk.treatment || ""}
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "treatment", val)
                     }
-                    className="rounded-md border border-gray-300 bg-white text-gray-800 text-xs font-medium px-2 py-1 focus:outline-none focus:ring-1 focus:ring-black"
-                  >
-                    {treatmentOptions.map((option) => (
-                      <option key={option}>{option}</option>
-                    ))}
-                  </select>
+                    placeholder="Select treatment"
+                  />
                 </td>
-                <td
-                  className="px-4 py-3 text-gray-600 max-w-xs truncate"
-                  title={risk.control}
-                >
-                  {risk.control}
-                </td>
-                <td className="px-4 py-3 text-gray-600">{risk.owner}</td>
-                <td className="px-4 py-3 text-gray-600">{risk.lastAction}</td>
+
                 <td className="px-4 py-3">
-                  <button
-                    className="p-1 rounded-full hover:bg-gray-200"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedRisk(risk);
-                    }}
-                  >
-                    <MoreHorizontal className="w-5 h-5 text-gray-500" />
-                  </button>
+                  <input
+                    type="text"
+                    placeholder="Comment here"
+                    value={risk.control}
+                    onChange={(e) =>
+                      handleSelectChange(risk.id, "control", e.target.value)
+                    }
+                    className="w-full text-xs border border-gray-300 rounded-md px-2 py-1"
+                  />
                 </td>
+
+                <td className="px-4 py-3">
+                  <DropdownSelect
+                    options={levelOptions}
+                    value={risk.residualImpact || ""}
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "residualImpact", val)
+                    }
+                    placeholder="Select residual impact"
+                  />
+                </td>
+
+                <td className="px-4 py-3">
+                  <DropdownSelect
+                    options={levelOptions}
+                    value={risk.residualLikelihood || ""}
+                    onChange={(val) =>
+                      handleSelectChange(risk.id, "residualLikelihood", val)
+                    }
+                    placeholder="Select residual likelihood"
+                  />
+                </td>
+
+                <td className="px-4 py-3">{risk.residualScore}</td>
+                <td className="px-4 py-3">{risk.owner}</td>
+                <td className="px-4 py-3">{risk.lastAction}</td>
               </tr>
             ))}
             {filteredRisks.length === 0 && (
               <tr>
-                <td colSpan="10" className="px-4 py-8 text-center text-gray-500">
-                  No risks found matching your search criteria
+                <td colSpan="12" className="px-4 py-8 text-center text-gray-500">
+                  No risks found matching your search criteria.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      {/* Pagination */}
-      {filteredRisks.length > 0 && (
-        <div className="flex justify-end mt-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
-        </div>
-      )}
 
-      {/* Risk Detail Modal */}
-      {selectedRisk && (
-        <RiskDetail risk={selectedRisk} onClose={() => setSelectedRisk(null)} />
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(val) => {
+          setRowsPerPage(val);
+          setCurrentPage(1);
+        }}
+        totalItems={filteredRisks.length}
+      />
     </div>
   );
 }

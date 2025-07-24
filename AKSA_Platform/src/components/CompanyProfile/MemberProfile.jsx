@@ -1,7 +1,8 @@
 
 // MemberProfile.jsx
 import React, { useEffect, useState } from "react";
-
+import { userServices } from "../../services/UserServices";
+import { domainServices } from "../../services/domainServices";
 const MemberProfile = ({
   profileData,
   cardBg,
@@ -15,41 +16,33 @@ const MemberProfile = ({
   const [companyName, setCompanyName] = useState(profileData.name || "");
 
   useEffect(() => {
-    const fetchDomains = async () => {
+    const fetchDomainCount = async () => {
       try {
         const userEmail = localStorage.getItem("currentUser");
-        const res = await fetch("http://localhost:3000/api/domains");
-        const data = await res.json();
-        const filtered = data.filter(domain => domain.userEmail === userEmail);
-        setDomainCount(filtered.length);
-      } catch (err) {
+        const domains = await domainServices.fetchDomains();
+        const userDomains = domains.filter(domain => domain.userEmail === userEmail);
+        setDomainCount(userDomains.length);
+      } catch (error) {
+        console.error("Error fetching domains:", error);
         setDomainCount(0);
       }
     };
-    fetchDomains();
+
+    fetchDomainCount();
   }, []);
 
   useEffect(() => {
     const fetchUserCompany = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        const res = await fetch("http://localhost:3000/api/auth/user", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error("Failed to fetch user");
-        const data = await res.json();
-        if (data.user && data.user.companyName) {
-          setCompanyName(data.user.companyName);
-        }
-      } catch (err) {
-        // fallback to profileData.name
+      const data = await userServices.getUser();
+      if (data?.user?.companyName) {
+        setCompanyName(data.user.companyName);
+      } else {
         setCompanyName(profileData.name || "");
       }
     };
     fetchUserCompany();
-    // eslint-disable-next-line
   }, []);
+
 
   return (
     <div>

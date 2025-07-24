@@ -3,6 +3,7 @@ import AddMemberModal from "../Dashboard/AddMemberModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showSuccess, showError } from "../ui/toast"; // adjust path as needed
+import { userServices } from "../../services/UserServices";
 
 const UserManagement = ({
   showAddMemberModal,
@@ -14,21 +15,16 @@ const UserManagement = ({
   const selectAllRef = useRef();
 
   // Fetch users from backend
+  // Fetch users using userServices
   const fetchMembers = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/agentMap/users-with-role-user");
-      const data = await res.json();
-      setMembers(data.users || []);
-    } catch (err) {
-      setMembers([]);
-    }
+    const users = await userServices.fetchMembers();
+    setMembers(users);
   };
 
   useEffect(() => {
     fetchMembers();
-    const user = JSON.parse(localStorage.getItem("user"));
-    setCurrentUser(user);
   }, []);
+
 
   useEffect(() => {
     // Update indeterminate state
@@ -67,13 +63,12 @@ const UserManagement = ({
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
-    const res = await fetch(`http://localhost:3000/api/agentMap/delete-user/${id}`, {
-      method: "DELETE",
-    });
-    if (res.ok) {
+  
+    try {
+      await userServices.deleteUser(id);
       showSuccess("User deleted successfully");
-      fetchMembers();
-    } else {
+      fetchMembers(); // Refresh the user list
+    } catch (error) {
       showError("Failed to delete user");
     }
   };

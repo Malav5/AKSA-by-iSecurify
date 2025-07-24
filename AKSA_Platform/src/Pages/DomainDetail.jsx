@@ -261,7 +261,7 @@ const DomainDetail = () => {
                     </div>
                     <div className="flex-1 overflow-y-auto scrollbar-hide p-4 sm:p-6">
                         <div className="flex justify-between items-center mb-6">
-                           
+
                             <button
                                 onClick={() => navigate("/dashboard")}
                                 className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"

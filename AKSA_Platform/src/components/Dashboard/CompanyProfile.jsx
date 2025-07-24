@@ -10,7 +10,7 @@ import Settings from "../CompanyProfile/Settings";
 import UserManagement from "../CompanyProfile/UserManagement";
 import NotificationSettings from "../CompanyProfile/NotificationSettings";
 import axios from "axios";
-
+import { userServices } from "../../services/UserServices";
 const TABS = [
   { label: "Member Profile", key: "member" },
   { label: "Security Settings", key: "security" },
@@ -82,27 +82,18 @@ const CompanyProfile = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch user info from backend for accurate role
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          "http://localhost:3000/api/auth/user",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setRole(response.data.user?.role || null);
-        setUserPlan(response.data.user?.plan || null);
+        const data = await userServices.getUser();
+        setRole(data.user?.role || null);
+        setUserPlan(data.user?.plan || null);
       } catch (err) {
-        // fallback to localStorage if backend fails
         const user = JSON.parse(localStorage.getItem("user"));
         setRole(user?.role || null);
         setUserPlan(user?.plan || null);
       }
     };
+  
     fetchUser();
   }, []);
 

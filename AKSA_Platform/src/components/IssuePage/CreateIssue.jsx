@@ -2,10 +2,21 @@ import React, { useEffect, useState } from "react";
 
 const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
   const [visible, setVisible] = useState(false);
+  const [newNote, setNewNote] = useState("");
 
   useEffect(() => {
     setVisible(true);
   }, []);
+
+  const handleAddNote = () => {
+    if (newNote.trim()) {
+      setIssueData({
+        ...issueData,
+        changeLog: [...(issueData.changeLog || []), newNote]
+      });
+      setNewNote("");
+    }
+  };
 
   return (
     <div
@@ -15,14 +26,15 @@ const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
-          onSubmit(e);
+          e.preventDefault();
+          onSubmit();
         }}
         className={`bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full
         transform transition-transform duration-600 ease-out
         ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20"}`}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Create New Issue</h2>
+          <h2 className="text-2xl font-bold">Create new issue</h2>
           <button
             type="button"
             onClick={onClose}
@@ -32,135 +44,139 @@ const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
           </button>
         </div>
 
-        {/* Two-column layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Left Column: Name, Description, Notes */}
+        {/* Main form content */}
+        <div className="space-y-6">
+          {/* Issue name */}
           <div>
-            <div>
-              <label className="block font-medium text-gray-600 mb-1">Issue Name</label>
-              <input
-                type="text"
-                value={issueData.name}
-                onChange={(e) =>
-                  setIssueData({ ...issueData, name: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded px-4 py-2"
-                placeholder="Enter issue name"
-                required
-              />
-            </div>
-
-            <div className="mt-4">
-              <label className="block font-medium text-gray-600 mb-1">Description</label>
-              <textarea
-                value={issueData.description}
-                onChange={(e) =>
-                  setIssueData({ ...issueData, description: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded px-4 py-2"
-                rows={4}
-                placeholder="Enter issue description"
-                required
-              />
-            </div>
-
-            <div className="mt-4">
-              <label className="block font-medium text-gray-600 mb-1">
-                Notes (for changelog)
-              </label>
-              <textarea
-                value={issueData.notes || ""}
-                onChange={(e) =>
-                  setIssueData({ ...issueData, notes: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded px-4 py-2"
-                rows={3}
-                placeholder="Optional notes"
-              />
-            </div>
+            <label className="block font-medium text-gray-600 mb-1">Issue name</label>
+            <input
+              type="text"
+              value={issueData.title}
+              onChange={(e) =>
+                setIssueData({ ...issueData, title: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded px-4 py-2"
+              placeholder="Name this issue..."
+              required
+            />
           </div>
 
-          {/* Right Column: Dropdowns */}
-          <div className="space-y-4">
+          {/* Status and Criticality row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block font-medium text-gray-600 mb-1">Status</label>
               <select
-                value={issueData.status || ""}
+                value={issueData.assignedTo}
                 onChange={(e) =>
-                  setIssueData({ ...issueData, status: e.target.value })
+                  setIssueData({ ...issueData, assignedTo: e.target.value })
                 }
-                className={`w-full border border-gray-300 rounded px-4 py-2 ${!issueData.status ? "text-gray-400" : "text-black"
-                  }`}
-                required
+                className="w-full border border-gray-300 rounded px-4 py-2"
               >
-                <option value="">Select status</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Closed">Closed</option>
+                <option value="Unassigned">Unassigned</option>
+                <option value="Cyclekicks">Cyclekicks</option>
+                <option value="Alice">Alice</option>
+                <option value="Bob">Bob</option>
               </select>
             </div>
-
             <div>
               <label className="block font-medium text-gray-600 mb-1">Criticality</label>
               <select
-                value={issueData.criticality || ""}
+                value={issueData.level}
                 onChange={(e) =>
-                  setIssueData({ ...issueData, criticality: e.target.value })
+                  setIssueData({ ...issueData, level: e.target.value })
                 }
-                className={`w-full border border-gray-300 rounded px-4 py-2 ${!issueData.criticality ? "text-gray-400" : "text-black"
-                  }`}
-                required
+                className="w-full border border-gray-300 rounded px-4 py-2"
+                placeholder="Assign criticality"
               >
-                <option value="">Select criticality</option>
+                <option value="">Assign criticality</option>
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
-                <option value="Critical">Critical</option>
               </select>
             </div>
+          </div>
 
+          {/* Description */}
+          <div>
+            <label className="block font-medium text-gray-600 mb-1">Description</label>
+            <textarea
+              value={issueData.description}
+              onChange={(e) =>
+                setIssueData({ ...issueData, description: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded px-4 py-2 min-h-[100px]"
+              placeholder="Add Description..."
+            />
+          </div>
+
+          {/* Assignee and Solution row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block font-medium text-gray-600 mb-1">Assignee</label>
               <select
-                value={issueData.assignee || ""}
+                value={issueData.assignedTo}
                 onChange={(e) =>
-                  setIssueData({ ...issueData, assignee: e.target.value })
+                  setIssueData({ ...issueData, assignedTo: e.target.value })
                 }
-                className={`w-full border border-gray-300 rounded px-4 py-2 ${!issueData.assignee ? "text-gray-400" : "text-black"
-                  }`}
-                required
+                className="w-full border border-gray-300 rounded px-4 py-2"
               >
-                <option value="">Select assignee</option>
+                <option value="Cyclekicks">Cyclekicks</option>
                 <option value="Alice">Alice</option>
                 <option value="Bob">Bob</option>
-                <option value="Charlie">Charlie</option>
-                <option value="Dana">Dana</option>
+                <option value="Unassigned">Unassigned</option>
               </select>
             </div>
-
             <div>
               <label className="block font-medium text-gray-600 mb-1">Solution</label>
               <select
-                value={issueData.solution || ""}
+                value={issueData.solution}
                 onChange={(e) =>
                   setIssueData({ ...issueData, solution: e.target.value })
                 }
-                className={`w-full border border-gray-300 rounded px-4 py-2 ${!issueData.solution ? "text-gray-400" : "text-black"
-                  }`}
-                required
+                className="w-full border border-gray-300 rounded px-4 py-2"
+                placeholder="Pick solution"
               >
-                <option value="">Select solution</option>
-                <option value="Mitigate">Mitigate</option>
-                <option value="Accept">Accept</option>
-                <option value="Transfer">Transfer</option>
-                <option value="Avoid">Avoid</option>
+                <option value="">Pick solution</option>
+                <option value="Fix available">Fix available</option>
+                <option value="Workaround">Workaround</option>
+                <option value="No solution">No solution</option>
               </select>
             </div>
+          </div>
 
+          {/* Change log */}
+          <div>
+            <label className="block font-medium text-gray-600 mb-1">Change log</label>
+            <div className="border border-gray-200 rounded p-4">
+              {(!issueData.changeLog || issueData.changeLog.length === 0) && (
+                <p className="text-gray-500 italic">You don't have any notes yet...</p>
+              )}
+              {issueData.changeLog?.map((note, index) => (
+                <div key={index} className="mb-2 p-2 bg-gray-50 rounded">
+                  {note}
+                </div>
+              ))}
+              <div className="mt-4 flex">
+                <input
+                  type="text"
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded-l px-4 py-2"
+                  placeholder="Post a new note..."
+                />
+                <button
+                  type="button"
+                  onClick={handleAddNote}
+                  className="bg-primary text-white px-4 py-2 rounded-r hover:bg-blue-700"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
+        {/* Form actions */}
         <div className="mt-6 flex justify-end gap-4">
           <button
             type="button"
@@ -173,7 +189,7 @@ const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
             type="submit"
             className="bg-primary text-white px-6 py-2 rounded hover:bg-blue-700"
           >
-            Create Issue
+            Create issue
           </button>
         </div>
       </form>

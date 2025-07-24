@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Listbox } from "@headlessui/react";
 import { Check, ChevronDown } from "lucide-react";
 import { toast } from "react-toastify";
-
+import { userServices } from "../../services/UserServices";
 export const showSuccess = (message) => toast.success(message);
 export const showError = (message) => toast.error(message);
 export const showInfo = (message) => toast.info(message);
@@ -31,47 +31,33 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
     setLoading(true);
     setError("");
     setSuccess("");
-
-    // Use current user's companyName
+  
     const payload = {
       firstName: memberData.firstName,
       lastName: memberData.lastName,
       email: memberData.email,
-      password: memberData.password || "changeme123", // Default password if not set
+      password: memberData.password || "changeme123",
       role: memberData.role,
-      // companyName: currentUser?.companyName || "", // REMOVE, now set server-side
     };
-
+  
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/api/agentMap/add-user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        showError("Failed to add user. Please check the server.");
-        throw new Error("Failed to add user. Please check the server.");
-      }
-
-      const result = await response.json();
+      const result = await userServices.addUser(payload);
       showSuccess(result.message || "User added successfully!");
       setMemberData({ firstName: "", lastName: "", email: "", role: "user", password: "" });
-
+  
       if (onSuccess) onSuccess();
+  
       setTimeout(() => {
         onClose();
       }, 1500);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Something went wrong.");
+      showError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50">
