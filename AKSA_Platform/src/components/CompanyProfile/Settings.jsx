@@ -45,7 +45,8 @@ const Settings = () => {
         localStorage.clear();
         navigate("/login");
       } catch (err) {
-        showToast("Failed to delete account.", "error");
+        const msg = err?.response?.data?.error || "Failed to delete account.";
+        showToast(msg, "error");
       }
     } else {
       showToast("Account deletion cancelled.", "info");

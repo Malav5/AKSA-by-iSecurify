@@ -129,4 +129,35 @@ router.patch("/update-plan", authMiddleware, async (req, res) => {
   }
 });
 
+// Delete current user account
+router.delete("/delete-account", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Prevent subadmin from deleting their own account
+    if (user.role === "subadmin") {
+      return res.status(403).json({ error: "Subadmins cannot delete their own account." });
+    }
+
+    await User.findByIdAndDelete(userId);
+    res.json({ message: "Account deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete account" });
+  }
+});
+
+// Get all users (no restrictions)
+router.get("/users", async (req, res) => {
+  try {
+    const users = await User.find({}, "-passwordHash");
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
 module.exports = router;

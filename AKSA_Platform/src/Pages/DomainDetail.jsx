@@ -2,20 +2,21 @@ import React, { useEffect, useState, useRef } from "react";
 import { fetchWhoisData, fetchSSLDetails, fetchDNSDetails, fetchHttpHeaders, fetchHttpSecurity, fetchTlsInfo, fetchLinkedPages, fetchCarbonData, fetchSocialTags } from "../services/DashboardServices";
 import { domainServices } from "../services/domainServices";
 import {
-    Globe,
-    Lock,
-    Network,
-    ShieldCheck,
-    Inbox,
-    Mail,
-    Server,
-    Folder,
-    Loader2,
-    ChevronDown, Trash2,
-    CheckCircle,
-    XCircle,
-    Info,
-    Copy
+  Globe,
+  Lock,
+  Network,
+  ShieldCheck,
+  Inbox,
+  Mail,
+  Server,
+  Folder,
+  Loader2,
+  ChevronDown,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Info,
+  Copy
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Dashboard/Sidebar";
@@ -58,15 +59,13 @@ const InfoRow = ({ title, value, badge, tooltip }) => (
 );
 
 const SectionCard = ({ title, icon: Icon, color, children }) => (
-    <div className="bg-white p-4 sm:p-5 rounded-xl shadow transition-shadow duration-200 hover:shadow-lg">
-        <div className={`flex items-center gap-2 mb-3 sm:mb-4 font-semibold text-base sm:text-lg ${color}`}>
-            <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${color}`} />
-            <span className="truncate">{title}</span>
-        </div>
-        <div className="text-xs sm:text-sm">
-            {children}
-        </div>
+  <div className="bg-white p-4 sm:p-5 rounded-xl shadow transition-shadow duration-200 hover:shadow-lg">
+    <div className={`flex items-center gap-2 mb-3 sm:mb-4 font-semibold text-base sm:text-lg ${color}`}>
+      <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${color}`} />
+      <span className="truncate">{title}</span>
     </div>
+    <div className="text-xs sm:text-sm">{children}</div>
+  </div>
 );
 
 const DomainDetail = () => {
@@ -449,228 +448,228 @@ const DomainDetail = () => {
         );
     }
 
-    if (loading) {
-        return (
-            <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
-                <div className="sticky top-0 h-screen">
-                    <Sidebar />
-                </div>
-                <div className="flex-1 flex flex-col h-screen overflow-hidden">
-                    <div className="sticky top-0 z-10 bg-white">
-                        <Header />
-                    </div>
-                    <div className="flex justify-between items-center mb-6 p-4 sm:p-6">
-                        <h1 className="text-2xl font-bold">Domain Details: {selected}</h1>
-                        <button
-                            onClick={() => navigate("/dashboard")}
-                            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
-                        >
-                            Back to Dashboard
-                        </button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto scrollbar-hide p-4 sm:p-6">
-                        {/* Always show domain selector and add domain input, even while loading */}
-                        <div className="relative max-w-xs mb-4" ref={dropdownRef}>
-                            <label className="block mb-2 text-sm font-semibold text-gray-800">
-                                Select Domain
-                            </label>
-                            <button
-                                type="button"
-                                onClick={() => setOpen(!open)}
-                                className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <span>{selected || "Select a domain"}</span>
-                                <ChevronDown className="h-4 w-4 text-gray-500" />
-                            </button>
-                            {open && (
-                                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-                                    <li
-                                        key="no-domain"
-                                        className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-500"
-                                        onClick={() => {
-                                            setSelected("");
-                                            localStorage.removeItem(DOMAIN_DETAIL_KEY);
-                                            setWhois(null);
-                                            setSSL(null);
-                                            setDNS(null);
-                                            setHttpHeaders(null);
-                                            setHttpSecurity(null);
-                                            setTlsData(null);
-                                            setLinkedPages({ internal: [], external: [] });
-                                            setCarbonData(null);
-                                            setSocialTags(null);
-                                            setOpen(false);
-                                            setLoading(false);
-                                        }}
-                                    >
-                                        <span className="flex-1 italic">No Domain</span>
-                                    </li>
-                                    {domainList && domainList.map((domain) => (
-                                        <li
-                                            key={domain._id}
-                                            className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            <span
-                                                className="flex-1"
-                                                onClick={() => handleSelect(domain)}
-                                            >
-                                                {domain.name}
-                                            </span>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (window.confirm(`Are you sure you want to delete ${domain.name}?`)) {
-                                                        handleDeleteDomain(domain._id);
-                                                    }
-                                                }}
-                                                className="text-red-600 hover:text-red-800"
-                                                aria-label={`Delete domain ${domain.name}`}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                        <div className="mt-4 max-w-xs mb-8">
-                            <label htmlFor="new-domain" className="block text-sm font-medium text-gray-700">Add New Domain</label>
-                            <div className="flex space-x-2 mt-1">
-                                <input
-                                    id="new-domain"
-                                    type="text"
-                                    value={newDomain}
-                                    onChange={(e) => setNewDomain(e.target.value)}
-                                    className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="e.g. yourdomain.com"
-                                />
-                                <button
-                                    onClick={handleAddDomain}
-                                    className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
-                                >
-                                    Add
-                                </button>
-                            </div>
-                        </div>
-                        <div className="flex flex-col items-center justify-center py-10 animate-fade-in text-center text-gray-600">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-                            <p className="text-sm font-medium">Fetching domain insights for {selected}...</p>
-                        </div>
-                    </div>
-                </div>
+  if (loading) {
+    return (
+      <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
+        <div className="sticky top-0 h-screen">
+          <Sidebar />
+        </div>
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+          <div className="sticky top-0 z-10 bg-white">
+            <Header />
+          </div>
+          <div className="flex justify-between items-center mb-6 p-4 sm:p-6">
+            <h1 className="text-2xl font-bold">Domain Details: {selected}</h1>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto scrollbar-hide p-4 sm:p-6">
+            {/* Always show domain selector and add domain input, even while loading */}
+            <div className="relative max-w-xs mb-4" ref={dropdownRef}>
+              <label className="block mb-2 text-sm font-semibold text-gray-800">
+                Select Domain
+              </label>
+              <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <span>{selected || "Select a domain"}</span>
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              </button>
+              {open && (
+                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                  <li
+                    key="no-domain"
+                    className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-500"
+                    onClick={() => {
+                      setSelected("");
+                      localStorage.removeItem(DOMAIN_DETAIL_KEY);
+                      setWhois(null);
+                      setSSL(null);
+                      setDNS(null);
+                      setHttpHeaders(null);
+                      setHttpSecurity(null);
+                      setTlsData(null);
+                      setLinkedPages({ internal: [], external: [] });
+                      setCarbonData(null);
+                      setSocialTags(null);
+                      setOpen(false);
+                      setLoading(false);
+                    }}
+                  >
+                    <span className="flex-1 italic">No Domain</span>
+                  </li>
+                  {domainList && domainList.map((domain) => (
+                    <li
+                      key={domain._id}
+                      className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <span
+                        className="flex-1"
+                        onClick={() => handleSelect(domain)}
+                      >
+                        {domain.name}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Are you sure you want to delete ${domain.name}?`)) {
+                            handleDeleteDomain(domain._id);
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                        aria-label={`Delete domain ${domain.name}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-        );
-    }
+            <div className="mt-4 max-w-xs mb-8">
+              <label htmlFor="new-domain" className="block text-sm font-medium text-gray-700">Add New Domain</label>
+              <div className="flex space-x-2 mt-1">
+                <input
+                  id="new-domain"
+                  type="text"
+                  value={newDomain}
+                  onChange={(e) => setNewDomain(e.target.value)}
+                  className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="e.g. yourdomain.com"
+                />
+                <button
+                  onClick={handleAddDomain}
+                  className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-col items-center justify-center py-10 animate-fade-in text-center text-gray-600">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+              <p className="text-sm font-medium">Fetching domain insights for {selected}...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-    if (error) {
-        return (
-            <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
-                <div className="sticky top-0 h-screen">
-                    <Sidebar />
-                </div>
-                <div className="flex-1 flex flex-col h-screen overflow-hidden">
-                    <div className="sticky top-0 z-10 bg-white">
-                        <Header />
-                    </div>
-                    <div className="flex-1 overflow-y-auto scrollbar-hide p-4 sm:p-6">
-                        {/* Always show domain selector and add domain input, even on error */}
-                        <div className="relative max-w-xs mb-4" ref={dropdownRef}>
-                            <label className="block mb-2 text-sm font-semibold text-gray-800">
-                                Select Domain
-                            </label>
-                            <button
-                                type="button"
-                                onClick={() => setOpen(!open)}
-                                className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <span>{selected || "Select a domain"}</span>
-                                <ChevronDown className="h-4 w-4 text-gray-500" />
-                            </button>
-                            {open && (
-                                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-                                    <li
-                                        key="no-domain"
-                                        className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-500"
-                                        onClick={() => {
-                                            setSelected("");
-                                            localStorage.removeItem(DOMAIN_DETAIL_KEY);
-                                            setWhois(null);
-                                            setSSL(null);
-                                            setDNS(null);
-                                            setHttpHeaders(null);
-                                            setHttpSecurity(null);
-                                            setTlsData(null);
-                                            setLinkedPages({ internal: [], external: [] });
-                                            setCarbonData(null);
-                                            setSocialTags(null);
-                                            setOpen(false);
-                                            setLoading(false);
-                                        }}
-                                    >
-                                        <span className="flex-1 italic">No Domain</span>
-                                    </li>
-                                    {domainList && domainList.map((domain) => (
-                                        <li
-                                            key={domain._id}
-                                            className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            <span
-                                                className="flex-1"
-                                                onClick={() => handleSelect(domain)}
-                                            >
-                                                {domain.name}
-                                            </span>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (window.confirm(`Are you sure you want to delete ${domain.name}?`)) {
-                                                        handleDeleteDomain(domain._id);
-                                                    }
-                                                }}
-                                                className="text-red-600 hover:text-red-800"
-                                                aria-label={`Delete domain ${domain.name}`}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                        <div className="mt-4 max-w-xs mb-8">
-                            <label htmlFor="new-domain" className="block text-sm font-medium text-gray-700">Add New Domain</label>
-                            <div className="flex space-x-2 mt-1">
-                                <input
-                                    id="new-domain"
-                                    type="text"
-                                    value={newDomain}
-                                    onChange={(e) => setNewDomain(e.target.value)}
-                                    className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="e.g. yourdomain.com"
-                                />
-                                <button
-                                    onClick={handleAddDomain}
-                                    className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
-                                >
-                                    Add
-                                </button>
-                            </div>
-                        </div>
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-                            <strong className="font-bold">Error!</strong>
-                            <span className="block sm:inline"> {error}</span>
-                        </div>
-                        <button
-                            onClick={() => navigate("/dashboard")}
-                            className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
-                        >
-                            Go Back to Dashboard
-                        </button>
-                    </div>
-                </div>
+  if (error) {
+    return (
+      <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
+        <div className="sticky top-0 h-screen">
+          <Sidebar />
+        </div>
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+          <div className="sticky top-0 z-10 bg-white">
+            <Header />
+          </div>
+          <div className="flex-1 overflow-y-auto scrollbar-hide p-4 sm:p-6">
+            {/* Always show domain selector and add domain input, even on error */}
+            <div className="relative max-w-xs mb-4" ref={dropdownRef}>
+              <label className="block mb-2 text-sm font-semibold text-gray-800">
+                Select Domain
+              </label>
+              <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <span>{selected || "Select a domain"}</span>
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              </button>
+              {open && (
+                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                  <li
+                    key="no-domain"
+                    className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-500"
+                    onClick={() => {
+                      setSelected("");
+                      localStorage.removeItem(DOMAIN_DETAIL_KEY);
+                      setWhois(null);
+                      setSSL(null);
+                      setDNS(null);
+                      setHttpHeaders(null);
+                      setHttpSecurity(null);
+                      setTlsData(null);
+                      setLinkedPages({ internal: [], external: [] });
+                      setCarbonData(null);
+                      setSocialTags(null);
+                      setOpen(false);
+                      setLoading(false);
+                    }}
+                  >
+                    <span className="flex-1 italic">No Domain</span>
+                  </li>
+                  {domainList && domainList.map((domain) => (
+                    <li
+                      key={domain._id}
+                      className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <span
+                        className="flex-1"
+                        onClick={() => handleSelect(domain)}
+                      >
+                        {domain.name}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Are you sure you want to delete ${domain.name}?`)) {
+                            handleDeleteDomain(domain._id);
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                        aria-label={`Delete domain ${domain.name}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-        );
-    }
+            <div className="mt-4 max-w-xs mb-8">
+              <label htmlFor="new-domain" className="block text-sm font-medium text-gray-700">Add New Domain</label>
+              <div className="flex space-x-2 mt-1">
+                <input
+                  id="new-domain"
+                  type="text"
+                  value={newDomain}
+                  onChange={(e) => setNewDomain(e.target.value)}
+                  className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="e.g. yourdomain.com"
+                />
+                <button
+                  onClick={handleAddDomain}
+                  className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <strong className="font-bold">Error!</strong>
+              <span className="block sm:inline"> {error}</span>
+            </div>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
+            >
+              Go Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
     return (
         <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
@@ -693,95 +692,95 @@ const DomainDetail = () => {
                         </button>
                     </div>
 
-                    {/* Domain Selection Section */}
-                    <div className="space-y-4 sm:space-y-6 mb-6">
-                        <div className="relative max-w-xs sm:max-w-md" ref={dropdownRef}>
-                            <label className="block mb-2 text-sm font-semibold text-gray-800">
-                                Select Domain
-                            </label>
-                            <button
-                                type="button"
-                                onClick={() => setOpen(!open)}
-                                className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 sm:px-4 py-2 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                            >
-                                <span className="truncate">{selected || "Select a domain"}</span>
-                                <ChevronDown className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                            </button>
-                            {open && (
-                                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-                                    <li
-                                        key="no-domain"
-                                        className="flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-500"
-                                        onClick={() => {
-                                            setSelected("");
-                                            localStorage.removeItem(DOMAIN_DETAIL_KEY);
-                                            setWhois(null);
-                                            setSSL(null);
-                                            setDNS(null);
-                                            setHttpHeaders(null);
-                                            setHttpSecurity(null);
-                                            setTlsData(null);
-                                            setLinkedPages({ internal: [], external: [] });
-                                            setCarbonData(null);
-                                            setSocialTags(null);
-                                            setOpen(false);
-                                            setLoading(false);
-                                        }}
-                                    >
-                                        <span className="flex-1 italic">No Domain</span>
-                                    </li>
-                                    {domainList.map((domain) => (
-                                        <li
-                                            key={domain._id}
-                                            className="flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            <span
-                                                className="flex-1 truncate"
-                                                onClick={() => handleSelect(domain)}
-                                            >
-                                                {domain.name}
-                                            </span>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (window.confirm(`Are you sure you want to delete ${domain.name}?`)) {
-                                                        handleDeleteDomain(domain._id);
-                                                    }
-                                                }}
-                                                className="text-red-600 hover:text-red-800 ml-2 flex-shrink-0"
-                                                aria-label={`Delete domain ${domain.name}`}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
+          {/* Domain Selection Section */}
+          <div className="space-y-4 sm:space-y-6 mb-6">
+            <div className="relative max-w-xs sm:max-w-md" ref={dropdownRef}>
+              <label className="block mb-2 text-sm font-semibold text-gray-800">
+                Select Domain
+              </label>
+              <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 sm:px-4 py-2 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              >
+                <span className="truncate">{selected || "Select a domain"}</span>
+                <ChevronDown className="h-4 w-4 text-gray-500 flex-shrink-0" />
+              </button>
+              {open && (
+                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                  <li
+                    key="no-domain"
+                    className="flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-500"
+                    onClick={() => {
+                      setSelected("");
+                      localStorage.removeItem(DOMAIN_DETAIL_KEY);
+                      setWhois(null);
+                      setSSL(null);
+                      setDNS(null);
+                      setHttpHeaders(null);
+                      setHttpSecurity(null);
+                      setTlsData(null);
+                      setLinkedPages({ internal: [], external: [] });
+                      setCarbonData(null);
+                      setSocialTags(null);
+                      setOpen(false);
+                      setLoading(false);
+                    }}
+                  >
+                    <span className="flex-1 italic">No Domain</span>
+                  </li>
+                  {domainList.map((domain) => (
+                    <li
+                      key={domain._id}
+                      className="flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <span
+                        className="flex-1 truncate"
+                        onClick={() => handleSelect(domain)}
+                      >
+                        {domain.name}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Are you sure you want to delete ${domain.name}?`)) {
+                            handleDeleteDomain(domain._id);
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-800 ml-2 flex-shrink-0"
+                        aria-label={`Delete domain ${domain.name}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-                        {/* Add New Domain */}
-                        <div className="max-w-xs sm:max-w-md">
-                            <label htmlFor="new-domain" className="block text-sm font-medium text-gray-700 mb-2">
-                                Add New Domain
-                            </label>
-                            <div className="flex space-x-2">
-                                <input
-                                    id="new-domain"
-                                    type="text"
-                                    value={newDomain}
-                                    onChange={(e) => setNewDomain(e.target.value)}
-                                    className="flex-1 rounded border border-gray-300 px-3 sm:px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="e.g. yourdomain.com"
-                                />
-                                <button
-                                    onClick={handleAddDomain}
-                                    className="bg-primary text-white px-3 sm:px-4 py-2 rounded hover:bg-[#700070] transition-colors text-sm"
-                                >
-                                    Add
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            {/* Add New Domain */}
+            <div className="max-w-xs sm:max-w-md">
+              <label htmlFor="new-domain" className="block text-sm font-medium text-gray-700 mb-2">
+                Add New Domain
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  id="new-domain"
+                  type="text"
+                  value={newDomain}
+                  onChange={(e) => setNewDomain(e.target.value)}
+                  className="flex-1 rounded border border-gray-300 px-3 sm:px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="e.g. yourdomain.com"
+                />
+                <button
+                  onClick={handleAddDomain}
+                  className="bg-primary text-white px-3 sm:px-4 py-2 rounded hover:bg-[#700070] transition-colors text-sm"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
 
                     {/* Empty State */}
                     {domainList.length === 0 && (
