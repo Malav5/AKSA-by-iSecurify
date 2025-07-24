@@ -125,7 +125,6 @@ export const fetchSocialTags = async (domain) => {
   return res.data;
 };
 
-
 // Fixed fetchRiskData function
 export const fetchRiskData = async (domain) => {
   try {
