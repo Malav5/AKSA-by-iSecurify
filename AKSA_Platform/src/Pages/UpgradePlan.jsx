@@ -2,6 +2,11 @@ import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+    Globe,
+    Lock,
+    Shield,Server, Users, Clock,LifeBuoy,Zap
+  } from "lucide-react";
 
 const plans = [
     {
