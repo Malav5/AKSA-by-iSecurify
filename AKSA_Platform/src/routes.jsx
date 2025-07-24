@@ -22,6 +22,7 @@ import AssignAgent from "./components/SOCDashboard/AssignAgent";
 import Policies from "./components/Dashboard/Policies";
 import SOC from "./Pages/SOC";
 import AdminDashboard from "./Pages/AdminDashboard";
+import UpgradePlan from "./Pages/UpgradePlan";
 
 const AppRoutes = () => {
   // Role-based dashboard selection
@@ -49,6 +50,7 @@ const AppRoutes = () => {
       <Route path="/policies" element={<Policies />} />
       <Route path="/soc-dashboard" element={<SOC />} />
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/upgrade-plan" element={<UpgradePlan />} />
     </Routes>
   );
 };

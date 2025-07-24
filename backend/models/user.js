@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true }, // store hashed password, NOT raw password
   plan: {
     type: String,
-    enum: ["Freemium", "PlanA", "PlanB", "Nirvana"],
+    enum: ["Freemium", "Aditya", "Ayush", "Moksha"],
     default: "Freemium",
   },
   role: {

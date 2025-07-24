@@ -111,4 +111,22 @@ router.get("/user", authMiddleware, async (req, res) => {
   }
 });
 
+// Update user plan
+router.patch("/update-plan", authMiddleware, async (req, res) => {
+  try {
+    const { plan } = req.body;
+    if (!plan) return res.status(400).json({ error: "Plan is required" });
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { plan },
+      { new: true }
+    ).select("-passwordHash");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    return res.json({ success: true, plan: user.plan });
+  } catch (err) {
+    console.error("Update plan error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;

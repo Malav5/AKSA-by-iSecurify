@@ -8,7 +8,8 @@ const MemberProfile = ({
   border,
   handleLogoChange,
   setShowDomainsInline,
-  handleAttachmentChange
+  handleAttachmentChange,
+  userPlan
 }) => {
   const [domainCount, setDomainCount] = useState(0);
   const [companyName, setCompanyName] = useState(profileData.name || "");
@@ -107,7 +108,7 @@ const MemberProfile = ({
             </div>
             <div>
               <div className="text-xs text-gray-500 mb-1">Company Status</div>
-              <div className="text-lg font-bold text-primary">Freemium</div>
+              <div className="text-lg font-bold text-primary">{userPlan || "-"}</div>
             </div>
           </div>
         </div>

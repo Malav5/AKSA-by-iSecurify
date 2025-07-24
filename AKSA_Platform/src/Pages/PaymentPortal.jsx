@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+import axios from "axios";
+import { showSuccess, showError } from "../components/ui/toast";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PaymentPortal = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { plan } = location.state || {};
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [loading, setLoading] = useState(false);
 
   if (!plan) {
     navigate('/pricing');
@@ -13,6 +18,28 @@ const PaymentPortal = () => {
   }
 
   const handleGoToMainDashboard = () => {
+    navigate("/dashboard");
+  };
+
+  const handleConfirmPayment = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch(
+        "http://localhost:3000/api/auth/update-plan", // Adjust endpoint as needed
+        { plan },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      showSuccess("Plan upgraded successfully!");
+      setTimeout(() => navigate("/dashboard"), 1200);
+    } catch (err) {
+      showError("Failed to update plan: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
     navigate("/dashboard");
   };
 
@@ -97,6 +124,7 @@ const PaymentPortal = () => {
 
   return (
     <main className="min-h-screen w-full bg-white">
+      <ToastContainer />
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left Side - Hero Section */}
         <div className="lg:w-1/2 bg-gray-900 text-white flex flex-col justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
@@ -105,7 +133,7 @@ const PaymentPortal = () => {
             alt="Security"
             className="absolute inset-0 w-full h-full object-cover opacity-30"
           />
-          
+
           {/* Mobile Logo - Top left on mobile */}
           <div className="lg:hidden absolute top-4 left-4 z-10">
             <div className="flex items-baseline space-x-2">
@@ -155,25 +183,22 @@ const PaymentPortal = () => {
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                 <button
                   onClick={() => setPaymentMethod('card')}
-                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${
-                    paymentMethod === 'card' ? 'bg-[#800080] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${paymentMethod === 'card' ? 'bg-[#800080] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
                 >
                   Credit/Debit Card
                 </button>
                 <button
                   onClick={() => setPaymentMethod('upi')}
-                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${
-                    paymentMethod === 'upi' ? 'bg-[#800080] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${paymentMethod === 'upi' ? 'bg-[#800080] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
                 >
                   UPI
                 </button>
                 <button
                   onClick={() => setPaymentMethod('bank_transfer')}
-                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${
-                    paymentMethod === 'bank_transfer' ? 'bg-[#800080] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${paymentMethod === 'bank_transfer' ? 'bg-[#800080] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
                 >
                   Bank Transfer
                 </button>
@@ -183,14 +208,15 @@ const PaymentPortal = () => {
             {renderPaymentForm()}
 
             <button
-              onClick={() => alert(`Confirming payment for ${plan} plan via ${paymentMethod}!`)}
+              onClick={handleConfirmPayment}
+              disabled={loading}
               className="w-full px-4 py-3 bg-[#800080] text-white font-semibold rounded-lg hover:bg-[#6a006a] focus:outline-none focus:ring-2 focus:ring-[#800080] focus:ring-opacity-50 transition duration-200 ease-in-out transform hover:scale-105 text-sm sm:text-base"
             >
-              Confirm Payment
+              {loading ? "Processing..." : "Confirm Payment"}
             </button>
 
             <button
-              onClick={() => navigate('/pricing')}
+              onClick={handleCancel}
               className="w-full mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-200 ease-in-out text-sm sm:text-base"
             >
               Cancel
