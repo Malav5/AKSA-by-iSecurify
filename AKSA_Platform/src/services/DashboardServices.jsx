@@ -126,8 +126,6 @@ export const fetchSocialTags = async (domain) => {
 };
 
 
-// dashboardservices.jsx
-
 // Fixed fetchRiskData function
 export const fetchRiskData = async (domain) => {
   try {
@@ -155,7 +153,6 @@ export const fetchRiskData = async (domain) => {
     };
   }
 };
-
 // Dynamically score the entire API response
 const calculateOverallRiskScore = (data) => {
   let totalPoints = 0;

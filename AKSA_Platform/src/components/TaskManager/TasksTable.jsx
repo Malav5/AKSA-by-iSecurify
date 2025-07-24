@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   BadgeCheck,
   ChevronDown,
@@ -67,8 +67,10 @@ export default function TasksTable() {
   const [menuTaskId, setMenuTaskId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const menuRefs = useRef({});
+  const dropdownRefs = useRef({});
 
-  const users = ["Alice Johnson", "Bob Smith", "Charlie Davis", "Dana Lane"];
+  const users = ["Alice Johnson", "Bob Smith", "Charlie Davis", "Dana Lane", "Krina Patel (manager)"];
   const statuses = ["Unassigned", "To Do", "In Progress", "Resolved", "Reopened"];
   const priorities = ["Urgent", "High", "Medium", "Low"];
 
@@ -119,6 +121,32 @@ export default function TasksTable() {
       setSortDirection("asc");
     }
   };
+
+  const getDropdownPosition = (taskId) => {
+    const buttonElement = menuRefs.current[taskId];
+    const dropdownElement = dropdownRefs.current[taskId];
+    
+    if (!buttonElement || !dropdownElement) return {};
+
+    const buttonRect = buttonElement.getBoundingClientRect();
+    const dropdownHeight = dropdownElement.offsetHeight;
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+
+    if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+      return { bottom: '100%', top: 'auto', right: '0' };
+    }
+    return { top: '100%', bottom: 'auto', right: '0' };
+  };
+
+  useEffect(() => {
+    if (menuTaskId) {
+      const position = getDropdownPosition(menuTaskId);
+      if (dropdownRefs.current[menuTaskId]) {
+        Object.assign(dropdownRefs.current[menuTaskId].style, position);
+      }
+    }
+  }, [menuTaskId]);
 
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
@@ -201,10 +229,10 @@ export default function TasksTable() {
           />
         </div>
       </div>
-
-      <div className="overflow-x-auto rounded border border-gray-200">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-100 text-gray-700">
+      <div className="overflow-x-auto border border-gray-200 rounded">
+  <div className="max-h-[400px] overflow-y-auto scrollbar-hide">
+    <table className="w-full text-sm text-left">
+      <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
             <tr>
               {["name", "criticality", "priority", "status", "assignee"].map((field) => (
                 <th
@@ -257,6 +285,7 @@ export default function TasksTable() {
                 <td className="px-4 py-2">{new Date(task.updatedAt || task.createdAt).toLocaleDateString()}</td>
                 <td className="px-4 py-2 relative">
                   <button
+                    ref={el => menuRefs.current[task._id] = el}
                     className="p-1 rounded-full hover:bg-gray-200"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -266,9 +295,13 @@ export default function TasksTable() {
                     <MoreHorizontal className="w-5 h-5 text-gray-500" />
                   </button>
                   {menuTaskId === task._id && (
-                    <div className="absolute right-2 mt-2 w-32 bg-white border border-gray-200 rounded shadow z-10">
+                    <div 
+                      ref={el => dropdownRefs.current[task._id] = el}
+                      className="absolute mt-1 w-32 bg-white border border-gray-200 rounded shadow-lg z-50"
+                    >
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setSelectedTask(task);
                           setMenuTaskId(null);
                         }}
@@ -277,7 +310,8 @@ export default function TasksTable() {
                         View Details
                       </button>
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           deleteTask(task._id);
                           setMenuTaskId(null);
                         }}
@@ -299,6 +333,7 @@ export default function TasksTable() {
             )}
           </tbody>
         </table>
+      </div>
       </div>
 
       <Pagination
