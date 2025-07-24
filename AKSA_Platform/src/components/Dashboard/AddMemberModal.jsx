@@ -39,14 +39,16 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
       email: memberData.email,
       password: memberData.password || "changeme123", // Default password if not set
       role: memberData.role,
-      companyName: currentUser?.companyName || "",
+      // companyName: currentUser?.companyName || "", // REMOVE, now set server-side
     };
 
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:3000/api/agentMap/add-user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
