@@ -150,4 +150,14 @@ router.delete("/delete-account", authMiddleware, async (req, res) => {
   }
 });
 
+// Get all users (no restrictions)
+router.get("/users", async (req, res) => {
+  try {
+    const users = await User.find({}, "-passwordHash");
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
 module.exports = router;
