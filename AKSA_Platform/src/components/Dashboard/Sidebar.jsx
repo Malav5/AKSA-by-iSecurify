@@ -3,12 +3,14 @@ import { LayoutDashboard, AlertCircle, Settings, ShieldCheck, Menu, X } from "lu
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../../index.css";
-
+import Pricing from "../Home/Pricing";
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
 
   // Fetch user info
   useEffect(() => {
@@ -42,13 +44,15 @@ const Sidebar = () => {
   const isActive = (path) => location.pathname === path;
 
   const handleNavClick = (item) => {
-    if (item.forceReload) {
-      // Handle external links
+    if (item.label === "SOC") {
+      // Instead of navigating directly, show the modal
+      setShowModal(true);
+    } else if (item.forceReload) {
       window.open(item.path, item.openInNewTab ? "_blank" : "_self");
     } else {
-      // Handle internal navigation
       navigate(item.path);
     }
+  
     // Close mobile menu after navigation
     setIsMobileMenuOpen(false);
   };
@@ -124,6 +128,35 @@ const Sidebar = () => {
           </nav>
         </div>
       </aside>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-gray-900/50 bg-opacity-40 flex items-center justify-center z-150">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-[90%] max-w-md">
+            <h2 className="text-xl font-semibold mb-2">Upgrade Required</h2>
+            <p className="text-gray-700 mb-4">
+              Please purchase our next plan to access SOC services.
+            </p>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {setShowModal(false)}} 
+                className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+              >
+                View Plans
+              </button>
+            </div>
+          </div>
+
+
+        </div>
+      )}
+
     </>
   );
 };

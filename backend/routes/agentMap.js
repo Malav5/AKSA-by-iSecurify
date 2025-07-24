@@ -10,6 +10,7 @@ const AgentUserAssignment = require("../models/AgentUserAssignment");
 const bcrypt = require('bcryptjs');
 const Manager = require("../models/Manager");
 const SubadminManagerAssignment = require("../models/SubadminManagerAssignment");
+const authMiddleware = require("../middleware/authmiddleware");
 
 // Register agent mapping
 router.post("/register-agent", async (req, res) => {
@@ -196,7 +197,7 @@ router.get("/users", async (req, res) => {
 });
 
 // Add user (from AddUserModal)
-router.post("/add-user", async (req, res) => {
+router.post("/add-user", authMiddleware, async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ error: "First name, last name, email, and password are required" });
@@ -207,6 +208,14 @@ router.post("/add-user", async (req, res) => {
     if (existing) {
       return res.status(409).json({ error: "User with this email already exists" });
     }
+    // Fetch admin user to get companyName
+    let companyName = undefined;
+    if (req.userId) {
+      const admin = await User.findById(req.userId);
+      if (admin && admin.companyName) {
+        companyName = admin.companyName;
+      }
+    }
     // Hash the password
     const hashed = await bcrypt.hash(password, 10);
     const newUser = new User({
@@ -215,9 +224,10 @@ router.post("/add-user", async (req, res) => {
       email,
       passwordHash: hashed,
       role: 'user',
+      companyName, // assign from admin if available
     });
     await newUser.save();
-    res.status(201).json({ message: "User added", user: { firstName, lastName, email } });
+    res.status(201).json({ message: "User added", user: { firstName, lastName, email, companyName } });
   } catch (err) {
     res.status(500).json({ error: "Failed to add user", details: err.message });
   }
@@ -226,8 +236,9 @@ router.post("/add-user", async (req, res) => {
 // Get all users with role 'user'
 router.get("/users-with-role-user", async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }, "email firstName lastName");
+    const users = await User.find({ role: "user" }, "_id email firstName lastName");
     const formatted = users.map(u => ({
+      _id: u._id,
       email: u.email,
       name: `${u.firstName} ${u.lastName}`.trim()
     }));
@@ -329,6 +340,15 @@ router.get("/manager-subadmins/:managerId", async (req, res) => {
     res.json({ assignments });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch assignments", details: err.message });
+  }
+});
+
+router.delete("/delete-user/:id", async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete user" });
   }
 });
 
