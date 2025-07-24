@@ -63,7 +63,7 @@ const UserManagement = ({
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
-  
+
     try {
       await userServices.deleteUser(id);
       showSuccess("User deleted successfully");
@@ -146,7 +146,7 @@ const UserManagement = ({
                     </label>
                   </td>
                   <td className="px-4 py-3">
-                    {/* {currentUser?.role === "admin" && ( */}
+                    {/* {currentUser?.role === "subadmin" && ( */}
                     <button
                       className="text-red-500 hover:text-red-700"
                       title="Delete"

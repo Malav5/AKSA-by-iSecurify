@@ -91,7 +91,7 @@ const Vulnerabilities = () => {
       const token = localStorage.getItem('token');
       const role = localStorage.getItem('role');
       setUserRole(role);
-      if (role === 'admin') {
+      if (role === 'subadmin') {
         // Admin: fetch all agents
         const res = await axios.get('/api/wazuh/agents', {
           headers: { Authorization: `Bearer ${token}` }
@@ -191,7 +191,7 @@ const Vulnerabilities = () => {
   const filteredVulnerabilities = vulnerabilities.filter(v => {
     const agent = v._source?.agent?.name || 'Unknown';
     const severity = v._source?.vulnerability?.severity || 'Unknown';
-    if (userRole === 'admin') {
+    if (userRole === 'subadmin') {
       return (selectedAgent === 'All' || agent === selectedAgent) &&
         (selectedSeverity === 'All' || severity === selectedSeverity);
     } else {

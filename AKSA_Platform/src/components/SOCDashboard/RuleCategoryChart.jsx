@@ -29,7 +29,7 @@ const RuleCategoryChart = ({ maxCategories = 8 }) => {
         const token = localStorage.getItem('token');
         const userRole = localStorage.getItem('role');
         let allAlerts = [];
-        if (userRole === 'admin') {
+        if (userRole === 'subadmin') {
           // Admin: use all alerts
           const res = await fetchAllAlerts();
           allAlerts = res?.hits?.hits || [];

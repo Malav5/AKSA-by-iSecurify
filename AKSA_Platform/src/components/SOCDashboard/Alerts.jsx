@@ -189,7 +189,7 @@ const Alerts = () => {
       const token = localStorage.getItem('token');
       const role = localStorage.getItem('role');
       setUserRole(role);
-      if (role === 'admin') {
+      if (role === 'subadmin') {
         // Admin: fetch all agents
         const res = await axios.get('/api/wazuh/agents', {
           headers: { Authorization: `Bearer ${token}` }
@@ -234,7 +234,7 @@ const Alerts = () => {
     const selectedSeverityLower = (selectedSeverity || '').toLowerCase();
     const severityMatch = selectedSeverity === 'All' || alertSeverity === selectedSeverityLower;
 
-    if (userRole === 'admin') {
+    if (userRole === 'subadmin') {
       return agentMatch && severityMatch;
     } else {
       if (selectedAgent === 'All') {
@@ -334,7 +334,7 @@ const Alerts = () => {
       mode: 'nearest',
       intersect: true,
       animationDuration: 400,
-      onHover: function(e, activeEls) {
+      onHover: function (e, activeEls) {
         if (e.native) {
           e.native.target.style.cursor = activeEls.length ? 'pointer' : 'default';
         }
@@ -485,7 +485,7 @@ const Alerts = () => {
                     <Listbox.Button ref={agentListboxButtonRef} className="relative w-full cursor-pointer rounded-md border border-gray-300 bg-white py-2 pl-3 pr-8 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">
                       {selectedAgent}
                       <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                        <svg className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <svg className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </span>
                     </Listbox.Button>
                     <Listbox.Options className={`absolute z-10 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base focus:outline-none sm:text-sm ${agentDropUp ? 'bottom-full mb-1' : 'mt-1'}`}>

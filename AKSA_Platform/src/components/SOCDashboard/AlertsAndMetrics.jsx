@@ -108,7 +108,7 @@ const AlertsAndMetrics = ({
         let filteredAlerts = [];
         let filteredVulns = [];
         let agentIds = [];
-        if (userRole === 'admin') {
+        if (userRole === 'subadmin') {
           // Admin: show all alerts and all vulnerabilities
           const allAlertsData = await fetchAllAlerts();
           filteredAlerts = allAlertsData.hits?.hits?.map(hit => hit._source) || [];

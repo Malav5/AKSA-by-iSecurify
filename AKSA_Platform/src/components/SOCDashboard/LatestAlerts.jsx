@@ -14,7 +14,7 @@ const LatestAlerts = () => {
     const loadLatestAlerts = async () => {
       const token = localStorage.getItem('token');
       const userRole = localStorage.getItem('role');
-      if (userRole === 'admin') {
+      if (userRole === 'subadmin') {
         // Admin: show all alerts
         const alerts = await fetchLatestAlerts();
         setLatestAlerts(transformAlerts(alerts));

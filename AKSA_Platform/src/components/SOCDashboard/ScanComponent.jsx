@@ -83,7 +83,7 @@ const ScanComponent = () => {
         const fetchAssignedAgentsForUser = async () => {
             const token = localStorage.getItem('token');
             const userRole = localStorage.getItem('role');
-            if (userRole === 'admin') {
+            if (userRole === 'subadmin') {
                 setAssignedAgentIds([]); // Admin sees all
                 setAssignedLoading(false); // NEW
                 return;
@@ -110,7 +110,7 @@ const ScanComponent = () => {
                 const token = localStorage.getItem("token");
                 const userRole = localStorage.getItem('role');
                 // If not admin and assigned agents are loaded and none assigned, set agents to [] and return early
-                if (userRole !== 'admin' && !assignedLoading && assignedAgentIds.length === 0) {
+                if (userRole !== 'subadmin' && !assignedLoading && assignedAgentIds.length === 0) {
                     setAgents([]);
                     setAgentId('');
                     return;
@@ -121,7 +121,7 @@ const ScanComponent = () => {
                     },
                 });
                 let wazuhAgents = res.data.data.affected_items || [];
-                if (userRole === 'admin') {
+                if (userRole === 'subadmin') {
                     setAgents(wazuhAgents);
                     if (wazuhAgents.length > 0) setAgentId(wazuhAgents[0].id);
                 } else {
