@@ -1,8 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import QueAns from "./QueAns";
+import { ComplianceScoreCard } from "./ComplianceScoreCard";
 
 const ComplianceScore = () => {
   const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const [questionnaireSubmitted, setQuestionnaireSubmitted] = useState(false);
+  const [userKey, setUserKey] = useState("");
+
+  // Helper to get user-specific key
+  const getUserKey = (key) => {
+    const currentUser = localStorage.getItem("currentUser");
+    const userPrefix = currentUser ? currentUser.split("@")[0] : "";
+    return `${userPrefix}_${key}`;
+  };
+
+  // On mount and when user changes, check if questionnaire is submitted
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    const userPrefix = currentUser ? currentUser.split("@")[0] : "";
+    setUserKey(userPrefix);
+    const submittedFlag = localStorage.getItem(
+      `${userPrefix}_questionnaireSubmitted`
+    );
+    setQuestionnaireSubmitted(submittedFlag === "true");
+  }, [localStorage.getItem("currentUser")]);
+
+  // Listen for storage events to update view live
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === getUserKey("questionnaireSubmitted")) {
+        setQuestionnaireSubmitted(
+          localStorage.getItem(getUserKey("questionnaireSubmitted")) === "true"
+        );
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [userKey]);
+
+  // Render logic
+  if (questionnaireSubmitted) {
+    return <ComplianceScoreCard />;
+  }
 
   return (
     <div className="bg-white shadow rounded-lg p-4 sm:p-6 w-full max-w-xl mx-auto">
@@ -40,7 +79,13 @@ const ComplianceScore = () => {
       </div>
 
       {showQuestionnaire && (
-        <QueAns onCancel={() => setShowQuestionnaire(false)} />
+        <QueAns
+          onCancel={() => setShowQuestionnaire(false)}
+          setQuestionnaireSubmitted={() => {
+            setShowQuestionnaire(false);
+            setQuestionnaireSubmitted(true);
+          }}
+        />
       )}
     </div>
   );
