@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Domain = require("../models/domain");
 const mongoose = require("mongoose");
+const User = require("../models/user");
+const Plan = require("../models/plan");
 // GET all domains
 router.get("/", async (req, res) => {
   try {
@@ -22,6 +24,19 @@ router.post("/", async (req, res) => {
     // Check for existing domain for this user
     const existing = await Domain.findOne({ name, userEmail });
     if (existing) return res.status(409).json({ error: "You have already added this domain." });
+
+    // Fetch user and their plan
+    const user = await User.findOne({ email: userEmail });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const plan = await Plan.findById(user.plan);
+    if (!plan) return res.status(404).json({ error: "Plan not found" });
+    const domainLimit = plan.DomainLimit;
+
+    // Count current domains for this user
+    const userDomainCount = await Domain.countDocuments({ userEmail });
+    if (domainLimit !== -1 && userDomainCount >= domainLimit) {
+      return res.status(403).json({ error: `Domain limit reached for your plan (${user.plan}).` });
+    }
 
     const newDomain = new Domain({ name, userEmail });
     await newDomain.save();
