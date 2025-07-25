@@ -28,17 +28,18 @@ const IssueManagement = ({ hideViewAll = false }) => {
   ];
 
   // 🔵 Static Line Chart Data
-  const trendData = viewMode === "weeks"
-    ? [
-        { label: "W27", low: 1, medium: 2, high: 1, critical: 0 },
-        { label: "W28", low: 2, medium: 1, high: 1, critical: 1 },
-        { label: "W29", low: 3, medium: 1, high: 1, critical: 1 },
-      ]
-    : [
-        { label: "May", low: 2, medium: 1, high: 1, critical: 0 },
-        { label: "Jun", low: 3, medium: 1, high: 1, critical: 1 },
-        { label: "Jul", low: 1, medium: 2, high: 1, critical: 1 },
-      ];
+  const trendData =
+    viewMode === "weeks"
+      ? [
+          { label: "W27", low: 1, medium: 2, high: 1, critical: 0 },
+          { label: "W28", low: 2, medium: 1, high: 1, critical: 1 },
+          { label: "W29", low: 3, medium: 1, high: 1, critical: 1 },
+        ]
+      : [
+          { label: "May", low: 2, medium: 1, high: 1, critical: 0 },
+          { label: "Jun", low: 3, medium: 1, high: 1, critical: 1 },
+          { label: "Jul", low: 1, medium: 2, high: 1, critical: 1 },
+        ];
 
   // 🔵 Static Score and Status
   const issueScore = 15;
@@ -52,7 +53,10 @@ const IssueManagement = ({ hideViewAll = false }) => {
         <div className="flex justify-between items-center mb-3 md:mb-4">
           <h2 className="text-xl md:text-2xl font-bold">Issues Management</h2>
           {!hideViewAll && (
-            <Link to="/issues" className="text-primary cursor-pointer underline text-sm md:text-base">
+            <Link
+              to="/issues"
+              className="text-primary cursor-pointer underline text-sm md:text-base"
+            >
               View all
             </Link>
           )}
@@ -61,7 +65,9 @@ const IssueManagement = ({ hideViewAll = false }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Bar Chart */}
           <div className="bg-white rounded-2xl p-3 md:p-4 shadow">
-            <h3 className="font-semibold mb-2 text-sm md:text-base">Open Issues by Criticality</h3>
+            <h3 className="font-semibold mb-2 text-sm md:text-base">
+              Open Issues by Criticality
+            </h3>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={barData}>
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
@@ -84,7 +90,9 @@ const IssueManagement = ({ hideViewAll = false }) => {
 
           {/* Circular Progress */}
           <div className="bg-white rounded-2xl p-3 md:p-4 shadow flex flex-col items-center justify-center">
-            <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Current Status</h3>
+            <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">
+              Current Status
+            </h3>
             <div className="w-24 h-24 md:w-32 md:h-32">
               <CircularProgressbar
                 value={issueScore}
@@ -98,9 +106,22 @@ const IssueManagement = ({ hideViewAll = false }) => {
               />
             </div>
             <div className="mt-3 md:mt-4 space-y-1 text-xs md:text-sm text-gray-700">
-              <p><span className="text-purple-500 font-bold">{toDoCount}</span> To Do</p>
-              <p><span className="text-gray-500 font-bold">{unassignedCount}</span> Unassigned</p>
-              <p><span className="text-gray-400 font-bold">{inProgressCount}</span> In Progress</p>
+              <p>
+                <span className="text-purple-500 font-bold">{toDoCount}</span>{" "}
+                To Do
+              </p>
+              <p>
+                <span className="text-gray-500 font-bold">
+                  {unassignedCount}
+                </span>{" "}
+                Unassigned
+              </p>
+              <p>
+                <span className="text-gray-400 font-bold">
+                  {inProgressCount}
+                </span>{" "}
+                In Progress
+              </p>
             </div>
             <div className="mt-2 md:mt-3 text-xs md:text-sm bg-white border-custom rounded-lg p-2 text-primary cursor-pointer">
               💡 The current status of your issues
@@ -109,11 +130,15 @@ const IssueManagement = ({ hideViewAll = false }) => {
 
           {/* Line Chart */}
           <div className="bg-white rounded-2xl p-3 md:p-4 shadow">
-            <h3 className="font-semibold mb-2 text-sm md:text-base">Trend by Criticality</h3>
+            <h3 className="font-semibold mb-2 text-sm md:text-base">
+              Trend by Criticality
+            </h3>
             <div className="flex justify-end mb-1">
               <button
                 className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded mr-1 md:mr-2 ${
-                  viewMode === "weeks" ? "bg-gray-200 text-gray-700" : "text-gray-500"
+                  viewMode === "weeks"
+                    ? "bg-gray-200 text-gray-700"
+                    : "text-gray-500"
                 }`}
                 onClick={() => setViewMode("weeks")}
               >
@@ -121,7 +146,9 @@ const IssueManagement = ({ hideViewAll = false }) => {
               </button>
               <button
                 className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded ${
-                  viewMode === "months" ? "bg-gray-200 text-gray-700" : "text-gray-500"
+                  viewMode === "months"
+                    ? "bg-gray-200 text-gray-700"
+                    : "text-gray-500"
                 }`}
                 onClick={() => setViewMode("months")}
               >
@@ -135,10 +162,30 @@ const IssueManagement = ({ hideViewAll = false }) => {
                 <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="low" stroke="#10B981" name="Low" />
-                <Line type="monotone" dataKey="medium" stroke="#FACC15" name="Medium" />
-                <Line type="monotone" dataKey="high" stroke="#F97316" name="High" />
-                <Line type="monotone" dataKey="critical" stroke="#EF4444" name="Critical" />
+                <Line
+                  type="monotone"
+                  dataKey="low"
+                  stroke="#10B981"
+                  name="Low"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="medium"
+                  stroke="#FACC15"
+                  name="Medium"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="high"
+                  stroke="#F97316"
+                  name="High"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="critical"
+                  stroke="#EF4444"
+                  name="Critical"
+                />
               </LineChart>
             </ResponsiveContainer>
             <div className="mt-2 md:mt-3 text-xs md:text-sm bg-white border-custom rounded-lg p-2 text-primary cursor-pointer">

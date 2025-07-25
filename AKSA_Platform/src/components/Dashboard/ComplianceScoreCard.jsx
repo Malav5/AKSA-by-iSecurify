@@ -5,7 +5,7 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
   // Helper to get user-specific key
   const getUserKey = (key) => {
     const currentUser = localStorage.getItem("currentUser");
-    const userPrefix = currentUser ? currentUser.split('@')[0] : '';
+    const userPrefix = currentUser ? currentUser.split("@")[0] : "";
     return `${userPrefix}_${key}`;
   };
 
@@ -23,7 +23,7 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
     if (savedScore !== null) {
       const score = parseInt(savedScore);
       setComplianceScore(score);
-      
+
       // Set health status based on score
       if (score >= 90) {
         setHealthStatus("Excellent – Secure, well-configured, and trusted.");
@@ -45,7 +45,9 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === getUserKey("questionnaireSubmitted")) {
-        setQuestionnaireSubmitted(localStorage.getItem(getUserKey("questionnaireSubmitted")) === "true");
+        setQuestionnaireSubmitted(
+          localStorage.getItem(getUserKey("questionnaireSubmitted")) === "true"
+        );
       }
       if (e.key === getUserKey("domainHealthScore")) {
         updateScoreFromStorage();
@@ -57,10 +59,9 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
 
   // Update score when questionnaire version changes or on initial load
   useEffect(() => {
-  
     if (questionnaireVersion !== lastVersion || complianceScore === null) {
-        setLastVersion(questionnaireVersion);
-        updateScoreFromStorage();
+      setLastVersion(questionnaireVersion);
+      updateScoreFromStorage();
     }
   }, [questionnaireVersion, lastVersion, complianceScore]);
 
@@ -100,7 +101,9 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
           <div className="relative w-full flex justify-center">
             <div className="w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] h-[120px] sm:h-[150px] md:h-[175px] lg:h-[200px] bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 rounded-t-full relative">
               <div className="absolute inset-0 flex flex-col justify-center items-center mt-6 sm:mt-8 md:mt-10">
-                <span className={`text-3xl sm:text-4xl md:text-5xl font-bold ${getScoreColor()}`}>
+                <span
+                  className={`text-3xl sm:text-4xl md:text-5xl font-bold ${getScoreColor()}`}
+                >
                   {complianceLevel()}
                 </span>
                 <span className="text-base md:text-lg font-medium text-gray-800 mt-1">
@@ -119,7 +122,9 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
 
           {complianceScore !== null && (
             <div className="mt-3 md:mt-4 space-y-2">
-              <div className={`text-center font-semibold text-xs md:text-sm lg:text-base ${getScoreColor()}`}>
+              <div
+                className={`text-center font-semibold text-xs md:text-sm lg:text-base ${getScoreColor()}`}
+              >
                 {healthStatus}
               </div>
               <div className="text-center text-xs md:text-sm text-gray-600">

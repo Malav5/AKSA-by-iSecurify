@@ -12,11 +12,14 @@ const AdminDashboard = () => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:3000/api/auth/users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          "http://localhost:3000/api/auth/users",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         setUsers(response.data.users || []);
       } catch (err) {
         setUsers([]);
@@ -54,14 +57,16 @@ const AdminDashboard = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-100 sticky top-0 z-10">
                       <tr>
-                        {["Name", "Email", "Company", "Role", "Plan"].map((header) => (
-                          <th
-                            key={header}
-                            className="px-6 py-3 text-left text-sm font-medium text-gray-700"
-                          >
-                            {header}
-                          </th>
-                        ))}
+                        {["Name", "Email", "Company", "Role", "Plan"].map(
+                          (header) => (
+                            <th
+                              key={header}
+                              className="px-6 py-3 text-left text-sm font-medium text-gray-700"
+                            >
+                              {header}
+                            </th>
+                          )
+                        )}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -73,7 +78,9 @@ const AdminDashboard = () => {
                           <td className="px-6 py-3 whitespace-nowrap font-medium">
                             {user.firstName} {user.lastName}
                           </td>
-                          <td className="px-6 py-3 whitespace-nowrap">{user.email}</td>
+                          <td className="px-6 py-3 whitespace-nowrap">
+                            {user.email}
+                          </td>
                           <td className="px-6 py-3 whitespace-nowrap">
                             {user.companyName || "-"}
                           </td>
