@@ -82,7 +82,7 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-3 md:p-4 lg:p-6 w-full max-w-xl mx-auto">
+    <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 shadow-xl rounded-2xl p-3 md:p-4 lg:p-6 w-full max-w-xl mx-auto border border-purple-100 transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <h2 className="text-gray-800 font-semibold text-base md:text-lg text-left">
           Compliance Score

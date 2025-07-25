@@ -166,10 +166,10 @@ const RiskDashboard = () => {
   };
 
   return (
-    <div className="w-full bg-white p-3 md:p-4 pt-4 md:pt-6 text-gray-900">
+    <div className="w-full bg-white p-3 md:p-4 pt-4 md:pt-6 text-gray-900 rounded-2xl shadow-xl">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Domain Score Panel */}
-        <div className="bg-white rounded-lg shadow-sm flex flex-col items-center justify-center p-3 md:p-4">
+        <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl shadow-xl flex flex-col items-center justify-center p-3 md:p-4 border border-purple-100">
           <h2 className="text-sm md:text-base font-semibold mb-2 md:mb-3">
             Domain Score
           </h2>

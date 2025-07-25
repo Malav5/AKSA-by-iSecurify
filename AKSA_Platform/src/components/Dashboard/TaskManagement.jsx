@@ -103,7 +103,7 @@ const TaskManagement = ({ hideViewAll = false }) => {
   const trendData = viewMode === "weeks" ? weeklyTrend : monthlyTrend;
 
   return (
-    <div className="w-full bg-white text-gray-800 p-3 md:p-4 lg:p-6">
+    <div className="w-full bg-white text-gray-800 p-3 md:p-4 lg:p-6 rounded-lg shadow">
       <div>
         <div className="flex justify-between items-center mb-3 md:mb-4">
           <h2 className="text-xl md:text-2xl font-bold">Task Management</h2>
@@ -116,7 +116,7 @@ const TaskManagement = ({ hideViewAll = false }) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Bar Chart */}
-          <div className="bg-white rounded-2xl p-3 md:p-4 shadow">
+          <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl p-3 md:p-4 shadow-xl border border-purple-100">
             <h3 className="font-semibold mb-2 text-sm md:text-base">Tasks by Status</h3>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={barData}>
@@ -139,7 +139,7 @@ const TaskManagement = ({ hideViewAll = false }) => {
           </div>
 
           {/* Circular Progress */}
-          <div className="bg-white rounded-2xl p-3 md:p-4 shadow flex flex-col items-center justify-center">
+          <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl p-3 md:p-4 shadow-xl flex flex-col items-center justify-center border border-purple-100">
             <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Completion Score</h3>
             <div className="w-24 h-24 md:w-32 md:h-32">
               <CircularProgressbar
@@ -170,7 +170,7 @@ const TaskManagement = ({ hideViewAll = false }) => {
           </div>
 
           {/* Line Chart with toggle */}
-          <div className="bg-white rounded-2xl p-3 md:p-4 shadow">
+          <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl p-3 md:p-4 shadow-xl border border-purple-100">
             <h3 className="font-semibold mb-2 text-sm md:text-base">Task Trend by {viewMode === "weeks" ? "Week" : "Month"}</h3>
             <div className="flex justify-end mb-1">
               <button

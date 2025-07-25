@@ -48,7 +48,7 @@ const IssueManagement = ({ hideViewAll = false }) => {
   const inProgressCount = 6;
 
   return (
-    <div className="w-full bg-white text-gray-800 p-3 md:p-4 lg:p-6">
+    <div className="w-full bg-white text-gray-800 p-3 md:p-4 lg:p-6 rounded-lg shadow">
       <div>
         <div className="flex justify-between items-center mb-3 md:mb-4">
           <h2 className="text-xl md:text-2xl font-bold">Issues Management</h2>
@@ -64,10 +64,8 @@ const IssueManagement = ({ hideViewAll = false }) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Bar Chart */}
-          <div className="bg-white rounded-2xl p-3 md:p-4 shadow">
-            <h3 className="font-semibold mb-2 text-sm md:text-base">
-              Open Issues by Criticality
-            </h3>
+          <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl p-3 md:p-4 shadow-xl border border-purple-100">
+            <h3 className="font-semibold mb-2 text-sm md:text-base">Open Issues by Criticality</h3>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={barData}>
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
@@ -89,10 +87,8 @@ const IssueManagement = ({ hideViewAll = false }) => {
           </div>
 
           {/* Circular Progress */}
-          <div className="bg-white rounded-2xl p-3 md:p-4 shadow flex flex-col items-center justify-center">
-            <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">
-              Current Status
-            </h3>
+          <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl p-3 md:p-4 shadow-xl flex flex-col items-center justify-center border border-purple-100">
+            <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Current Status</h3>
             <div className="w-24 h-24 md:w-32 md:h-32">
               <CircularProgressbar
                 value={issueScore}
@@ -129,10 +125,8 @@ const IssueManagement = ({ hideViewAll = false }) => {
           </div>
 
           {/* Line Chart */}
-          <div className="bg-white rounded-2xl p-3 md:p-4 shadow">
-            <h3 className="font-semibold mb-2 text-sm md:text-base">
-              Trend by Criticality
-            </h3>
+          <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl p-3 md:p-4 shadow-xl border border-purple-100">
+            <h3 className="font-semibold mb-2 text-sm md:text-base">Trend by Criticality</h3>
             <div className="flex justify-end mb-1">
               <button
                 className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded mr-1 md:mr-2 ${
