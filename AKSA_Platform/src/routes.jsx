@@ -34,7 +34,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/domain" element={<DomainDetail />} />
       <Route path="/signup" element={<SignUp />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard" element={<Deaddashboard1 />} />
       <Route path="/issues" element={<Issues />} />
       {/* <Route path="/issuePage" element={<IssuesPage />} /> */}
       <Route path="/company-profile" element={<CompanyProfile />} />
@@ -53,7 +53,7 @@ const AppRoutes = () => {
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/upgrade-plan" element={<UpgradePlan />} />
       <Route path="/deaddashboard" element={<DeadDashboard />} />
-      <Route path="/dead-dashboard" element={<Deaddashboard1 />} />
+      <Route path="/dead-dashboard" element={<Dashboard />} />
 
 
     </Routes>

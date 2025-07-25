@@ -56,7 +56,7 @@ const Sidebar = () => {
         });
         const userDomains = res.data.filter(domain => domain.userEmail === userEmail);
         if (userDomains.length > 0) {
-          navigate("/dead-dashboard");
+          navigate("/dashboard");
         } else {
           navigate("/deaddashboard");
         }

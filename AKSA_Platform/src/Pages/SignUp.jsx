@@ -76,7 +76,7 @@ const Signup = () => {
           });
           const userDomains = res.data.filter(domain => domain.userEmail === data.user.email);
           if (userDomains.length > 0) {
-            navigate("/dead-dashboard");
+            navigate("/dashboard");
           } else {
             navigate("/deaddashboard");
           }
