@@ -68,10 +68,10 @@ const Deaddashboard1 = () => {
           <div className="mt-6 space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Security Analysis Results</h2>
-              <RiskDashboard/>
+              <RiskDashboard />
             </div>
           </div>
-          
+
           <div className="my-6 space-y-6 bg-white rounded-lg shadow-sm p-6 border border-gray-100">
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 mb-10">
               <ComplianceScoreCard />
@@ -82,11 +82,11 @@ const Deaddashboard1 = () => {
           </div>
 
           <div className="space-y-4 sm:space-y-6">
-              <IssueManagement />
-              <TaskManagement />
-              <RiskManagement />
-              <OptionsMenu />
-            </div>
+            <IssueManagement />
+            <TaskManagement />
+            <RiskManagement />
+            <OptionsMenu />
+          </div>
 
           <div className="border-t border-gray-200 mt-10 pt-6 text-center text-sm text-gray-400">
             ©2024 AKSA by iSecurify. All Rights Reserved.

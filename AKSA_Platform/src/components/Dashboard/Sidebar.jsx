@@ -76,6 +76,8 @@ const Sidebar = () => {
         }
         navigate("/soc");
       }
+    } else if (item.label === "Settings") {
+      navigate("/company-profile?tab=settings");
     } else if (item.forceReload) {
       window.open(item.path, item.openInNewTab ? "_blank" : "_self");
     } else {
