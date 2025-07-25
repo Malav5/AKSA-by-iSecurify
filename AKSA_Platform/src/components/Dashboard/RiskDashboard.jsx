@@ -287,7 +287,7 @@ const RiskDashboard = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> 
           </div>
         </div>
       </div>

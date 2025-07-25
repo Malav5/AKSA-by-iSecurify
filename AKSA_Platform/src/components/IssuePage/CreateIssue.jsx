@@ -1,8 +1,37 @@
 import React, { useEffect, useState } from "react";
+import { Listbox } from "@headlessui/react";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 
-const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
+const CreateIssue = ({ issueData, setIssueData, onClose }) => {
   const [visible, setVisible] = useState(false);
   const [newNote, setNewNote] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Dropdown options
+  const statusOptions = [
+    { id: 1, name: "Low" },
+    { id: 2, name: "Medium" },
+    { id: 3, name: "High" },
+  ];
+
+  const criticalityOptions = [
+    { id: 1, name: "Low" },
+    { id: 2, name: "Medium" },
+    { id: 3, name: "High" },
+  ];
+
+  const assigneeOptions = [
+    { id: 1, name: "Cyclekicks" },
+    { id: 2, name: "Alice" },
+    { id: 3, name: "Bob" },
+    { id: 4, name: "Unassigned" },
+  ];
+
+  const solutionOptions = [
+    { id: 1, name: "Fix available" },
+    { id: 2, name: "Workaround" },
+    { id: 3, name: "No solution" },
+  ];
 
   useEffect(() => {
     setVisible(true);
@@ -12,11 +41,88 @@ const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
     if (newNote.trim()) {
       setIssueData({
         ...issueData,
-        changeLog: [...(issueData.changeLog || []), newNote]
+        changeLog: [...(issueData.changeLog || []), newNote],
       });
       setNewNote("");
     }
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/issues", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(issueData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create issue");
+      }
+
+      const data = await response.json();
+      console.log("✅ Issue created:", data);
+      onClose();
+    } catch (error) {
+      console.error("❌ Error submitting issue:", error.message);
+      alert("Something went wrong while creating the issue.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Custom Dropdown component
+  const CustomDropdown = ({ value, onChange, options, placeholder }) => (
+    <Listbox value={value} onChange={onChange}>
+      <div className="relative">
+        <Listbox.Button className="relative w-full cursor-default rounded bg-white py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+          <span className={`block truncate ${!value ? "text-gray-400" : ""}`}>
+            {value || placeholder}
+          </span>
+          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+            <ChevronUpDownIcon
+              className="h-5 w-5 text-gray-400"
+              aria-hidden="true"
+            />
+          </span>
+        </Listbox.Button>
+        <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm z-10">
+          {options.map((option) => (
+            <Listbox.Option
+              key={option.id}
+              className={({ active }) =>
+                `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                  active ? "bg-secondary text-primary" : "text-gray-900"
+                }`
+              }
+              value={option.name}
+            >
+              {({ selected }) => (
+                <>
+                  <span
+                    className={`block truncate ${
+                      selected ? "font-medium" : "font-normal"
+                    }`}
+                  >
+                    {option.name}
+                  </span>
+                  {selected ? (
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary">
+                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                  ) : null}
+                </>
+              )}
+            </Listbox.Option>
+          ))}
+        </Listbox.Options>
+      </div>
+    </Listbox>
+  );
 
   return (
     <div
@@ -25,10 +131,7 @@ const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
     >
       <form
         onClick={(e) => e.stopPropagation()}
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSubmit();
-        }}
+        onSubmit={handleSubmit}
         className={`bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full
         transform transition-transform duration-600 ease-out
         ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20"}`}
@@ -44,11 +147,12 @@ const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
           </button>
         </div>
 
-        {/* Main form content */}
         <div className="space-y-6">
           {/* Issue name */}
           <div>
-            <label className="block font-medium text-gray-600 mb-1">Issue name</label>
+            <label className="block font-medium text-gray-600 mb-1">
+              Issue name
+            </label>
             <input
               type="text"
               value={issueData.title}
@@ -64,41 +168,38 @@ const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
           {/* Status and Criticality row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block font-medium text-gray-600 mb-1">Status</label>
-              <select
-                value={issueData.assignedTo}
-                onChange={(e) =>
-                  setIssueData({ ...issueData, assignedTo: e.target.value })
+              <label className="block font-medium text-gray-600 mb-1">
+                Status
+              </label>
+              <CustomDropdown
+                value={issueData.status}
+                onChange={(value) =>
+                  setIssueData({ ...issueData, status: value })
                 }
-                className="w-full border border-gray-300 rounded px-4 py-2"
-              >
-                <option value="Unassigned">Unassigned</option>
-                <option value="Cyclekicks">Cyclekicks</option>
-                <option value="Alice">Alice</option>
-                <option value="Bob">Bob</option>
-              </select>
+                options={statusOptions}
+                placeholder="Select status"
+              />
             </div>
             <div>
-              <label className="block font-medium text-gray-600 mb-1">Criticality</label>
-              <select
+              <label className="block font-medium text-gray-600 mb-1">
+                Criticality
+              </label>
+              <CustomDropdown
                 value={issueData.level}
-                onChange={(e) =>
-                  setIssueData({ ...issueData, level: e.target.value })
+                onChange={(value) =>
+                  setIssueData({ ...issueData, level: value })
                 }
-                className="w-full border border-gray-300 rounded px-4 py-2"
+                options={criticalityOptions}
                 placeholder="Assign criticality"
-              >
-                <option value="">Assign criticality</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
+              />
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block font-medium text-gray-600 mb-1">Description</label>
+            <label className="block font-medium text-gray-600 mb-1">
+              Description
+            </label>
             <textarea
               value={issueData.description}
               onChange={(e) =>
@@ -112,44 +213,43 @@ const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
           {/* Assignee and Solution row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block font-medium text-gray-600 mb-1">Assignee</label>
-              <select
+              <label className="block font-medium text-gray-600 mb-1">
+                Assignee
+              </label>
+              <CustomDropdown
                 value={issueData.assignedTo}
-                onChange={(e) =>
-                  setIssueData({ ...issueData, assignedTo: e.target.value })
+                onChange={(value) =>
+                  setIssueData({ ...issueData, assignedTo: value })
                 }
-                className="w-full border border-gray-300 rounded px-4 py-2"
-              >
-                <option value="Cyclekicks">Cyclekicks</option>
-                <option value="Alice">Alice</option>
-                <option value="Bob">Bob</option>
-                <option value="Unassigned">Unassigned</option>
-              </select>
+                options={assigneeOptions}
+                placeholder="Select assignee"
+              />
             </div>
             <div>
-              <label className="block font-medium text-gray-600 mb-1">Solution</label>
-              <select
+              <label className="block font-medium text-gray-600 mb-1">
+                Solution
+              </label>
+              <CustomDropdown
                 value={issueData.solution}
-                onChange={(e) =>
-                  setIssueData({ ...issueData, solution: e.target.value })
+                onChange={(value) =>
+                  setIssueData({ ...issueData, solution: value })
                 }
-                className="w-full border border-gray-300 rounded px-4 py-2"
+                options={solutionOptions}
                 placeholder="Pick solution"
-              >
-                <option value="">Pick solution</option>
-                <option value="Fix available">Fix available</option>
-                <option value="Workaround">Workaround</option>
-                <option value="No solution">No solution</option>
-              </select>
+              />
             </div>
           </div>
 
           {/* Change log */}
           <div>
-            <label className="block font-medium text-gray-600 mb-1">Change log</label>
+            <label className="block font-medium text-gray-600 mb-1">
+              Change log
+            </label>
             <div className="border border-gray-200 rounded p-4">
               {(!issueData.changeLog || issueData.changeLog.length === 0) && (
-                <p className="text-gray-500 italic">You don't have any notes yet...</p>
+                <p className="text-gray-500 italic">
+                  You don't have any notes yet...
+                </p>
               )}
               {issueData.changeLog?.map((note, index) => (
                 <div key={index} className="mb-2 p-2 bg-gray-50 rounded">
@@ -188,8 +288,9 @@ const CreateIssue = ({ issueData, setIssueData, onClose, onSubmit }) => {
           <button
             type="submit"
             className="bg-primary text-white px-6 py-2 rounded hover:bg-blue-700"
+            disabled={loading}
           >
-            Create issue
+            {loading ? "Creating..." : "Create issue"}
           </button>
         </div>
       </form>
