@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Bell, ArrowUpRight, Trash2 } from "lucide-react";
+import { Bell, ArrowUpRight, Trash2, Moon, Sun, LogOut, Download, Globe, Eye } from "lucide-react";
 
 const showToast = (msg, type = "info") => {
   const toast = document.createElement("div");
@@ -13,6 +13,11 @@ const showToast = (msg, type = "info") => {
 
 const Settings = () => {
   const navigate = useNavigate();
+  const [theme, setTheme] = useState("light");
+  const [language, setLanguage] = useState("en");
+  const [highContrast, setHighContrast] = useState(false);
+  const [privacyAnalytics, setPrivacyAnalytics] = useState(true);
+  const [privacyMarketing, setPrivacyMarketing] = useState(false);
 
   const handleUpgrade = () => {
     navigate("/upgrade-plan");
@@ -54,6 +59,25 @@ const Settings = () => {
     }
   };
 
+  // Theme toggle logic (placeholder)
+  const handleThemeToggle = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+    showToast(`Switched to ${theme === "light" ? "dark" : "light"} mode`, "success");
+    // Add real theme logic here
+  };
+
+  // Download data (placeholder)
+  const handleDownloadData = () => {
+    showToast("Your data download will start soon (placeholder)", "info");
+    // Add real download logic here
+  };
+
+  // Log out all sessions (placeholder)
+  const handleLogoutAll = () => {
+    showToast("Logged out of all devices (placeholder)", "success");
+    // Add real session management logic here
+  };
+
   return (
     <div className="max-w-2xl mx-auto animate-fade-in-up">
       <div className="mb-10 flex items-center gap-3">
@@ -71,6 +95,110 @@ const Settings = () => {
         <button className="text-teal-700 font-semibold hover:underline text-lg md:ml-8">Unsubscribe from this list</button>
       </div>
 
+      {/* Theme Toggle */}
+      <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 mb-6 shadow flex items-center gap-4 animate-fade-in-up">
+        <span className="inline-flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full">
+          {theme === "light" ? <Sun className="w-6 h-6 text-primary" /> : <Moon className="w-6 h-6 text-primary" />}
+        </span>
+        <div className="flex-1">
+          <div className="font-semibold text-gray-900">Theme</div>
+          <div className="text-gray-600 text-sm">Switch between light and dark mode</div>
+        </div>
+        <button
+          className="px-4 py-2 rounded-lg font-semibold bg-primary text-white hover:bg-[#700070] transition shadow"
+          onClick={handleThemeToggle}
+        >
+          {theme === "light" ? "Enable Dark Mode" : "Enable Light Mode"}
+        </button>
+      </div>
+
+      {/* Session Management */}
+      <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 mb-6 shadow animate-fade-in-up">
+        <div className="flex items-center gap-3 mb-2">
+          <LogOut className="w-6 h-6 text-primary" />
+          <div className="font-semibold text-gray-900">Session Management</div>
+        </div>
+        <div className="text-gray-600 text-sm mb-3">You are currently logged in on this device. For security, you can log out of all other devices.</div>
+        <button
+          className="px-4 py-2 rounded-lg font-semibold bg-primary text-white hover:bg-[#700070] transition shadow"
+          onClick={handleLogoutAll}
+        >
+          Log out of all devices
+        </button>
+      </div>
+
+      {/* Download My Data */}
+      <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 mb-6 shadow flex items-center gap-4 animate-fade-in-up">
+        <span className="inline-flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full">
+          <Download className="w-6 h-6 text-primary" />
+        </span>
+        <div className="flex-1">
+          <div className="font-semibold text-gray-900">Download My Data</div>
+          <div className="text-gray-600 text-sm">Download a copy of your account data for your records.</div>
+        </div>
+        <button
+          className="px-4 py-2 rounded-lg font-semibold bg-primary text-white hover:bg-[#700070] transition shadow"
+          onClick={handleDownloadData}
+        >
+          Download
+        </button>
+      </div>
+
+      {/* Privacy Controls */}
+      <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 mb-6 shadow animate-fade-in-up">
+        <div className="flex items-center gap-3 mb-2">
+          <Eye className="w-6 h-6 text-primary" />
+          <div className="font-semibold text-gray-900">Privacy Controls</div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 text-gray-700">
+            <input type="checkbox" checked={privacyAnalytics} onChange={() => setPrivacyAnalytics(v => !v)} className="accent-primary w-5 h-5" />
+            Allow usage analytics (helps us improve the product)
+          </label>
+          <label className="flex items-center gap-2 text-gray-700">
+            <input type="checkbox" checked={privacyMarketing} onChange={() => setPrivacyMarketing(v => !v)} className="accent-primary w-5 h-5" />
+            Receive marketing emails
+          </label>
+        </div>
+      </div>
+
+      {/* Language Selection */}
+      <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 mb-6 shadow flex items-center gap-4 animate-fade-in-up">
+        <span className="inline-flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full">
+          <Globe className="w-6 h-6 text-primary" />
+        </span>
+        <div className="flex-1">
+          <div className="font-semibold text-gray-900">Language</div>
+          <div className="text-gray-600 text-sm">Choose your preferred language</div>
+        </div>
+        <select
+          className="px-4 py-2 rounded-lg border border-gray-300 text-gray-900 focus:outline-none"
+          value={language}
+          onChange={e => setLanguage(e.target.value)}
+        >
+          <option value="en">English</option>
+          <option value="hi">Hindi</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+        </select>
+      </div>
+
+      {/* Accessibility Options */}
+      <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 mb-10 shadow flex items-center gap-4 animate-fade-in-up">
+        <span className="inline-flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full">
+          <Eye className="w-6 h-6 text-primary" />
+        </span>
+        <div className="flex-1">
+          <div className="font-semibold text-gray-900">Accessibility</div>
+          <div className="text-gray-600 text-sm">Enable high-contrast mode for better visibility</div>
+        </div>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={highContrast} onChange={() => setHighContrast(v => !v)} className="accent-primary w-5 h-5" />
+          <span className="text-gray-700 font-medium">High Contrast</span>
+        </label>
+      </div>
+
+      {/* Existing action buttons */}
       <div className="flex flex-col md:flex-row gap-4">
         <button
           className="border border-primary text-primary rounded-lg px-6 py-3 text-lg font-semibold hover:bg-purple-50 transition mb-4 md:mb-0 shadow"
