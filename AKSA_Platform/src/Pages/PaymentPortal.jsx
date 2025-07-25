@@ -183,21 +183,21 @@ const PaymentPortal = () => {
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                 <button
                   onClick={() => setPaymentMethod('card')}
-                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${paymentMethod === 'card' ? 'bg-[#800080] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${paymentMethod === 'card' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
                 >
                   Credit/Debit Card
                 </button>
                 <button
                   onClick={() => setPaymentMethod('upi')}
-                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${paymentMethod === 'upi' ? 'bg-[#800080] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${paymentMethod === 'upi' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
                 >
                   UPI
                 </button>
                 <button
                   onClick={() => setPaymentMethod('bank_transfer')}
-                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${paymentMethod === 'bank_transfer' ? 'bg-[#800080] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition duration-200 ease-in-out text-sm sm:text-base ${paymentMethod === 'bank_transfer' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
                 >
                   Bank Transfer
@@ -210,7 +210,7 @@ const PaymentPortal = () => {
             <button
               onClick={handleConfirmPayment}
               disabled={loading}
-              className="w-full px-4 py-3 bg-[#800080] text-white font-semibold rounded-lg hover:bg-[#6a006a] focus:outline-none focus:ring-2 focus:ring-[#800080] focus:ring-opacity-50 transition duration-200 ease-in-out transform hover:scale-105 text-sm sm:text-base"
+              className="w-full px-4 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-[#6a006a] focus:outline-none focus:ring-2 focus:ring-[#800080] focus:ring-opacity-50 transition duration-200 ease-in-out transform hover:scale-105 text-sm sm:text-base"
             >
               {loading ? "Processing..." : "Confirm Payment"}
             </button>

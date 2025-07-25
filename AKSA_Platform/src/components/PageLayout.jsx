@@ -6,7 +6,7 @@ import {
   fetchDomainProblems,
   fetchDNSData,
   fetchWebServerData,
-  fetchMxRecords
+  fetchMxRecords,
 } from "../services/servicedomain";
 
 const PageLayout = ({
@@ -128,32 +128,32 @@ const PageLayout = ({
       }
     };
 
-const loadWebServerCounts = async () => {
-  try {
-    const data = await fetchWebServerData(domain);
+    const loadWebServerCounts = async () => {
+      try {
+        const data = await fetchWebServerData(domain);
 
-    if (!data || data.length === 0) {
-      setWebServerCounts({ errors: 0, warning: 0, solved: 0 });
-      return;
-    }
+        if (!data || data.length === 0) {
+          setWebServerCounts({ errors: 0, warning: 0, solved: 0 });
+          return;
+        }
 
-    const counts = { errors: 0, warning: 0, solved: 0 };
+        const counts = { errors: 0, warning: 0, solved: 0 };
 
-    data.forEach((item) => {
-      if (item.level === "error") {
-        counts.errors++;
-      } else if (item.level === "warning") {
-        counts.warning++;
-      } else if (item.level === "passed") {
-        counts.solved++;
+        data.forEach((item) => {
+          if (item.level === "error") {
+            counts.errors++;
+          } else if (item.level === "warning") {
+            counts.warning++;
+          } else if (item.level === "passed") {
+            counts.solved++;
+          }
+        });
+
+        setWebServerCounts(counts);
+      } catch (error) {
+        console.error("Error fetching web server data:", error);
       }
-    });
-
-    setWebServerCounts(counts);
-  } catch (error) {
-    console.error("Error fetching web server data:", error);
-  }
-};
+    };
 
     loadDiagnostics();
     loadDNSCounts();
@@ -251,7 +251,7 @@ const loadWebServerCounts = async () => {
               <button className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded hover:bg-gray-100 cursor-pointer">
                 Filter
               </button>
-              <button className="px-6 py-2 bg-[#800080] text-white rounded cursor-pointer">
+              <button className="px-6 py-2 bg-primary text-white rounded cursor-pointer">
                 Export
               </button>
             </div>

@@ -45,10 +45,10 @@ const Login = () => {
 
       // Store the JWT token in localStorage for later authenticated requests
       localStorage.setItem("token", data.token);
-      
+
       // For returning users, ensure we don't clear their data
       const lastUser = localStorage.getItem("currentUser");
-      const userPrefix = data.user.email.split('@')[0];
+      const userPrefix = data.user.email.split("@")[0];
       if (lastUser === data.user.email) {
         // Same user logging in again, keep their data
         const savedDomain = localStorage.getItem(`${userPrefix}_savedDomain`);
@@ -70,9 +70,11 @@ const Login = () => {
         // Check if user has domains
         try {
           const res = await axios.get("/api/domains", {
-            headers: { Authorization: `Bearer ${data.token}` }
+            headers: { Authorization: `Bearer ${data.token}` },
           });
-          const userDomains = res.data.filter(domain => domain.userEmail === data.user.email);
+          const userDomains = res.data.filter(
+            (domain) => domain.userEmail === data.user.email
+          );
           if (userDomains.length > 0) {
             navigate("/dashboard");
           } else {
@@ -99,7 +101,7 @@ const Login = () => {
             alt="Security"
             className="absolute inset-0 w-full h-full object-cover opacity-30"
           />
-          
+
           {/* Mobile Logo - Top left on mobile */}
           <div className="lg:hidden absolute top-4 left-4 z-10">
             <div className="flex items-baseline space-x-2">
@@ -139,8 +141,12 @@ const Login = () => {
         <div className="lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:px-12 lg:py-8">
           <div className="w-full max-w-md space-y-4 sm:space-y-6">
             <div className="text-center lg:text-left">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2">Welcome back</h2>
-              <p className="text-sm sm:text-base text-gray-500">Sign in to your account</p>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2">
+                Welcome back
+              </h2>
+              <p className="text-sm sm:text-base text-gray-500">
+                Sign in to your account
+              </p>
             </div>
 
             {/* Alert Messages */}
@@ -168,7 +174,7 @@ const Login = () => {
                   className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
-              
+
               <div>
                 <input
                   type="password"
@@ -194,7 +200,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#800080] text-white p-3 sm:p-4 rounded-lg font-semibold disabled:opacity-50 transition-all duration-200 hover:bg-[#700070] text-sm sm:text-base"
+                className="w-full bg-primary text-white p-3 sm:p-4 rounded-lg font-semibold disabled:opacity-50 transition-all duration-200 hover:bg-[#700070] text-sm sm:text-base"
               >
                 {loading ? "Signing In..." : "Sign In"}
               </button>
@@ -204,7 +210,10 @@ const Login = () => {
 
             <p className="text-sm sm:text-base text-center">
               Don't have an account?{" "}
-              <Link to="/signup" className="text-[#800080] underline hover:text-[#700070]">
+              <Link
+                to="/signup"
+                className="text-[#800080] underline hover:text-[#700070]"
+              >
                 Sign up
               </Link>
             </p>

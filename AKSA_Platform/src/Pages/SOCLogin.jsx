@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { Home } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import { Home } from "lucide-react";
 
 const SOCLogin = () => {
   const navigate = useNavigate();
@@ -44,19 +44,21 @@ const SOCLogin = () => {
       console.log("Login API Response Data:", data);
 
       localStorage.setItem("token", data.token);
-      
+
       // Clear existing user data before setting new
       localStorage.removeItem("soc_username");
       localStorage.removeItem("soc_fullname");
       localStorage.removeItem("soc_email");
 
-      const usernameFromEmail = formData.email.split('@')[0];
+      const usernameFromEmail = formData.email.split("@")[0];
       localStorage.setItem("soc_username", usernameFromEmail);
-      
+
       // Store the real full name from backend response
       let fullNameToStore = usernameFromEmail.toUpperCase();
       if (data.user && (data.user.firstName || data.user.lastName)) {
-        fullNameToStore = `${data.user.firstName || ''} ${data.user.lastName || ''}`.trim();
+        fullNameToStore = `${data.user.firstName || ""} ${
+          data.user.lastName || ""
+        }`.trim();
       }
       localStorage.setItem("soc_fullname", fullNameToStore);
       // Store the real email from backend response
@@ -89,7 +91,7 @@ const SOCLogin = () => {
       <button
         onClick={() => {
           window.close();
-          window.opener.location.href = '/dashboard';
+          window.opener.location.href = "/dashboard";
         }}
         className="absolute top-4 right-4 bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 transition duration-200 ease-in-out text-sm z-50 flex items-center space-x-1"
       >
@@ -105,19 +107,17 @@ const SOCLogin = () => {
             className="absolute inset-0 w-full h-full object-cover opacity-30"
           />
           <div className="absolute top-0 my-8 flex flex-row items-center px-8 z-10">
-             <div className="flex items-baseline space-x-2">
-               <h1 className="text-3xl font-semibold">AKSA</h1>
-               <div className="flex items-center space-x-1">
-                 <span className="text-base">By</span>
-                 <img src="/logo_white.png" alt="Logo" className="h-4 w-4" />
-                 <span className="text-base">iSecurify</span>
-               </div>
-             </div>
-           </div>
+            <div className="flex items-baseline space-x-2">
+              <h1 className="text-3xl font-semibold">AKSA</h1>
+              <div className="flex items-center space-x-1">
+                <span className="text-base">By</span>
+                <img src="/logo_white.png" alt="Logo" className="h-4 w-4" />
+                <span className="text-base">iSecurify</span>
+              </div>
+            </div>
+          </div>
           <div className="relative z-10 max-w-md mx-auto">
-            <h2 className="text-3xl font-bold mb-6">
-              SOC Dashboard Access
-            </h2>
+            <h2 className="text-3xl font-bold mb-6">SOC Dashboard Access</h2>
             <p className="text-lg text-gray-300">
               Please log in to access the Security Operations Center dashboard.
             </p>
@@ -145,7 +145,9 @@ const SOCLogin = () => {
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
                 <input
                   type="email"
                   name="email"
@@ -158,7 +160,9 @@ const SOCLogin = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
                 <input
                   type="password"
                   name="password"
@@ -173,13 +177,17 @@ const SOCLogin = () => {
 
               <button
                 type="submit"
-                disabled={loading || formData.email.trim() === '' || formData.password.trim() === ''}
-                className="w-full bg-[#800080] text-white p-3 rounded-lg font-semibold hover:bg-[#6a006a] focus:outline-none focus:ring-2 focus:ring-[#800080] focus:ring-opacity-50 transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={
+                  loading ||
+                  formData.email.trim() === "" ||
+                  formData.password.trim() === ""
+                }
+                className="w-full bg-primary text-white p-3 rounded-lg font-semibold hover:bg-[#6a006a] focus:outline-none focus:ring-2 focus:ring-[#800080] focus:ring-opacity-50 transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Logging In..." : "Login to SOC Dashboard"}
               </button>
             </form>
-             <div className="text-sm text-gray-400 text-center pt-4">
+            <div className="text-sm text-gray-400 text-center pt-4">
               <p>✔ Enterprise-grade security</p>
               <p>Protected by AKSA by iSecurify • ISO 27001 Certified</p>
             </div>
@@ -190,4 +198,4 @@ const SOCLogin = () => {
   );
 };
 
-export default SOCLogin; 
+export default SOCLogin;

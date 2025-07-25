@@ -25,7 +25,9 @@ const DomainsInline = ({ setShowDomainsInline }) => {
   };
 
   const handleDelete = async (id, name) => {
-    const confirmDelete = window.confirm(`Are you sure you want to delete the domain "${name}"?`);
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the domain "${name}"?`
+    );
     if (!confirmDelete) return;
 
     try {
@@ -104,7 +106,7 @@ const DomainsInline = ({ setShowDomainsInline }) => {
 
       <div className="flex justify-between items-center mb-6">
         <button
-          className="px-4 py-2 bg-primary text-white rounded hover:bg-[#800080] text-sm font-semibold"
+          className="px-4 py-2 bg-primary text-white rounded hover:bg-primary text-sm font-semibold"
           onClick={() => setShowDomainsInline(false)}
         >
           &larr; Back to Profile
@@ -152,10 +154,14 @@ const DomainsInline = ({ setShowDomainsInline }) => {
               </th>
               <th className="px-4 py-3 font-semibold text-gray-700">Domain</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Actions</th>
-              <th className="px-4 py-3 font-semibold text-gray-700">Schedule</th>
+              <th className="px-4 py-3 font-semibold text-gray-700">
+                Schedule
+              </th>
               <th className="px-4 py-3 font-semibold text-gray-700">Added</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Status</th>
-              <th className="px-4 py-3 font-semibold text-gray-700">Error code</th>
+              <th className="px-4 py-3 font-semibold text-gray-700">
+                Error code
+              </th>
               <th className="px-4 py-3 font-semibold text-gray-700">Scan</th>
             </tr>
           </thead>
@@ -170,9 +176,14 @@ const DomainsInline = ({ setShowDomainsInline }) => {
                     aria-label={`Select domain ${domain.name}`}
                   />
                 </td>
-                <td className="px-4 py-3 text-gray-900 font-medium">{domain.name}</td>
+                <td className="px-4 py-3 text-gray-900 font-medium">
+                  {domain.name}
+                </td>
                 <td className="px-4 py-3 flex gap-2 items-center">
-                  <button title="Favorite" className="text-gray-400 hover:text-primary">
+                  <button
+                    title="Favorite"
+                    className="text-gray-400 hover:text-primary"
+                  >
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
                       <path
                         d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
@@ -207,7 +218,11 @@ const DomainsInline = ({ setShowDomainsInline }) => {
                 <td className="px-4 py-3">-</td>
                 <td className="px-4 py-3">
                   <label className="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" defaultChecked />
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      defaultChecked
+                    />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-teal-400 transition"></div>
                   </label>
                 </td>
@@ -226,12 +241,12 @@ const DomainsInline = ({ setShowDomainsInline }) => {
               className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
               placeholder="Enter domain name"
               value={newDomainName}
-              onChange={e => setNewDomainName(e.target.value)}
+              onChange={(e) => setNewDomainName(e.target.value)}
               autoFocus
             />
             <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-2 bg-primary text-white rounded hover:bg-[#800080]"
+                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary"
                 onClick={handleAddDomainSubmit}
               >
                 Add
