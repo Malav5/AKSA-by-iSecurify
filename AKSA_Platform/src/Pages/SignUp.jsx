@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -66,11 +67,23 @@ const Signup = () => {
       localStorage.removeItem(`${userPrefix}_domainHealthStatus`);
       localStorage.removeItem(`${userPrefix}_recommendedProducts`);
 
-      setSuccess("Signup successful! Redirecting to dashboard...");
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
+      setSuccess("Signup successful! Redirecting...");
+      setTimeout(async () => {
+        // Check if user has domains
+        try {
+          const res = await axios.get("/api/domains", {
+            headers: { Authorization: `Bearer ${data.token}` }
+          });
+          const userDomains = res.data.filter(domain => domain.userEmail === data.user.email);
+          if (userDomains.length > 0) {
+            navigate("/dead-dashboard");
+          } else {
+            navigate("/deaddashboard");
+          }
+        } catch (err) {
+          navigate("/deaddashboard");
+        }
+      }, 1000);
     } catch (err) {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -84,7 +97,7 @@ const Signup = () => {
         {/* Left Side - Hero Section */}
         <div className="lg:w-1/2 bg-gray-900 text-white flex flex-col justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
           <img src="/cyber.jpg" alt="Security" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-          
+
           {/* Mobile Logo - Top left on mobile */}
           <div className="lg:hidden absolute top-4 left-4 z-10">
             <div className="flex items-baseline space-x-2">
@@ -131,60 +144,60 @@ const Signup = () => {
               {/* Name Fields - Stack on mobile, side by side on larger screens */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="flex-1">
-                  <input 
-                    type="text" 
-                    name="firstName" 
-                    placeholder="First Name" 
-                    value={formData.firstName} 
-                    onChange={handleChange} 
-                    required 
-                    className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base" 
+                  <input
+                    type="text"
+                    name="firstName"
+                    placeholder="First Name"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base"
                   />
                 </div>
                 <div className="flex-1">
-                  <input 
-                    type="text" 
-                    name="lastName" 
-                    placeholder="Last Name" 
-                    value={formData.lastName} 
-                    onChange={handleChange} 
-                    required 
-                    className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base" 
+                  <input
+                    type="text"
+                    name="lastName"
+                    placeholder="Last Name"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base"
                   />
                 </div>
               </div>
 
               <div>
-                <input 
-                  type="text" 
-                  name="companyName" 
-                  placeholder="Company Name" 
-                  value={formData.companyName} 
-                  onChange={handleChange} 
-                  className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base" 
+                <input
+                  type="text"
+                  name="companyName"
+                  placeholder="Company Name"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
-              
+
               <div>
-                <input 
-                  type="email" 
-                  name="email" 
-                  placeholder="Work Email" 
-                  value={formData.email} 
-                  onChange={handleChange} 
-                  required 
-                  className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base" 
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Work Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
-              
+
               <div>
-                <input 
-                  type="tel" 
-                  name="phoneNumber" 
-                  placeholder="Phone Number" 
-                  value={formData.phoneNumber} 
-                  onChange={handleChange} 
-                  className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base" 
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  placeholder="Phone Number"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
 
@@ -205,9 +218,9 @@ const Signup = () => {
                 )}
               </div>
 
-              <button 
-                type="submit" 
-                disabled={loading} 
+              <button
+                type="submit"
+                disabled={loading}
                 className="w-full bg-primary text-white p-3 sm:p-4 rounded-lg font-semibold disabled:opacity-50 transition-all duration-200 hover:bg-[#700070] text-sm sm:text-base"
               >
                 {loading ? "Signing Up..." : "Sign Up"}

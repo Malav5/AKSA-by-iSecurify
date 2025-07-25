@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { userServices } from "../services/UserServices";
+import axios from "axios";
 const Login = () => {
   const navigate = useNavigate();
 
@@ -65,8 +66,21 @@ const Login = () => {
         localStorage.setItem("plan", data.user.plan);
       }
       setSuccess("Login successful! Redirecting...");
-      setTimeout(() => {
-        navigate("/dashboard", { state: { from: "/login", user: data.user } });
+      setTimeout(async () => {
+        // Check if user has domains
+        try {
+          const res = await axios.get("/api/domains", {
+            headers: { Authorization: `Bearer ${data.token}` }
+          });
+          const userDomains = res.data.filter(domain => domain.userEmail === data.user.email);
+          if (userDomains.length > 0) {
+            navigate("/dead-dashboard");
+          } else {
+            navigate("/deaddashboard");
+          }
+        } catch (err) {
+          navigate("/deaddashboard");
+        }
       }, 1000);
     } catch (err) {
       setError(err.message);

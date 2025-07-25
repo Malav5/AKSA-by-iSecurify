@@ -45,8 +45,25 @@ const Sidebar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const handleNavClick = (item) => {
-    if (item.label === "SOC") {
+  const handleNavClick = async (item) => {
+    if (item.label === "Dashboard") {
+      // Check if user has domains
+      try {
+        const token = localStorage.getItem("token");
+        const userEmail = user?.email || localStorage.getItem("currentUser");
+        const res = await axios.get("/api/domains", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const userDomains = res.data.filter(domain => domain.userEmail === userEmail);
+        if (userDomains.length > 0) {
+          navigate("/dead-dashboard");
+        } else {
+          navigate("/deaddashboard");
+        }
+      } catch (err) {
+        navigate("/deaddashboard");
+      }
+    } else if (item.label === "SOC") {
       if (user?.plan === "Freemium") {
         setShowUpgradeModal(true);
       } else {
