@@ -5,7 +5,7 @@ import Sidebar from "../components/Dashboard/Sidebar";
 import Header from "../components/Dashboard/Header";
 import QueAns from "../components/Dashboard/QueAns";
 import { fetchRiskData } from "../services/DashboardServices";
-import { ComplianceScore } from "../components/Dashboard/ComplianceScore";
+import ComplianceScore from "../components/Dashboard/ComplianceScore";
 import { ComplianceScoreCard } from "../components/Dashboard/ComplianceScoreCard";
 import AksaSecurityServices from "../components/Dashboard/Services";
 import SuggestedProducts from "../components/Dashboard/SuggestedProducts";

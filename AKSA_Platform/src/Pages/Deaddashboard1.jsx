@@ -16,6 +16,11 @@ import {
 } from 'chart.js';
 import "react-circular-progressbar/dist/styles.css";
 import AksaSecurityServices from "../components/Dashboard/Services";
+import { ComplianceScoreCard } from "../components/Dashboard/ComplianceScoreCard";
+import IssueManagement from "../components/Dashboard/IssueManagement";
+import RiskManagement from "../components/Dashboard/RiskManagement";
+import TaskManagement from "../components/Dashboard/TaskManagement";
+import OptionsMenu from "../components/Dashboard/OptionsMenu";
 
 // Register ChartJS components
 ChartJS.register(
@@ -26,7 +31,7 @@ ChartJS.register(
   Legend
 );
 
-const DeadDashboard = () => {
+const Deaddashboard1 = () => {
   const navigate = useNavigate();
   const [showQuestionnaire, setShowQuestionnaire] = useState(false);
 
@@ -63,22 +68,25 @@ const DeadDashboard = () => {
           <div className="mt-6 space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Security Analysis Results</h2>
-              <RiskDashboard />
+              <RiskDashboard/>
             </div>
           </div>
           
           <div className="my-6 space-y-6 bg-white rounded-lg shadow-sm p-6 border border-gray-100">
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 mb-10">
-              <ComplianceScore />
+              <ComplianceScoreCard />
               <div className="col-span-2">
-                <AksaSecurityServices />
+                <SuggestedProducts />
               </div>
             </div>
           </div>
 
-          <div className="text-center py-10">
-            <p className="text-gray-600">All content will be shown here when you add a domain in your profile</p>
-          </div>
+          <div className="space-y-4 sm:space-y-6">
+              <IssueManagement />
+              <TaskManagement />
+              <RiskManagement />
+              <OptionsMenu />
+            </div>
 
           <div className="border-t border-gray-200 mt-10 pt-6 text-center text-sm text-gray-400">
             ©2024 AKSA by iSecurify. All Rights Reserved.
@@ -96,4 +104,4 @@ const DeadDashboard = () => {
   );
 };
 
-export default DeadDashboard;
+export default Deaddashboard1;

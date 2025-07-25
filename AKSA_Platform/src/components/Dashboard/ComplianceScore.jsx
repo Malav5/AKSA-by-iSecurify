@@ -1,5 +1,9 @@
-import React from "react";
-export const ComplianceScore = () => {
+import React, { useState } from "react";
+import QueAns from "./QueAns";
+
+const ComplianceScore = () => {
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+
   return (
     <div className="bg-white shadow rounded-lg p-4 sm:p-6 w-full max-w-xl mx-auto">
       <h2 className="text-gray-800 font-semibold text-lg mb-6 text-center sm:text-left">
@@ -25,6 +29,21 @@ export const ComplianceScore = () => {
       <div className="text-gray-500 mt-4 text-center font-medium text-sm sm:text-base">
         Awaiting score...
       </div>
+
+      <div className="mt-6 text-center">
+        <button
+          onClick={() => setShowQuestionnaire(true)}
+          className="bg-primary hover:bg-blue-700 text-white text-sm font-medium py-1.5 px-4 rounded-lg transition-colors duration-200"
+        >
+          Take Assessment
+        </button>
+      </div>
+
+      {showQuestionnaire && (
+        <QueAns onCancel={() => setShowQuestionnaire(false)} />
+      )}
     </div>
   );
 };
+
+export default ComplianceScore;
