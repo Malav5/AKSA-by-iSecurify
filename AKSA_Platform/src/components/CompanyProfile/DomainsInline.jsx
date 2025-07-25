@@ -8,6 +8,8 @@ const DomainsInline = ({ setShowDomainsInline }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
   const selectAllRef = useRef();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newDomainName, setNewDomainName] = useState("");
 
   const userEmail = localStorage.getItem("currentUser");
 
@@ -37,14 +39,19 @@ const DomainsInline = ({ setShowDomainsInline }) => {
   };
 
   const handleAddDomain = async () => {
-    const name = prompt("Enter domain name:");
-    if (!name) return;
+    setShowAddModal(true);
+    setNewDomainName("");
+  };
 
+  const handleAddDomainSubmit = async () => {
+    if (!newDomainName) return;
     try {
-      const payload = { name, userEmail };
+      const payload = { name: newDomainName, userEmail };
       await domainServices.addDomain(payload);
       toast.success("Domain added successfully");
       fetchDomains();
+      setShowAddModal(false);
+      setNewDomainName("");
     } catch (err) {
       console.error("Add error:", err);
       toast.error(err?.response?.data?.error || "Failed to add domain");
@@ -105,7 +112,7 @@ const DomainsInline = ({ setShowDomainsInline }) => {
 
         <button
           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-semibold"
-          onClick={handleAddDomain}
+          onClick={() => setShowAddModal(true)}
         >
           + Add Domain
         </button>
@@ -146,7 +153,7 @@ const DomainsInline = ({ setShowDomainsInline }) => {
               <th className="px-4 py-3 font-semibold text-gray-700">Domain</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Actions</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Schedule</th>
-              <th className="px-4 py-3 font-semibold text-gray-700">Last scan</th>
+              <th className="px-4 py-3 font-semibold text-gray-700">Added</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Status</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Error code</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Scan</th>
@@ -209,6 +216,36 @@ const DomainsInline = ({ setShowDomainsInline }) => {
           </tbody>
         </table>
       </div>
+
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 bg-opacity-30">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-bold mb-4">Add Domain</h2>
+            <input
+              type="text"
+              className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
+              placeholder="Enter domain name"
+              value={newDomainName}
+              onChange={e => setNewDomainName(e.target.value)}
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 bg-primary text-white rounded hover:bg-[#800080]"
+                onClick={handleAddDomainSubmit}
+              >
+                Add
+              </button>
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                onClick={() => setShowAddModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

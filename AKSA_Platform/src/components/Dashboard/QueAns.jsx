@@ -214,6 +214,10 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
   return (
     <div className="fixed inset-0 bg-gray-900/50 flex justify-center items-center z-50 overflow-auto">
       <div className="relative bg-white rounded-xl shadow-lg max-w-3xl w-full max-h-[90vh]">
+      <h1 className="text-3xl font-semibold text-center text-primary my-6">
+            Domain Health Assessment
+          </h1>
+
         <button
           onClick={onCancel}
           className="absolute top-4 right-4 text-gray-500 hover:text-red-500 z-10"
@@ -221,11 +225,8 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
           <X className="w-6 h-6" />
         </button>
 
-        <div className="p-8 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
-          <h1 className="text-3xl font-semibold text-center text-primary mb-6">
-            Domain Health Assessment
-          </h1>
-
+        <div className="p-8 space-y-6 max-h-[75vh] overflow-y-auto scrollbar-hide">
+         
           {errorMessage && (
             <div className="text-red-600 text-center mb-4">
               {errorMessage}

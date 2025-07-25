@@ -67,7 +67,7 @@ const Settings = () => {
 
         <div className="flex flex-col md:flex-row gap-4">
           <button
-            className="border border-purple-600 text-purple-700 rounded-lg px-6 py-3 text-lg font-semibold hover:bg-purple-50 transition mb-4 md:mb-0"
+            className="border border-primary text-primary rounded-lg px-6 py-3 text-lg font-semibold hover:bg-purple-50 transition mb-4 md:mb-0"
             onClick={handleUpgrade}
           >
             Upgrade My Plan

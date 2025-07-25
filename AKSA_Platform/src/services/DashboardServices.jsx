@@ -1,5 +1,6 @@
 import axios from "axios";
 import BASE_URL from "./api"
+import { calculateOverallRiskScore, calculateTechRiskScore, calculateSSLRiskScore } from "./domainScoreServices";
 
 export const fetchWhoisData = async (domain) => {
   try {
@@ -146,54 +147,13 @@ export const fetchRiskData = async (domain) => {
     };
   } catch (error) {
     console.error("Error fetching risk data:", error);
-    return { 
-      success: false, 
-      error: error.message || error 
+    return {
+      success: false,
+      error: error.message || error
     };
   }
 };
-// Dynamically score the entire API response
-const calculateOverallRiskScore = (data) => {
-  let totalPoints = 0;
-  let maxPoints = 0;
 
-  for (const [sectionKey, sectionValue] of Object.entries(data)) {
-    if (typeof sectionValue !== "object" || sectionValue === null) continue;
-
-    for (const [fieldKey, fieldValue] of Object.entries(sectionValue)) {
-      maxPoints += 1;
-
-      // Positive signals
-      if (typeof fieldValue === "boolean") {
-        totalPoints += fieldValue ? 1 : 0;
-      } else if (typeof fieldValue === "string") {
-        if (fieldKey.includes("valid") && isValidDate(fieldValue)) {
-          totalPoints += new Date(fieldValue) > new Date() ? 1 : 0;
-        } else if (fieldValue.length > 0) {
-          totalPoints += 1;
-        }
-      } else if (Array.isArray(fieldValue)) {
-        if (fieldKey.includes("blocklists")) {
-          const clean = fieldValue.every((b) => b.isBlocked === false);
-          totalPoints += clean ? 1 : 0;
-        } else {
-          totalPoints += fieldValue.length > 0 ? 1 : 0;
-        }
-      } else if (typeof fieldValue === "object" && fieldValue !== null) {
-        const allTruthy = Object.values(fieldValue).some((v) => !!v);
-        totalPoints += allTruthy ? 1 : 0;
-      }
-    }
-  }
-
-  // Avoid division by zero
-  const finalScore = maxPoints === 0 ? 0 : (totalPoints / maxPoints) * 10;
-  return parseFloat(finalScore.toFixed(1));
-};
-
-const isValidDate = (d) => !isNaN(Date.parse(d));;
-
-// Fixed fetchTechStack function
 export const fetchTechStack = async (domain) => {
   try {
     const response = await axios.get(`${BASE_URL}/tech-stack`, {
@@ -214,25 +174,12 @@ export const fetchTechStack = async (domain) => {
     };
   } catch (error) {
     console.error("Error fetching tech stack:", error);
-    return { 
-      success: false, 
-      error: error.message || error 
+    return {
+      success: false,
+      error: error.message || error
     };
   }
 };
-
-
-// Example scoring function for tech stack
-function calculateTechRiskScore(data) {
-  // Basic example logic: give points based on PHP version
-  const php = data.technologies.find((t) => t.slug === "php");
-  if (!php || !php.version) return 0;
-
-  const major = parseInt(php.version.split(".")[0], 10);
-  if (major >= 8) return 10; // Low risk
-  if (major >= 7) return 30; // Medium risk
-  return 50; // High risk
-}
 
 export const fetchSSL = async (domain) => {
   try {
@@ -254,25 +201,9 @@ export const fetchSSL = async (domain) => {
     };
   } catch (error) {
     console.error("Error fetching SSL data:", error);
-    return { 
-      success: false, 
-      error: error.message || error 
+    return {
+      success: false,
+      error: error.message || error
     };
   }
 };
-
-
-// Example scoring function for SSL
-function calculateSSLRiskScore(data) {
-  let score = 0;
-
-  if (data.issuer && data.issuer.O && data.issuer.O.includes("Let's Encrypt")) {
-    score += 5;
-  }
-
-  if (data.bits && data.bits >= 2048) {
-    score += 5;
-  }
-
-  return score;
-}

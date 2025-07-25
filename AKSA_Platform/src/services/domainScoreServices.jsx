@@ -38,10 +38,10 @@ export const calculatePatchingScore = (technologies) => {
   });
 
   // Calculate score out of 10
-  const score = maximumPoints > 0 
-    ? (achievedPoints / maximumPoints) * 10 
+  const score = maximumPoints > 0
+    ? (achievedPoints / maximumPoints) * 10
     : 0;
-    
+
   return parseFloat(score.toFixed(1));
 };
 
@@ -56,7 +56,7 @@ export const calculateAppSecurityScore = async (domain) => {
       try {
         const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
         const data = response.data;
-        
+
         let endpointScore = 0;
         switch (endpoint) {
           case "/http-security":
@@ -97,7 +97,7 @@ export const calculateWebEncryptionScore = async (domain) => {
       try {
         const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
         const data = response.data;
-        
+
         let endpointScore = 0;
         switch (endpoint) {
           case "/ssl":
@@ -135,7 +135,7 @@ export const calculateNetworkFilteringScore = async (domain) => {
       try {
         const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
         const data = response.data;
-        
+
         let endpointScore = 0;
         switch (endpoint) {
           case "/ports":
@@ -173,7 +173,7 @@ export const calculateBreachEventsScore = async (domain) => {
       try {
         const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
         const data = response.data;
-        
+
         let endpointScore = 0;
         switch (endpoint) {
           case "/threats":
@@ -211,7 +211,7 @@ export const calculateSystemReputationScore = async (domain) => {
       try {
         const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
         const data = response.data;
-        
+
         let endpointScore = 0;
         switch (endpoint) {
           case "/threats":
@@ -249,7 +249,7 @@ export const calculateDnsSecurityScore = async (domain) => {
       try {
         const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
         const data = response.data;
-        
+
         let endpointScore = 0;
         switch (endpoint) {
           case "/dnssec":
@@ -287,7 +287,7 @@ export const calculateSystemHostingScore = async (domain) => {
       try {
         const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
         const data = response.data;
-        
+
         let endpointScore = 0;
         switch (endpoint) {
           case "/get-ip":
@@ -694,10 +694,10 @@ const calculateDnssecScore = (data) => {
     maximumPoints += 1; // trustAnchorConfigured
     if (data.trustAnchorConfigured) achievedPoints += 1;
   } else {
-      // If DNSSEC is not enabled, these points are not achievable.
-      // We could add them to max points to penalize lack of DNSSEC, or not.
-      // Let's add them to maximumPoints to reflect the potential for improvement.
-      maximumPoints += 6; // for validSignatures, algorithmSupported, etc.
+    // If DNSSEC is not enabled, these points are not achievable.
+    // We could add them to max points to penalize lack of DNSSEC, or not.
+    // Let's add them to maximumPoints to reflect the potential for improvement.
+    maximumPoints += 6; // for validSignatures, algorithmSupported, etc.
   }
 
   // Normalize to a 0-10 score
@@ -775,10 +775,10 @@ const calculateIpScore = (data) => {
     maximumPoints += 1; // ddosProtection
     if (data.ddosProtection) achievedPoints += 1;
   } else {
-      // If no IP data, these points are not applicable.
-      // We can choose to add to maxPoints to penalize lack of IP info or not.
-      // Let's add them to reflect potential.
-      maximumPoints += 5; // for ipv6, cdn, cloudProvider, loadBalanced, ddosProtection
+    // If no IP data, these points are not applicable.
+    // We can choose to add to maxPoints to penalize lack of IP info or not.
+    // Let's add them to reflect potential.
+    maximumPoints += 5; // for ipv6, cdn, cloudProvider, loadBalanced, ddosProtection
   }
 
   // Normalize to a 0-10 score
@@ -810,11 +810,79 @@ const calculateWhoisScore = (data) => {
     if (data.registrarReputation === 'high') achievedPoints += 1;
 
   } else {
-      // If no registrant data, these points are not applicable.
-      maximumPoints += 4; // for privacy, age, period, reputation
+    // If no registrant data, these points are not applicable.
+    maximumPoints += 4; // for privacy, age, period, reputation
   }
 
   // Normalize to a 0-10 score
   const score = maximumPoints > 0 ? (achievedPoints / maximumPoints) * 10 : 0;
   return parseFloat(score.toFixed(1));
-}; 
+};
+
+// Dynamically score the entire API response
+export const calculateOverallRiskScore = (data) => {
+  let totalPoints = 0;
+  let maxPoints = 0;
+
+  for (const [sectionKey, sectionValue] of Object.entries(data)) {
+    if (typeof sectionValue !== "object" || sectionValue === null) continue;
+
+    for (const [fieldKey, fieldValue] of Object.entries(sectionValue)) {
+      maxPoints += 1;
+
+      // Positive signals
+      if (typeof fieldValue === "boolean") {
+        totalPoints += fieldValue ? 1 : 0;
+      } else if (typeof fieldValue === "string") {
+        if (fieldKey.includes("valid") && isValidDate(fieldValue)) {
+          totalPoints += new Date(fieldValue) > new Date() ? 1 : 0;
+        } else if (fieldValue.length > 0) {
+          totalPoints += 1;
+        }
+      } else if (Array.isArray(fieldValue)) {
+        if (fieldKey.includes("blocklists")) {
+          const clean = fieldValue.every((b) => b.isBlocked === false);
+          totalPoints += clean ? 1 : 0;
+        } else {
+          totalPoints += fieldValue.length > 0 ? 1 : 0;
+        }
+      } else if (typeof fieldValue === "object" && fieldValue !== null) {
+        const allTruthy = Object.values(fieldValue).some((v) => !!v);
+        totalPoints += allTruthy ? 1 : 0;
+      }
+    }
+  }
+
+  // Avoid division by zero
+  const finalScore = maxPoints === 0 ? 0 : (totalPoints / maxPoints) * 10;
+  return parseFloat(finalScore.toFixed(1));
+};
+
+export const isValidDate = (d) => !isNaN(Date.parse(d));
+
+// Example scoring function for tech stack
+export function calculateTechRiskScore(data) {
+  // Basic example logic: give points based on PHP version
+  const php = data.technologies.find((t) => t.slug === "php");
+  if (!php || !php.version) return 0;
+
+  const major = parseInt(php.version.split(".")[0], 10);
+  if (major >= 8) return 10; // Low risk
+  if (major >= 7) return 30; // Medium risk
+  return 50; // High risk
+}
+
+// Example scoring function for SSL
+export function calculateSSLRiskScore(data) {
+  let score = 0;
+
+  if (data.issuer && data.issuer.O && data.issuer.O.includes("Let's Encrypt")) {
+    score += 5;
+  }
+
+  if (data.bits && data.bits >= 2048) {
+    score += 5;
+  }
+
+  return score;
+} 
