@@ -2,10 +2,14 @@ import React, { useEffect, useState, Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { Check, ChevronDown } from "lucide-react";
 import { createTask } from "../../services/TaskServics";
+import { userServices } from "../../services/UserServices";
+import { showSuccess, showError } from "../ui/toast";
 
 const CreateTask = ({ onClose }) => {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [assigneeOptions, setAssigneeOptions] = useState([]);
+
   const [taskData, setTaskData] = useState({
     name: "",
     description: "",
@@ -14,46 +18,52 @@ const CreateTask = ({ onClose }) => {
     priority: "",
     assignee: "",
     category: "",
-    criticality: "", // ✅
+    criticality: "",
   });
-
-  useEffect(() => {
-    setVisible(true);
-  }, []);
 
   const statusOptions = ["To Do", "In Progress", "Completed", "Blocked"];
   const priorityOptions = ["Low", "Medium", "High", "Urgent"];
-  const [assigneeOptions, setAssigneeOptions] = useState([]);
-
-useEffect(() => {
-  setVisible(true);
-  fetchMembers();
-}, []);
-
-const fetchMembers = async () => {
-  try {
-    const res = await fetch("http://localhost:3000/api/member/get-members");
-    const data = await res.json();
-    if (data.members) {
-      const names = data.members.map((member) => `${member.name} (${member.role})`);
-      setAssigneeOptions(names);
-    }
-  } catch (error) {
-    console.error("Failed to fetch members", error);
-  }
-};
-
   const categoryOptions = ["Development", "Design", "Testing", "Documentation"];
-  const criticalityOptions = ["Informational", "Low", "Medium", "High", "Critical"];
+  const criticalityOptions = [
+    "Informational",
+    "Low",
+    "Medium",
+    "High",
+    "Critical",
+  ];
+
+  useEffect(() => {
+    setVisible(true);
+    loadMembers();
+  }, []);
+
+  // ✅ Use service method here
+  const loadMembers = async () => {
+    try {
+      const response = await userServices.fetchMembers();
+      console.log("API response:", response);
+      // Handle both { users: [...] } and [...]
+      let users = [];
+      if (Array.isArray(response)) {
+        users = response;
+      } else if (Array.isArray(response.users)) {
+        users = response.users;
+      }
+      const formatted = users.map((user) => user.name);
+      setAssigneeOptions(formatted);
+    } catch (err) {
+      console.error("Failed to fetch members", err);
+    }
+  };
 
   const handleFormSubmit = async () => {
     setLoading(true);
     try {
-      await createTask(taskData); // ✅ Call service function
-      alert("✅ Task created successfully!");
+      await createTask(taskData);
+      showSuccess("Task created successfully!");
       onClose();
     } catch (error) {
-      alert("❌ Error: " + error.message);
+      showError("❌ Error: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -80,12 +90,21 @@ const fetchMembers = async () => {
                   key={index}
                   value={option}
                   className={({ active }) =>
-                    `cursor-pointer select-none px-4 py-2 ${active ? "bg-blue-100" : ""}`
+                    `cursor-pointer select-none px-4 py-2 ${
+                      active ? "bg-blue-100" : ""
+                    }`
                   }
                 >
                   {({ selected }) => (
-                    <span className={`block ${selected ? "font-medium" : "font-normal"}`}>
-                      {option} {selected && <Check className="inline w-4 h-4 ml-2 text-blue-500" />}
+                    <span
+                      className={`block ${
+                        selected ? "font-medium" : "font-normal"
+                      }`}
+                    >
+                      {option}{" "}
+                      {selected && (
+                        <Check className="inline w-4 h-4 ml-2 text-blue-500" />
+                      )}
                     </span>
                   )}
                 </Listbox.Option>
@@ -108,7 +127,9 @@ const fetchMembers = async () => {
           e.preventDefault();
           handleFormSubmit();
         }}
-        className={`bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full transform transition-transform duration-600 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20"}`}
+        className={`bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full transform transition-transform duration-600 ease-out ${
+          visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20"
+        }`}
       >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Create New Task</h2>
@@ -123,21 +144,29 @@ const fetchMembers = async () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <label className="block text-gray-600 font-medium mb-1">Task Name</label>
+            <label className="block text-gray-600 font-medium mb-1">
+              Task Name
+            </label>
             <input
               type="text"
               value={taskData.name}
-              onChange={(e) => setTaskData({ ...taskData, name: e.target.value })}
+              onChange={(e) =>
+                setTaskData({ ...taskData, name: e.target.value })
+              }
               className="w-full border border-gray-300 rounded px-4 py-2"
               placeholder="Enter task name"
               required
             />
 
             <div className="mt-4">
-              <label className="block text-gray-600 font-medium mb-1">Description</label>
+              <label className="block text-gray-600 font-medium mb-1">
+                Description
+              </label>
               <textarea
                 value={taskData.description}
-                onChange={(e) => setTaskData({ ...taskData, description: e.target.value })}
+                onChange={(e) =>
+                  setTaskData({ ...taskData, description: e.target.value })
+                }
                 className="w-full border border-gray-300 rounded px-4 py-2"
                 rows={4}
                 placeholder="Enter task description"
@@ -146,10 +175,14 @@ const fetchMembers = async () => {
             </div>
 
             <div className="mt-4">
-              <label className="block text-gray-600 font-medium mb-1">Notes (optional)</label>
+              <label className="block text-gray-600 font-medium mb-1">
+                Notes (optional)
+              </label>
               <textarea
                 value={taskData.notes}
-                onChange={(e) => setTaskData({ ...taskData, notes: e.target.value })}
+                onChange={(e) =>
+                  setTaskData({ ...taskData, notes: e.target.value })
+                }
                 className="w-full border border-gray-300 rounded px-4 py-2"
                 rows={3}
                 placeholder="Optional notes"
@@ -161,17 +194,29 @@ const fetchMembers = async () => {
             {renderListbox("Status", taskData.status, statusOptions, (val) =>
               setTaskData({ ...taskData, status: val })
             )}
-            {renderListbox("Priority", taskData.priority, priorityOptions, (val) =>
-              setTaskData({ ...taskData, priority: val })
+            {renderListbox(
+              "Priority",
+              taskData.priority,
+              priorityOptions,
+              (val) => setTaskData({ ...taskData, priority: val })
             )}
-            {renderListbox("Assignee", taskData.assignee, assigneeOptions, (val) =>
-              setTaskData({ ...taskData, assignee: val })
+            {renderListbox(
+              "Assignee",
+              taskData.assignee,
+              assigneeOptions,
+              (val) => setTaskData({ ...taskData, assignee: val })
             )}
-            {renderListbox("Category", taskData.category, categoryOptions, (val) =>
-              setTaskData({ ...taskData, category: val })
+            {renderListbox(
+              "Category",
+              taskData.category,
+              categoryOptions,
+              (val) => setTaskData({ ...taskData, category: val })
             )}
-            {renderListbox("Criticality", taskData.criticality, criticalityOptions, (val) =>
-              setTaskData({ ...taskData, criticality: val })
+            {renderListbox(
+              "Criticality",
+              taskData.criticality,
+              criticalityOptions,
+              (val) => setTaskData({ ...taskData, criticality: val })
             )}
           </div>
         </div>
