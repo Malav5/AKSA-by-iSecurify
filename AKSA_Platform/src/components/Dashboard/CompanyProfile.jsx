@@ -1,5 +1,5 @@
 import Sidebar from "./Sidebar";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import AddMemberModal from "./AddMemberModal";
@@ -11,13 +11,16 @@ import UserManagement from "../CompanyProfile/UserManagement";
 import NotificationSettings from "../CompanyProfile/NotificationSettings";
 import axios from "axios";
 import { userServices } from "../../services/UserServices";
-const TABS = [
-  { label: "Member Profile", key: "member" },
-  { label: "Security Settings", key: "security" },
-  { label: "Notification Settings", key: "notification" },
-  { label: "Settings", key: "settings" },
-  // User Management tab will be conditionally added below
-];
+// Import icons for tabs
+import { User, ShieldCheck, Bell, Settings as Cog, Users } from "lucide-react";
+
+const ICONS = {
+  member: <User className="w-5 h-5 mr-1" />,
+  security: <ShieldCheck className="w-5 h-5 mr-1" />,
+  notification: <Bell className="w-5 h-5 mr-1" />,
+  settings: <Cog className="w-5 h-5 mr-1" />,
+  "user-management": <Users className="w-5 h-5 mr-1" />,
+};
 
 const CompanyProfile = () => {
   const location = useLocation();
@@ -61,6 +64,9 @@ const CompanyProfile = () => {
 
   const navigate = useNavigate();
 
+  const tabRefs = useRef({});
+  const [gliderStyle, setGliderStyle] = useState({ left: 0, width: 0 });
+
   useEffect(() => {
     setLoadingMembers(true);
     setMembersError(null);
@@ -103,6 +109,35 @@ const CompanyProfile = () => {
     const tab = params.get("tab");
     if (tab) setActiveTab(tab);
   }, [location.search]);
+
+  // Tabs to render (add User Management only for admin)
+  const visibleTabs = [
+    { label: "Member Profile", key: "member" },
+    { label: "Security Settings", key: "security" },
+    { label: "Notification Settings", key: "notification" },
+    { label: "Settings", key: "settings" },
+  ];
+  if (role === "subadmin") {
+    visibleTabs.push({ label: "User Management", key: "user-management" });
+  }
+
+  useEffect(() => {
+    // Update glider position and width when activeTab or window size changes
+    const updateGlider = () => {
+      const ref = tabRefs.current[activeTab];
+      if (ref) {
+        const rect = ref.getBoundingClientRect();
+        const parentRect = ref.parentNode.getBoundingClientRect();
+        setGliderStyle({
+          left: rect.left - parentRect.left,
+          width: rect.width,
+        });
+      }
+    };
+    updateGlider();
+    window.addEventListener("resize", updateGlider);
+    return () => window.removeEventListener("resize", updateGlider);
+  }, [activeTab, visibleTabs.length]);
 
   // Generic handlers
   const handleChange = (e) => {
@@ -179,200 +214,78 @@ const CompanyProfile = () => {
   const tabActive = "border-b-2 border-[#800080] text-primary font-semibold";
   const tabInactive = "text-gray-500";
 
-  // Tabs to render (add User Management only for admin)
-  const visibleTabs = [
-    { label: "Member Profile", key: "member" },
-    { label: "Security Settings", key: "security" },
-    { label: "Notification Settings", key: "notification" },
-    { label: "Settings", key: "settings" },
-  ];
-  if (role === "subadmin") {
-    visibleTabs.push({ label: "User Management", key: "user-management" });
-  }
-
   return (
-    <div className={`flex h-screen font-sans overflow-hidden ${mainBg}`}>
+    <div className={`flex h-screen font-sans overflow-hidden bg-gradient-to-br from-gray-50 via-purple-50 to-white`}> {/* Subtle gradient background */}
       <aside className="sticky top-0 h-screen">
         <Sidebar />
       </aside>
 
       <div className="flex-1 flex flex-col h-screen my-4">
-        {/* <header className="sticky top-0 z-10">
-          <Header />
-        </header> */}
-
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6 overflow-y-auto relative">
+          {/* Decorative SVG background */}
+          <svg className="absolute left-0 top-0 w-full h-40 opacity-10 pointer-events-none z-0" viewBox="0 0 1440 320" fill="none">
+            <path fill="#a78bfa" fillOpacity="0.2" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z" />
+          </svg>
           {/* Tabs */}
-          <nav className="flex space-x-8 border-b mb-8 bg-white px-4 py-2 rounded-t-lg shadow-sm">
+          <nav className="relative flex space-x-2 md:space-x-6 mb-8 bg-white/80 backdrop-blur-lg px-4 py-3 rounded-2xl shadow-lg z-10" style={{overflow: 'visible'}}>
+            {/* Glider */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 h-[44px] bg-primary rounded-full z-0 transition-all duration-300"
+              style={{
+                left: gliderStyle.left,
+                width: gliderStyle.width,
+                pointerEvents: 'none',
+                boxShadow: '0 4px 24px 0 rgba(128,0,128,0.10)',
+              }}
+            />
             {visibleTabs.map((tab) => (
               <button
                 key={tab.key}
-                className={`pb-2 px-1 transition-colors duration-150 focus:outline-none ${
-                  activeTab === tab.key ? tabActive : tabInactive
-                }`}
+                ref={el => tabRefs.current[tab.key] = el}
+                className={`relative flex items-center gap-1 px-5 py-2 rounded-full font-semibold transition-all duration-200 focus:outline-none text-base z-10
+                  ${activeTab === tab.key
+                    ? "text-white"
+                    : "text-gray-700 hover:bg-primary/10 hover:text-primary"}
+                `}
                 onClick={() => setActiveTab(tab.key)}
+                style={{ background: 'transparent' }}
               >
+                {ICONS[tab.key]}
                 {tab.label}
               </button>
             ))}
           </nav>
 
           {/* Tab Content */}
-          {activeTab === "member" &&
-            (showDomainsInline ? (
-              <DomainsInline setShowDomainsInline={setShowDomainsInline} />
-            ) : (
-              <MemberProfile
-                profileData={profileData}
-                cardBg={cardBg}
-                border={border}
-                handleLogoChange={handleLogoChange}
-                setShowDomainsInline={setShowDomainsInline}
-                handleAttachmentChange={handleAttachmentChange}
-                userPlan={userPlan}
+          <div className="relative z-10">
+            {activeTab === "member" && (
+              showDomainsInline ? (
+                <DomainsInline setShowDomainsInline={setShowDomainsInline} />
+              ) : (
+                <MemberProfile
+                  profileData={profileData}
+                  cardBg={cardBg}
+                  border={border}
+                  handleLogoChange={handleLogoChange}
+                  setShowDomainsInline={setShowDomainsInline}
+                  handleAttachmentChange={handleAttachmentChange}
+                  userPlan={userPlan}
+                />
+              )
+            )}
+
+            {activeTab === "security" && <SecuritySettings />}
+            {activeTab === "notification" && <NotificationSettings />}
+            {activeTab === "settings" && <Settings />}
+            {activeTab === "user-management" && role === "subadmin" && (
+              <UserManagement
+                showAddMemberModal={showAddMemberModal}
+                setShowAddMemberModal={setShowAddMemberModal}
               />
-            ))}
-
-          {activeTab === "security" && <SecuritySettings />}
-
-          {activeTab === "notification" && <NotificationSettings />}
-          {activeTab === "settings" && <Settings />}
-
-          {activeTab === "user-management" && role === "subadmin" && (
-            <UserManagement
-              showAddMemberModal={showAddMemberModal}
-              setShowAddMemberModal={setShowAddMemberModal}
-              // ...other props as needed
-            />
-          )}
+            )}
+          </div>
         </main>
       </div>
-
-      {/* Domains Modal */}
-      {showDomainsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full p-8 relative">
-            <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-primary text-2xl font-bold"
-              onClick={() => setShowDomainsModal(false)}
-            >
-              &times;
-            </button>
-            <div className="mb-4">
-              <span className="text-gray-500 text-sm">
-                Members / My domains
-              </span>
-              <h2 className="text-xl font-bold mt-2 mb-1 text-primary">
-                Listing all domains{" "}
-                <span className="font-normal text-gray-700">1 domains</span>
-              </h2>
-            </div>
-            <div className="mb-4 flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Search"
-                className="w-64 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none bg-gray-50"
-              />
-            </div>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="min-w-full text-sm text-left">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-4 py-3 font-semibold text-gray-700">
-                      <input type="checkbox" />
-                    </th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">
-                      Domain
-                    </th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">
-                      Actions
-                    </th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">
-                      Schedule
-                    </th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">
-                      Last scan
-                    </th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">
-                      Error code
-                    </th>
-                    <th className="px-4 py-3 font-semibold text-gray-700">
-                      Scan
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <input type="checkbox" />
-                    </td>
-                    <td className="px-4 py-3 text-gray-900 font-medium">
-                      allianzcloud.com
-                    </td>
-                    <td className="px-4 py-3 flex gap-2 items-center">
-                      <button
-                        title="Favorite"
-                        className="text-gray-400 hover:text-primary"
-                      >
-                        <svg
-                          width="18"
-                          height="18"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        title="Delete"
-                        className="text-red-400 hover:text-red-600"
-                      >
-                        <svg
-                          width="18"
-                          height="18"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2 2v2H8V5a2 2 0 0 1 2-2z"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                          />
-                        </svg>
-                      </button>
-                    </td>
-                    <td className="px-4 py-3">12 Feb, 2024 at 10:00</td>
-                    <td className="px-4 py-3">12 Jul, 2025 at 10:35</td>
-                    <td className="px-4 py-3">
-                      <span className="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-xs font-semibold">
-                        Complete
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">-</td>
-                    <td className="px-4 py-3">
-                      <label className="inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          defaultChecked
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-teal-400 transition"></div>
-                      </label>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

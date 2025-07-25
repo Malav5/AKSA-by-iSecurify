@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showSuccess, showError } from "../ui/toast"; // adjust path as needed
 import { userServices } from "../../services/UserServices";
+import { Users, UserPlus } from "lucide-react";
 
 const UserManagement = ({
   showAddMemberModal,
@@ -15,7 +16,6 @@ const UserManagement = ({
   const selectAllRef = useRef();
 
   // Fetch users from backend
-  // Fetch users using userServices
   const fetchMembers = async () => {
     const users = await userServices.fetchMembers();
     setMembers(users);
@@ -24,7 +24,6 @@ const UserManagement = ({
   useEffect(() => {
     fetchMembers();
   }, []);
-
 
   useEffect(() => {
     // Update indeterminate state
@@ -74,25 +73,28 @@ const UserManagement = ({
   };
 
   return (
-    <div className="w-full px-2 ">
+    <div className="w-full px-2 animate-fade-in-up">
       <ToastContainer position="top-right" autoClose={2000} />
       {/* Title, description, and add button */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-primary mb-1">User Management</h1>
-          <p className="text-gray-500">Manage your organization's members, roles, and permissions.</p>
+        <div className="flex items-center gap-2">
+          <Users className="w-7 h-7 text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold text-primary mb-1">User Management</h1>
+            <p className="text-gray-500">Manage your organization's members, roles, and permissions.</p>
+          </div>
         </div>
         <div>
           <button
-            className="bg-primary text-white font-semibold px-6 py-3 rounded-lg text-lg flex items-center gap-2 shadow"
+            className="bg-primary text-white font-semibold px-6 py-3 rounded-lg text-lg flex items-center gap-2 shadow hover:bg-[#700070] transition-all duration-200"
             onClick={() => setShowAddMemberModal(true)}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            <UserPlus className="w-5 h-5" />
             Add new member
           </button>
         </div>
       </div>
-      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white/80 backdrop-blur-lg shadow-xl animate-fade-in-up">
         <table className="min-w-full text-sm text-left">
           <thead className="bg-gray-100">
             <tr>
@@ -114,13 +116,12 @@ const UserManagement = ({
           </thead>
           <tbody className="divide-y divide-gray-100">
             {members.map((member, idx) => {
-              // member: { email, name, _id, role, createdAt }
               let name = member.name || `${member.firstName || ""} ${member.lastName || ""}`;
               let role = member.role || "user";
               let email = member.email;
               let createdAt = member.createdAt;
               return (
-                <tr key={idx}>
+                <tr key={idx} className="hover:bg-purple-50 transition-colors duration-200">
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"
@@ -130,7 +131,7 @@ const UserManagement = ({
                     />
                   </td>
                   <td className="px-4 py-3 flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-lg bg-cyan-400">
+                    <span className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-lg bg-cyan-400 shadow-md">
                       {name ? name.split(" ").map(n => n[0]).join("").toUpperCase() : ""}
                     </span>
                     <span className="font-medium text-gray-900">{name}</span>
@@ -146,7 +147,6 @@ const UserManagement = ({
                     </label>
                   </td>
                   <td className="px-4 py-3">
-                    {/* {currentUser?.role === "subadmin" && ( */}
                     <button
                       className="text-red-500 hover:text-red-700"
                       title="Delete"
@@ -154,7 +154,6 @@ const UserManagement = ({
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2-2z" /></svg>
                     </button>
-                    {/* ) */}
                   </td>
                   <td className="px-4 py-3 text-gray-700">{createdAt ? new Date(createdAt).toLocaleString() : ""}</td>
                 </tr>
