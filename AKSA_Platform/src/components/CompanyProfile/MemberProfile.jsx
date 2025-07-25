@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { userServices } from "../../services/UserServices";
 import { domainServices } from "../../services/domainServices";
+import { Building2, UploadCloud, Paperclip } from "lucide-react";
+
 const MemberProfile = ({
   profileData,
   cardBg,
@@ -28,7 +30,6 @@ const MemberProfile = ({
         setDomainCount(0);
       }
     };
-
     fetchDomainCount();
   }, []);
 
@@ -46,31 +47,28 @@ const MemberProfile = ({
 
   return (
     <div>
-      {/* Company Info Card */}
-      <section className={`${cardBg} rounded-lg shadow p-8 mb-8 ${border}`}>
-        <h2 className="text-lg font-semibold mb-6 flex items-center gap-2 text-primary">
-          <span className="inline-block w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center mr-2">
-            <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-              <path
-                d="M2.5 13.5v-2A2.5 2.5 0 0 1 5 9h6a2.5 2.5 0 0 1 2.5 2.5v2M8 7A2.5 2.5 0 1 0 8 2a2.5 2.5 0 0 0 0 5Z"
-                stroke="#7C3AED"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          Your company information
-        </h2>
-        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-          <div className="flex flex-col items-center">
-            <div className="w-32 h-32 rounded-full bg-purple-100 flex items-center justify-center mb-2 relative overflow-hidden border-4 border-purple-200">
+      {/* Hero/Banner */}
+      <section className="relative rounded-2xl overflow-hidden mb-8 animate-fade-in-down">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-100 via-white to-purple-50 opacity-80 z-0" />
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 p-8">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full bg-purple-200 flex items-center justify-center border-4 border-purple-300 shadow-lg overflow-hidden">
               <img
                 src={profileData.logo}
                 alt="Company Logo"
                 className="object-cover w-full h-full"
               />
             </div>
+            <div>
+              <h1 className="text-3xl font-extrabold text-primary">
+                {companyName}
+              </h1>
+              <p className="text-gray-600 text-lg font-medium mt-1">
+                {profileData.industry}
+              </p>
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col md:flex-row gap-4 md:justify-end items-center">
             <input
               id="logo-upload-input"
               type="file"
@@ -78,91 +76,34 @@ const MemberProfile = ({
               className="hidden"
               onChange={handleLogoChange}
             />
-            <div className="flex gap-2 mt-2">
-              <button
-                className="px-4 py-1 bg-primary text-white rounded hover:bg-primary text-sm flex items-center gap-1 shadow"
-                onClick={() =>
-                  document.getElementById("logo-upload-input").click()
-                }
-                type="button"
-              >
-                <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-                  <path
-                    d="M8 10.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
-                    stroke="#fff"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M13.5 14v-1.25A2.75 2.75 0 0 0 10.75 10h-5.5A2.75 2.75 0 0 0 2.5 12.75V14"
-                    stroke="#fff"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                Upload
-              </button>
-            </div>
-            <span className="text-xs text-purple-400 mt-1">
-              Max image size 800kbs
-            </span>
-          </div>
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-            <div>
-              <div className="text-xs text-gray-500 mb-1">Company name</div>
-              <div className="text-lg font-bold text-gray-900">
-                {companyName}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500 mb-1">Customer code</div>
-              <div className="text-lg font-bold text-gray-900">ALL</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500 mb-1">
-                Number of Employees
-              </div>
-              <div className="text-lg font-bold text-gray-900">-</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500 mb-1">Expected Devices</div>
-              <div className="text-lg font-bold text-gray-900">0</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500 mb-1">Member Domains</div>
-              <div className="text-lg font-bold text-gray-900">
-                {domainCount}{" "}
-                <span
-                  className="text-primary underline cursor-pointer ml-2 text-sm"
-                  onClick={() => setShowDomainsInline(true)}
-                >
-                  View my domains
-                </span>
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500 mb-1">Company Status</div>
-              <div className="text-lg font-bold text-primary">
-                {userPlan || "-"}
-              </div>
-            </div>
+            <button
+              className="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-lg shadow hover:bg-[#700070] transition-all duration-200 text-base font-semibold"
+              onClick={() => document.getElementById("logo-upload-input").click()}
+              type="button"
+            >
+              <UploadCloud className="w-5 h-5" /> Upload Logo
+            </button>
+            <span className="text-xs text-purple-400 mt-1">Max image size 800kbs</span>
           </div>
         </div>
       </section>
+
+      {/* Company Info Card */}
+      <section className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-8 border border-gray-200 animate-fade-in-up">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+          <InfoItem label="Customer code" value="ALL" />
+          <InfoItem label="Number of Employees" value="-" />
+          <InfoItem label="Expected Devices" value="0" />
+          <InfoItem label="Member Domains" value={<span>{domainCount} <span className="text-primary underline cursor-pointer ml-2 text-sm" onClick={() => setShowDomainsInline(true)}>View my domains</span></span>} />
+          <InfoItem label="Company Status" value={<span className="text-primary font-bold">{userPlan || "-"}</span>} />
+          <InfoItem label="Industry" value={profileData.industry} />
+        </div>
+      </section>
+
       {/* Attachments Section */}
-      <section className={`${cardBg} rounded-lg shadow p-8 mb-8 ${border}`}>
+      <section className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-8 border border-gray-200 animate-fade-in-up">
         <h2 className="text-lg font-semibold mb-6 flex items-center gap-2 text-primary">
-          <span className="inline-block w-5 h-5 bg-secondary text-primary rounded-full flex items-center justify-center mr-2">
-            <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-              <path
-                d="M2.5 13.5v-2A2.5 2.5 0 0 1 5 9h6a2.5 2.5 0 0 1 2.5 2.5v2M8 7A2.5 2.5 0 1 0 8 2a2.5 2.5 0 0 0 0 5Z"
-                stroke="#7C3AED"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          Attachments (0)
+          <Paperclip className="w-5 h-5" /> Attachments (0)
         </h2>
         <input
           id="attachment-upload-input"
@@ -172,24 +113,14 @@ const MemberProfile = ({
           onChange={handleAttachmentChange}
         />
         <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-          <div className="flex-1 flex items-center border-2 border-dashed border-dashed rounded-lg p-4 bg-purple-50 justify-center">
+          <div className="flex-1 flex items-center border-2 border-dashed border-purple-200 rounded-lg p-4 bg-purple-50 justify-center">
             <span className="text-primary">Drop files or</span>
             <button
               className="ml-2 px-4 py-1 bg-primary text-white rounded hover:bg-primary text-sm flex items-center gap-1 shadow"
-              onClick={() =>
-                document.getElementById("attachment-upload-input").click()
-              }
+              onClick={() => document.getElementById("attachment-upload-input").click()}
               type="button"
             >
-              <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-                <path
-                  d="M8 3v7m0 0l-2.5-2.5M8 10l2.5-2.5M3 13h10"
-                  stroke="#fff"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-              Browse
+              <UploadCloud className="w-4 h-4" /> Browse
             </button>
           </div>
           <div className="w-full md:w-72">
@@ -204,33 +135,18 @@ const MemberProfile = ({
           <table className="min-w-full text-sm text-left">
             <thead className="bg-purple-100">
               <tr>
-                <th className="px-4 py-2 font-semibold text-primary">
-                  File name
-                </th>
-                <th className="px-4 py-2 font-semibold text-primary">
-                  File type
-                </th>
-                <th className="px-4 py-2 font-semibold text-primary">
-                  Creation date
-                </th>
-                <th className="px-4 py-2 font-semibold text-primary">
-                  Uploaded by
-                </th>
-                <th className="px-4 py-2 font-semibold text-primary">
-                  Times downloaded
-                </th>
-                <th className="px-4 py-2 font-semibold text-primary">
-                  Actions
-                </th>
+                <th className="px-4 py-2 font-semibold text-primary">File name</th>
+                <th className="px-4 py-2 font-semibold text-primary">File type</th>
+                <th className="px-4 py-2 font-semibold text-primary">Creation date</th>
+                <th className="px-4 py-2 font-semibold text-primary">Uploaded by</th>
+                <th className="px-4 py-2 font-semibold text-primary">Times downloaded</th>
+                <th className="px-4 py-2 font-semibold text-primary">Actions</th>
               </tr>
             </thead>
             <tbody>
               {/* Placeholder row */}
               <tr>
-                <td
-                  colSpan={6}
-                  className="text-center py-8 text-secondary font-semibold"
-                >
+                <td colSpan={6} className="text-center py-8 text-secondary font-semibold">
                   Attachments will appear here
                 </td>
               </tr>

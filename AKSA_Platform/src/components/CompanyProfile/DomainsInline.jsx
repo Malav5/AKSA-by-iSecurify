@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { domainServices } from "../../services/domainServices"; // adjust path if needed
+import { Globe, PlusCircle } from "lucide-react";
 
 const DomainsInline = ({ setShowDomainsInline }) => {
   const [domains, setDomains] = useState([]);
@@ -101,32 +102,30 @@ const DomainsInline = ({ setShowDomainsInline }) => {
   };
 
   return (
-    <div>
+    <div className="animate-fade-in-up">
       <ToastContainer position="top-right" />
 
       <div className="flex justify-between items-center mb-6">
         <button
-          className="px-4 py-2 bg-primary text-white rounded hover:bg-primary text-sm font-semibold"
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#700070] text-sm font-semibold shadow"
           onClick={() => setShowDomainsInline(false)}
         >
           &larr; Back to Profile
         </button>
 
         <button
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-semibold"
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold shadow flex items-center gap-2"
           onClick={() => setShowAddModal(true)}
         >
-          + Add Domain
+          <PlusCircle className="w-5 h-5" /> Add Domain
         </button>
       </div>
 
       <div className="mb-4">
         <span className="text-gray-500 text-sm">Members / My domains</span>
-        <h2 className="text-xl font-bold mt-2 mb-1 text-primary">
-          Listing all domains{" "}
-          <span className="font-normal text-gray-700">
-            {filteredDomains.length} domains
-          </span>
+        <h2 className="text-xl font-bold mt-2 mb-1 text-primary flex items-center gap-2">
+          <Globe className="w-6 h-6 text-primary" />
+          Listing all domains <span className="font-normal text-gray-700">{filteredDomains.length} domains</span>
         </h2>
       </div>
 
@@ -140,7 +139,7 @@ const DomainsInline = ({ setShowDomainsInline }) => {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white/80 backdrop-blur-lg shadow-xl animate-fade-in-up">
         <table className="min-w-full text-sm text-left">
           <thead className="bg-gray-100">
             <tr>
@@ -154,20 +153,16 @@ const DomainsInline = ({ setShowDomainsInline }) => {
               </th>
               <th className="px-4 py-3 font-semibold text-gray-700">Domain</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Actions</th>
-              <th className="px-4 py-3 font-semibold text-gray-700">
-                Schedule
-              </th>
+              <th className="px-4 py-3 font-semibold text-gray-700">Schedule</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Added</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Status</th>
-              <th className="px-4 py-3 font-semibold text-gray-700">
-                Error code
-              </th>
+              <th className="px-4 py-3 font-semibold text-gray-700">Error code</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Scan</th>
             </tr>
           </thead>
           <tbody>
             {filteredDomains.map((domain, idx) => (
-              <tr key={domain._id || idx} className="hover:bg-gray-50">
+              <tr key={domain._id || idx} className="hover:bg-purple-50 transition-colors duration-200">
                 <td className="px-4 py-3">
                   <input
                     type="checkbox"
@@ -233,9 +228,9 @@ const DomainsInline = ({ setShowDomainsInline }) => {
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 bg-opacity-30">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h2 className="text-lg font-bold mb-4">Add Domain</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 bg-opacity-30 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm animate-fade-in-up">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><PlusCircle className="w-5 h-5 text-primary" /> Add Domain</h2>
             <input
               type="text"
               className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
@@ -246,13 +241,13 @@ const DomainsInline = ({ setShowDomainsInline }) => {
             />
             <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#700070] shadow"
                 onClick={handleAddDomainSubmit}
               >
                 Add
               </button>
               <button
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
                 onClick={() => setShowAddModal(false)}
               >
                 Cancel
