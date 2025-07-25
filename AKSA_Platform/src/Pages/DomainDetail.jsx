@@ -250,7 +250,7 @@ const DomainDetail = () => {
       showSuccess("Domain added successfully!");
     } catch (err) {
       console.error(err);
-      showError("Failed to add domain");
+      showError(err?.response?.data?.error || "Failed to add domain");
     }
   };
 

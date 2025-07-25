@@ -4,7 +4,7 @@ module.exports = mongoose.model(
   new mongoose.Schema({
     _id: String,
     isFree: Boolean,
-    scanLimit: Number,
+    DomainLimit: Number,
     rescanWaitHours: Number,
     price: Number,
   })
