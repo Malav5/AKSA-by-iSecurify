@@ -1,6 +1,6 @@
 import Sidebar from "./Sidebar";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import AddMemberModal from "./AddMemberModal";
 import DomainsInline from "../CompanyProfile/DomainsInline";
@@ -20,7 +20,8 @@ const TABS = [
 ];
 
 const CompanyProfile = () => {
-  const [activeTab, setActiveTab] = useState("member");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState("member"); // default
   const [profileData, setProfileData] = useState({
     logo: "/logo2.png",
     name: "Allianz Cloud",
@@ -96,6 +97,12 @@ const CompanyProfile = () => {
 
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab");
+    if (tab) setActiveTab(tab);
+  }, [location.search]);
 
   // Generic handlers
   const handleChange = (e) => {
