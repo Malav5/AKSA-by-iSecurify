@@ -186,7 +186,9 @@ const CompanyProfile = () => {
       };
       reader.readAsDataURL(file);
     } else {
-      alert("Please select a valid image file (jpg, jpeg, png, gif, svg, webp)");
+      alert(
+        "Please select a valid image file (jpg, jpeg, png, gif, svg, webp)"
+      );
     }
   };
 
@@ -197,7 +199,9 @@ const CompanyProfile = () => {
       setAttachmentFile(file);
       // You can add logic to show preview or upload to server here
     } else {
-      alert("Please select a valid image file (jpg, jpeg, png, gif, svg, webp)");
+      alert(
+        "Please select a valid image file (jpg, jpeg, png, gif, svg, webp)"
+      );
     }
   };
 

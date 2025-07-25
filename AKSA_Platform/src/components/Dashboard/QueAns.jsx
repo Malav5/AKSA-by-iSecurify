@@ -5,140 +5,167 @@ import { X } from "lucide-react";
 export const questions = [
   {
     name: "q1",
-    label: "1. Do you maintain an up-to-date inventory of all authorized devices connected to your network?",
-    relatedSolutions: ["ITAM"]
+    label:
+      "1. Do you maintain an up-to-date inventory of all authorized devices connected to your network?",
+    relatedSolutions: ["ITAM"],
   },
   {
     name: "q2",
-    label: "2. Is there an inventory of all authorized software applications approved for use within the organization?",
-    relatedSolutions: ["ITAM"]
+    label:
+      "2. Is there an inventory of all authorized software applications approved for use within the organization?",
+    relatedSolutions: ["ITAM"],
   },
   {
     name: "q3",
-    label: "3. Are sensitive data identified, classified, and protected using encryption at rest and in transit?",
-    relatedSolutions: ["CSM"]
+    label:
+      "3. Are sensitive data identified, classified, and protected using encryption at rest and in transit?",
+    relatedSolutions: ["CSM"],
   },
   {
     name: "q4",
-    label: "4. Are secure baseline configurations established and maintained for all OS and software?",
-    relatedSolutions: ["CSM"]
+    label:
+      "4. Are secure baseline configurations established and maintained for all OS and software?",
+    relatedSolutions: ["CSM"],
   },
   {
     name: "q5",
-    label: "5. Do you enforce the use of unique, individual accounts for all employees?",
-    relatedSolutions: ["MSOAR"]
+    label:
+      "5. Do you enforce the use of unique, individual accounts for all employees?",
+    relatedSolutions: ["MSOAR"],
   },
   {
     name: "q6",
-    label: "6. Are user permissions reviewed regularly and based on least privilege principles?",
-    relatedSolutions: ["MSOAR"]
+    label:
+      "6. Are user permissions reviewed regularly and based on least privilege principles?",
+    relatedSolutions: ["MSOAR"],
   },
   {
     name: "q7",
-    label: "7. Do you run regular vulnerability scans and prioritize remediation based on risk?",
-    relatedSolutions: ["TVM"]
+    label:
+      "7. Do you run regular vulnerability scans and prioritize remediation based on risk?",
+    relatedSolutions: ["TVM"],
   },
   {
     name: "q8",
-    label: "8. Are system and security logs centralized, protected, and reviewed regularly?",
-    relatedSolutions: ["SEM"]
+    label:
+      "8. Are system and security logs centralized, protected, and reviewed regularly?",
+    relatedSolutions: ["SEM"],
   },
   {
     name: "q9",
-    label: "9. Do you implement anti-phishing and content filtering for emails and browsers?",
-    relatedSolutions: ["SEM"]
+    label:
+      "9. Do you implement anti-phishing and content filtering for emails and browsers?",
+    relatedSolutions: ["SEM"],
   },
   {
     name: "q10",
-    label: "10. Is antivirus/anti-malware software installed and automatically updated across systems?",
-    relatedSolutions: ["SEM"]
+    label:
+      "10. Is antivirus/anti-malware software installed and automatically updated across systems?",
+    relatedSolutions: ["SEM"],
   },
   {
     name: "q11",
-    label: "11. Are backups performed regularly, encrypted, and tested for integrity?",
-    relatedSolutions: ["IRM"]
+    label:
+      "11. Are backups performed regularly, encrypted, and tested for integrity?",
+    relatedSolutions: ["IRM"],
   },
   {
     name: "q12",
-    label: "12. Is your network segmented and protected by properly configured firewalls?",
-    relatedSolutions: ["CSM"]
+    label:
+      "12. Is your network segmented and protected by properly configured firewalls?",
+    relatedSolutions: ["CSM"],
   },
   {
     name: "q13",
-    label: "13. Are employees required to complete security awareness training annually?",
-    relatedSolutions: ["SAT"]
+    label:
+      "13. Are employees required to complete security awareness training annually?",
+    relatedSolutions: ["SAT"],
   },
   {
     name: "q14",
-    label: "14. Do you assess third-party vendors for security practices and compliance reports?",
-    relatedSolutions: ["EBM"]
+    label:
+      "14. Do you assess third-party vendors for security practices and compliance reports?",
+    relatedSolutions: ["EBM"],
   },
   {
     name: "q15",
-    label: "15. Are secure development practices followed for all in-house software?",
-    relatedSolutions: ["EBM"]
+    label:
+      "15. Are secure development practices followed for all in-house software?",
+    relatedSolutions: ["EBM"],
   },
   {
     name: "q16",
     label: "16. Do you maintain and regularly test an incident response plan?",
-    relatedSolutions: ["IRM"]
+    relatedSolutions: ["IRM"],
   },
   {
     name: "q17",
-    label: "17. Is penetration testing performed at least annually or after major changes?",
-    relatedSolutions: ["TVM"]
+    label:
+      "17. Is penetration testing performed at least annually or after major changes?",
+    relatedSolutions: ["TVM"],
   },
   {
     name: "q18",
-    label: "18. Is there a dedicated security team managing cybersecurity operations?",
-    relatedSolutions: ["MSOAR"]
+    label:
+      "18. Is there a dedicated security team managing cybersecurity operations?",
+    relatedSolutions: ["MSOAR"],
   },
   {
     name: "q19",
     label: "19. Is MFA enforced for remote access and critical systems?",
-    relatedSolutions: ["MFA"]
+    relatedSolutions: ["MFA"],
   },
   {
     name: "q20",
-    label: "20. Are critical patches applied within a defined SLA across all systems?",
-    relatedSolutions: ["TVM"]
-  }
+    label:
+      "20. Are critical patches applied within a defined SLA across all systems?",
+    relatedSolutions: ["TVM"],
+  },
 ].map((q) => ({
   ...q,
   options: [
     { label: "A. Yes (10 pts)", value: 10 },
     { label: "B. Partially (5 pts)", value: 5 },
     { label: "C. No (0 pts)", value: 0 },
-    // { label: "D. Not Applicable (N/A)", value: -1 } 
-  ]
+    // { label: "D. Not Applicable (N/A)", value: -1 }
+  ],
 }));
 
 const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
   // Helper to get user-specific key
   const getUserKey = (key) => {
     const currentUser = localStorage.getItem("currentUser");
-    const userPrefix = currentUser ? currentUser.split('@')[0] : '';
+    const userPrefix = currentUser ? currentUser.split("@")[0] : "";
     return `${userPrefix}_${key}`;
   };
 
   const [answers, setAnswers] = useState(() => {
-    const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
-    return savedAnswers ? JSON.parse(savedAnswers) : Object.fromEntries(questions.map((q) => [q.name, null]));
+    const savedAnswers = localStorage.getItem(
+      getUserKey("domainHealthAnswers")
+    );
+    return savedAnswers
+      ? JSON.parse(savedAnswers)
+      : Object.fromEntries(questions.map((q) => [q.name, null]));
   });
   const [errorMessage, setErrorMessage] = useState("");
 
   // Calculate remaining questions
-  const remainingQuestions = Object.values(answers).filter(answer => answer === null).length;
+  const remainingQuestions = Object.values(answers).filter(
+    (answer) => answer === null
+  ).length;
   const totalQuestions = questions.length;
 
   const handleAnswerChange = (question, points) => {
     const newAnswers = {
       ...answers,
-      [question]: points
+      [question]: points,
     };
     setAnswers(newAnswers);
     // Save to localStorage immediately when an answer changes
-    localStorage.setItem(getUserKey("domainHealthAnswers"), JSON.stringify(newAnswers));
+    localStorage.setItem(
+      getUserKey("domainHealthAnswers"),
+      JSON.stringify(newAnswers)
+    );
   };
 
   const calculateScore = () => {
@@ -159,9 +186,12 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
   const suggestProducts = (answers, score) => {
     const suggestions = [];
     if (answers.q1 === 0 || answers.q2 === 0) suggestions.push("ITAM");
-    if (answers.q3 === 0 || answers.q4 === 0 || answers.q12 === 0) suggestions.push("CSM");
-    if (answers.q5 === 0 || answers.q6 === 0 || answers.q18 === 0) suggestions.push("MSOAR");
-    if (answers.q7 === 0 || answers.q16 === 0 || answers.q17 === 0) suggestions.push("TVM");
+    if (answers.q3 === 0 || answers.q4 === 0 || answers.q12 === 0)
+      suggestions.push("CSM");
+    if (answers.q5 === 0 || answers.q6 === 0 || answers.q18 === 0)
+      suggestions.push("MSOAR");
+    if (answers.q7 === 0 || answers.q16 === 0 || answers.q17 === 0)
+      suggestions.push("TVM");
     if (answers.q9 === 0 || answers.q10 === 0) suggestions.push("SEM");
     if (answers.q13 === 0) suggestions.push("SAT");
     if (answers.q14 === 0 || answers.q15 === 0) suggestions.push("EBM");
@@ -182,10 +212,16 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
     const healthStatus = getHealthStatus(newScore);
 
     // Save all data to localStorage
-    localStorage.setItem(getUserKey("domainHealthAnswers"), JSON.stringify(answers));
+    localStorage.setItem(
+      getUserKey("domainHealthAnswers"),
+      JSON.stringify(answers)
+    );
     localStorage.setItem(getUserKey("domainHealthScore"), newScore.toString());
     localStorage.setItem(getUserKey("domainHealthStatus"), healthStatus);
-    localStorage.setItem(getUserKey("recommendedProducts"), JSON.stringify(suggestions));
+    localStorage.setItem(
+      getUserKey("recommendedProducts"),
+      JSON.stringify(suggestions)
+    );
     localStorage.setItem(getUserKey("questionnaireSubmitted"), "true");
 
     // Dispatch storage event to notify other components
@@ -195,7 +231,7 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
         newValue: JSON.stringify(answers),
         oldValue: null,
         url: window.location.href,
-        storageArea: localStorage
+        storageArea: localStorage,
       })
     );
 
@@ -205,7 +241,9 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
 
   // Load saved answers on component mount
   useEffect(() => {
-    const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
+    const savedAnswers = localStorage.getItem(
+      getUserKey("domainHealthAnswers")
+    );
     if (savedAnswers) {
       setAnswers(JSON.parse(savedAnswers));
     }
@@ -214,9 +252,9 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
   return (
     <div className="fixed inset-0 bg-gray-900/50 flex justify-center items-center z-50 overflow-auto">
       <div className="relative bg-white rounded-xl shadow-lg max-w-3xl w-full max-h-[90vh]">
-      <h1 className="text-3xl font-semibold text-center text-primary my-6">
-            Domain Health Assessment
-          </h1>
+        <h1 className="text-3xl font-semibold text-center text-primary my-6">
+          Domain Health Assessment
+        </h1>
 
         <button
           onClick={onCancel}
@@ -226,11 +264,8 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
         </button>
 
         <div className="p-8 space-y-6 max-h-[75vh] overflow-y-auto scrollbar-hide">
-         
           {errorMessage && (
-            <div className="text-red-600 text-center mb-4">
-              {errorMessage}
-            </div>
+            <div className="text-red-600 text-center mb-4">{errorMessage}</div>
           )}
 
           {questions.map(({ label, name, options }) => (
@@ -254,7 +289,10 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
                         if (answers[name] === opt.value) {
                           const newAnswers = { ...answers, [name]: null };
                           setAnswers(newAnswers);
-                          localStorage.setItem(getUserKey("domainHealthAnswers"), JSON.stringify(newAnswers));
+                          localStorage.setItem(
+                            getUserKey("domainHealthAnswers"),
+                            JSON.stringify(newAnswers)
+                          );
                         }
                       }}
                       className="h-5 w-5 accent-primary"
@@ -270,9 +308,14 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
             <div className="flex justify-between items-center">
               <div className="text-primary font-medium">
                 {remainingQuestions === 0 ? (
-                  <span className="font-semibold">All questions answered! You can now submit the questionnaire.</span>
+                  <span className="font-semibold">
+                    All questions answered! You can now submit the
+                    questionnaire.
+                  </span>
                 ) : (
-                  `${remainingQuestions} question${remainingQuestions === 1 ? '' : 's'} remaining`
+                  `${remainingQuestions} question${
+                    remainingQuestions === 1 ? "" : "s"
+                  } remaining`
                 )}
               </div>
               <div className="text-primary text-sm">
@@ -280,9 +323,14 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
               </div>
             </div>
             <div className="w-full bg-primary/30 rounded-full h-2 mt-2">
-              <div 
+              <div
                 className="bg-primary h-2 rounded-full transition-all duration-300"
-                style={{ width: `${((totalQuestions - remainingQuestions) / totalQuestions) * 100}%` }}
+                style={{
+                  width: `${
+                    ((totalQuestions - remainingQuestions) / totalQuestions) *
+                    100
+                  }%`,
+                }}
               />
             </div>
           </div>

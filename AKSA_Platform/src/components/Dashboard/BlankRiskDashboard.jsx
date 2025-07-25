@@ -24,7 +24,7 @@ const BlankRiskDashboard = () => {
     { domain: "Email Security", rating: "-", score: 0 },
     { domain: "DNS Security", rating: "-", score: 0 },
     { domain: "System Hosting", rating: "-", score: 0 },
-  ]
+  ];
 
   const getStars = (rating) => {
     const ratingMap = { A: 5, B: 4, C: 3, D: 2, F: 1 };
@@ -51,7 +51,9 @@ const BlankRiskDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Risk Score Panel */}
         <div className="bg-white rounded-lg shadow-sm flex flex-col items-center justify-center p-3 md:p-4">
-          <h2 className="text-sm md:text-base font-semibold mb-2 md:mb-3">RiskRecon Score</h2>
+          <h2 className="text-sm md:text-base font-semibold mb-2 md:mb-3">
+            RiskRecon Score
+          </h2>
           <div className="w-48 h-48 md:w-60 md:h-60">
             <CircularProgressbar
               value={riskScorePercent}
@@ -65,7 +67,9 @@ const BlankRiskDashboard = () => {
               })}
             />
           </div>
-          <p className="text-lg md:text-xl font-medium mt-3 md:mt-5">{riskScore} / 10</p>
+          <p className="text-lg md:text-xl font-medium mt-3 md:mt-5">
+            {riskScore} / 10
+          </p>
           <p className="text-xs text-gray-500 mt-1">
             Last updated: May 18, 2025
           </p>

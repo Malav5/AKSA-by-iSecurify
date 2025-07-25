@@ -12,6 +12,7 @@ const axios = require('axios');
 const https = require('https');
 const { getWazuhToken } = require('./wazuh/tokenService');
 const apiBaseUrl = process.env.WAZUH_API_URL;
+const issueRoutes = require("./routes/issues");
 
 const app = express();
 app.use(cors());
@@ -64,6 +65,7 @@ app.use('/api/wazuh', wazuhRoutes);
 app.use("/api/member", memberRoutes);
 app.use('/api', taskRoutes);
 app.use('/api/agentMap', agentMapRoutes);
+app.use("/api/issues", issueRoutes);
 
 app.listen(3000, () =>
   console.log("Server running on http://localhost:3000")
