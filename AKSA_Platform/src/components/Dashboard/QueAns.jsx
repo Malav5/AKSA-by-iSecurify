@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
-// Define and export the questions array at the top level
 export const questions = [
   {
     name: "q1",
@@ -127,12 +126,10 @@ export const questions = [
     { label: "A. Yes (10 pts)", value: 10 },
     { label: "B. Partially (5 pts)", value: 5 },
     { label: "C. No (0 pts)", value: 0 },
-    // { label: "D. Not Applicable (N/A)", value: -1 }
   ],
 }));
 
 const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
-  // Helper to get user-specific key
   const getUserKey = (key) => {
     const currentUser = localStorage.getItem("currentUser");
     const userPrefix = currentUser ? currentUser.split("@")[0] : "";
@@ -140,39 +137,22 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
   };
 
   const [answers, setAnswers] = useState(() => {
-    const savedAnswers = localStorage.getItem(
-      getUserKey("domainHealthAnswers")
-    );
-    return savedAnswers
-      ? JSON.parse(savedAnswers)
-      : Object.fromEntries(questions.map((q) => [q.name, null]));
+    const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
+    return savedAnswers ? JSON.parse(savedAnswers) : Object.fromEntries(questions.map((q) => [q.name, null]));
   });
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Calculate remaining questions
-  const remainingQuestions = Object.values(answers).filter(
-    (answer) => answer === null
-  ).length;
+  const remainingQuestions = Object.values(answers).filter((answer) => answer === null).length;
   const totalQuestions = questions.length;
 
   const handleAnswerChange = (question, points) => {
-    const newAnswers = {
-      ...answers,
-      [question]: points,
-    };
+    const newAnswers = { ...answers, [question]: points };
     setAnswers(newAnswers);
-    // Save to localStorage immediately when an answer changes
-    localStorage.setItem(
-      getUserKey("domainHealthAnswers"),
-      JSON.stringify(newAnswers)
-    );
+    localStorage.setItem(getUserKey("domainHealthAnswers"), JSON.stringify(newAnswers));
   };
 
   const calculateScore = () => {
-    const total = Object.values(answers).reduce(
-      (sum, val) => (val !== null && val !== -1 ? sum + val : sum),
-      0
-    );
+    const total = Object.values(answers).reduce((sum, val) => (val !== null && val !== -1 ? sum + val : sum), 0);
     return Math.round((total / 200) * 100);
   };
 
@@ -186,12 +166,9 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
   const suggestProducts = (answers, score) => {
     const suggestions = [];
     if (answers.q1 === 0 || answers.q2 === 0) suggestions.push("ITAM");
-    if (answers.q3 === 0 || answers.q4 === 0 || answers.q12 === 0)
-      suggestions.push("CSM");
-    if (answers.q5 === 0 || answers.q6 === 0 || answers.q18 === 0)
-      suggestions.push("MSOAR");
-    if (answers.q7 === 0 || answers.q16 === 0 || answers.q17 === 0)
-      suggestions.push("TVM");
+    if (answers.q3 === 0 || answers.q4 === 0 || answers.q12 === 0) suggestions.push("CSM");
+    if (answers.q5 === 0 || answers.q6 === 0 || answers.q18 === 0) suggestions.push("MSOAR");
+    if (answers.q7 === 0 || answers.q16 === 0 || answers.q17 === 0) suggestions.push("TVM");
     if (answers.q9 === 0 || answers.q10 === 0) suggestions.push("SEM");
     if (answers.q13 === 0) suggestions.push("SAT");
     if (answers.q14 === 0 || answers.q15 === 0) suggestions.push("EBM");
@@ -211,39 +188,26 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
     const suggestions = suggestProducts(answers, newScore);
     const healthStatus = getHealthStatus(newScore);
 
-    // Save all data to localStorage
-    localStorage.setItem(
-      getUserKey("domainHealthAnswers"),
-      JSON.stringify(answers)
-    );
+    localStorage.setItem(getUserKey("domainHealthAnswers"), JSON.stringify(answers));
     localStorage.setItem(getUserKey("domainHealthScore"), newScore.toString());
     localStorage.setItem(getUserKey("domainHealthStatus"), healthStatus);
-    localStorage.setItem(
-      getUserKey("recommendedProducts"),
-      JSON.stringify(suggestions)
-    );
+    localStorage.setItem(getUserKey("recommendedProducts"), JSON.stringify(suggestions));
     localStorage.setItem(getUserKey("questionnaireSubmitted"), "true");
 
-    // Dispatch storage event to notify other components
-    window.dispatchEvent(
-      new StorageEvent("storage", {
-        key: getUserKey("domainHealthAnswers"),
-        newValue: JSON.stringify(answers),
-        oldValue: null,
-        url: window.location.href,
-        storageArea: localStorage,
-      })
-    );
+    window.dispatchEvent(new StorageEvent("storage", {
+      key: getUserKey("domainHealthAnswers"),
+      newValue: JSON.stringify(answers),
+      oldValue: null,
+      url: window.location.href,
+      storageArea: localStorage,
+    }));
 
     setQuestionnaireSubmitted(true);
     onCancel();
   };
 
-  // Load saved answers on component mount
   useEffect(() => {
-    const savedAnswers = localStorage.getItem(
-      getUserKey("domainHealthAnswers")
-    );
+    const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
     if (savedAnswers) {
       setAnswers(JSON.parse(savedAnswers));
     }
@@ -251,11 +215,8 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 flex justify-center items-center z-50 overflow-auto">
-      <div className="relative bg-white rounded-xl shadow-lg max-w-3xl w-full max-h-[90vh]">
-        <h1 className="text-3xl font-semibold text-center text-primary my-6">
-          Domain Health Assessment
-        </h1>
-
+      <div className="relative bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <h1 className="text-3xl font-bold text-center text-primary mt-6">Domain Health Assessment</h1>
         <button
           onClick={onCancel}
           className="absolute top-4 right-4 text-gray-500 hover:text-red-500 z-10"
@@ -263,21 +224,21 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
           <X className="w-6 h-6" />
         </button>
 
-        <div className="p-8 space-y-6 max-h-[75vh] overflow-y-auto scrollbar-hide">
+        <div className="p-6 sm:p-8 overflow-y-auto max-h-[75vh] space-y-6 scrollbar-hide">
           {errorMessage && (
-            <div className="text-red-600 text-center mb-4">{errorMessage}</div>
+            <div className="text-red-600 text-center font-medium">{errorMessage}</div>
           )}
 
           {questions.map(({ label, name, options }) => (
-            <div key={name} className="bg-gray-50 p-4 rounded-lg shadow-sm">
-              <label className="block text-lg font-medium text-gray-700 mb-3">
+            <div key={name} className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+              <label className="block text-base font-semibold text-gray-800 mb-3">
                 {label}
               </label>
-              <div className="flex flex-wrap gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {options.map((opt, i) => (
                   <label
                     key={i}
-                    className="flex items-center gap-2 text-gray-600"
+                    className="flex items-center gap-3 text-gray-700 bg-white p-3 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-100 transition cursor-pointer"
                   >
                     <input
                       type="radio"
@@ -289,56 +250,43 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
                         if (answers[name] === opt.value) {
                           const newAnswers = { ...answers, [name]: null };
                           setAnswers(newAnswers);
-                          localStorage.setItem(
-                            getUserKey("domainHealthAnswers"),
-                            JSON.stringify(newAnswers)
-                          );
+                          localStorage.setItem(getUserKey("domainHealthAnswers"), JSON.stringify(newAnswers));
                         }
                       }}
                       className="h-5 w-5 accent-primary"
                     />
-                    {opt.label}
+                    <span>{opt.label}</span>
                   </label>
                 ))}
               </div>
             </div>
           ))}
 
-          <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-6 mt-6">
+          <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
             <div className="flex justify-between items-center">
-              <div className="text-primary font-medium">
-                {remainingQuestions === 0 ? (
-                  <span className="font-semibold">
-                    All questions answered! You can now submit the
-                    questionnaire.
-                  </span>
-                ) : (
-                  `${remainingQuestions} question${
-                    remainingQuestions === 1 ? "" : "s"
-                  } remaining`
-                )}
-              </div>
-              <div className="text-primary text-sm">
+              <p className="text-primary font-medium">
+                {remainingQuestions === 0
+                  ? "All questions answered! You can now submit the questionnaire."
+                  : `${remainingQuestions} question${remainingQuestions === 1 ? "" : "s"} remaining`}
+              </p>
+              <span className="text-primary text-sm">
                 {totalQuestions - remainingQuestions}/{totalQuestions} completed
-              </div>
+              </span>
             </div>
             <div className="w-full bg-primary/30 rounded-full h-2 mt-2">
               <div
                 className="bg-primary h-2 rounded-full transition-all duration-300"
                 style={{
-                  width: `${
-                    ((totalQuestions - remainingQuestions) / totalQuestions) *
-                    100
-                  }%`,
+                  width: `${((totalQuestions - remainingQuestions) / totalQuestions) * 100}%`,
                 }}
               />
             </div>
           </div>
 
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center">
             <button
               onClick={handleSubmit}
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg text-xl"
+              className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-3 rounded-xl mt-4 text-lg"
             >
               Submit
             </button>
@@ -350,13 +298,3 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
 };
 
 export default QueAns;
-
-/*
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
-}
-*/
