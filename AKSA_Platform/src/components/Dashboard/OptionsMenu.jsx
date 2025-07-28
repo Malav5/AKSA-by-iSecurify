@@ -24,8 +24,7 @@ const OptionsMenu = () => {
       bgGradient: "from-blue-50 to-cyan-50",
       borderColor: "border-blue-200",
       textColor: "text-blue-700",
-      buttonGradient: "from-blue-600 to-cyan-600",
-      buttonHover: "from-blue-700 to-cyan-700",
+      buttonGradient: "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700",
       buttonLabel: "Retake my assessment",
       onClick: () => setShowQuestionnaire(true),
     },
@@ -37,8 +36,7 @@ const OptionsMenu = () => {
       bgGradient: "from-purple-50 to-pink-50",
       borderColor: "border-purple-200",
       textColor: "text-purple-700",
-      buttonGradient: "from-purple-600 to-pink-600",
-      buttonHover: "from-purple-700 to-pink-700",
+      buttonGradient: "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700",
       buttonLabel: "View my policies",
       path: "/policies",
     },
@@ -50,8 +48,7 @@ const OptionsMenu = () => {
       bgGradient: "from-orange-50 to-red-50",
       borderColor: "border-orange-200",
       textColor: "text-orange-700",
-      buttonGradient: "from-orange-600 to-red-600",
-      buttonHover: "from-orange-700 to-red-700",
+      buttonGradient: "bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700",
       buttonLabel: "View my risks",
       path: "/risk-manager",
     },
@@ -63,8 +60,7 @@ const OptionsMenu = () => {
       bgGradient: "from-emerald-50 to-teal-50",
       borderColor: "border-emerald-200",
       textColor: "text-emerald-700",
-      buttonGradient: "from-emerald-600 to-teal-600",
-      buttonHover: "from-emerald-700 to-teal-700",
+      buttonGradient: "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700",
       buttonLabel: "View my tasks",
       path: "/task-manager",
     },
@@ -76,8 +72,7 @@ const OptionsMenu = () => {
       bgGradient: "from-green-50 to-emerald-50",
       borderColor: "border-green-200",
       textColor: "text-green-700",
-      buttonGradient: "from-green-600 to-emerald-600",
-      buttonHover: "from-green-700 to-emerald-700",
+      buttonGradient: "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700",
       buttonLabel: "Add a member",
       onClick: () => setShowAddMember(true),
     },
@@ -89,8 +84,7 @@ const OptionsMenu = () => {
       bgGradient: "from-indigo-50 to-purple-50",
       borderColor: "border-indigo-200",
       textColor: "text-indigo-700",
-      buttonGradient: "from-indigo-600 to-purple-600",
-      buttonHover: "from-indigo-700 to-purple-700",
+      buttonGradient: "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700",
       buttonLabel: "View my issues",
       path: "/issues",
     },
@@ -106,7 +100,7 @@ const OptionsMenu = () => {
           >
             {/* Background decoration */}
             <div
-              className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${card.gradient} rounded-full -translate-y-10 translate-x-10 opacity-10 group-hover:opacity-20 transition-opacity duration-300`}
+              className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${card.gradient} rounded-full -translate-y-10 translate-x-10 opacity-10 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none`}
             ></div>
 
             {/* Icon container */}
@@ -126,22 +120,18 @@ const OptionsMenu = () => {
               </p>
 
               {/* Button */}
-              <div className="mt-auto">
+              <div className="mt-auto relative z-10">
                 {card.path ? (
                   <Link
                     to={card.path}
-                    className={`bg-gradient-to-r ${card.buttonGradient} hover:${card.buttonHover} text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm md:text-base inline-block w-full`}
-                    onClick={(e) => {
-                      // Debugging - remove in production
-                      console.log(`Navigating to ${card.path}`);
-                    }}
+                    className={`${card.buttonGradient} text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm md:text-base inline-block w-full`}
                   >
                     {card.buttonLabel}
                   </Link>
                 ) : (
                   <button
                     onClick={card.onClick}
-                    className={`bg-gradient-to-r ${card.buttonGradient} hover:${card.buttonHover} text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm md:text-base w-full`}
+                    className={`${card.buttonGradient} text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm md:text-base w-full`}
                   >
                     {card.buttonLabel}
                   </button>
@@ -151,7 +141,7 @@ const OptionsMenu = () => {
 
             {/* Hover overlay */}
             <div
-              className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
+              className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl pointer-events-none`}
             ></div>
           </div>
         ))}

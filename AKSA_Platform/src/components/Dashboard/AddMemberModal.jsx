@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Listbox } from "@headlessui/react";
 import { Check, ChevronDown } from "lucide-react";
 import { toast } from "react-toastify";
 import { userServices } from "../../services/UserServices";
+
 export const showSuccess = (message) => toast.success(message);
 export const showError = (message) => toast.error(message);
-export const showInfo = (message) => toast.info(message);
-export const showWarning = (message) => toast.warning(message);
 
 const AddMemberModal = ({ onClose, onSuccess }) => {
   const [memberData, setMemberData] = useState({
@@ -18,20 +17,17 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
+  const [visible, setVisible] = useState(false);
   const roles = ["admin", "manager", "user"];
 
-  // Get current user from localStorage
-  const currentUser = JSON.parse(localStorage.getItem("user"));
+  useEffect(() => {
+    setVisible(true);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setSuccess("");
-  
+
     const payload = {
       firstName: memberData.firstName,
       lastName: memberData.lastName,
@@ -39,93 +35,62 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
       password: memberData.password || "changeme123",
       role: memberData.role,
     };
-  
+
     try {
       const result = await userServices.addUser(payload);
       showSuccess(result.message || "User added successfully!");
       setMemberData({ firstName: "", lastName: "", email: "", role: "user", password: "" });
-  
       if (onSuccess) onSuccess();
-  
-      setTimeout(() => {
-        onClose();
-      }, 1500);
+      setTimeout(() => onClose(), 1500);
     } catch (err) {
-      setError(err.message || "Something went wrong.");
       showError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
-    <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
+    <div
+      className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <form
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={handleSubmit}
+        className={`bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4 transition-transform duration-500 ease-out ${
+          visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"
+        }`}
+      >
+        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Add New User</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-red-600 text-xl font-bold"
+            type="button"
+          >
+            ✕
           </button>
         </div>
-        {error && (
-          <div className="mb-4 text-sm text-red-600 bg-red-100 px-3 py-2 rounded">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mb-4 text-sm text-green-600 bg-green-100 px-3 py-2 rounded">
-            {success}
-          </div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* First Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-            <input
-              type="text"
-              value={memberData.firstName}
-              onChange={(e) => setMemberData({ ...memberData, firstName: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          {/* Last Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-            <input
-              type="text"
-              value={memberData.lastName}
-              onChange={(e) => setMemberData({ ...memberData, lastName: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-            <input
-              type="email"
-              value={memberData.email}
-              onChange={(e) => setMemberData({ ...memberData, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={memberData.password}
-              onChange={(e) => setMemberData({ ...memberData, password: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          {/* Role (Listbox) */}
+
+        {/* Input Fields */}
+        <div className="space-y-4">
+          {["firstName", "lastName", "email", "password"].map((field) => (
+            <div key={field}>
+              <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                {field === "email" ? "Email Address" : field === "password" ? "Password" : field}
+              </label>
+              <input
+                type={field === "password" ? "password" : "text"}
+                value={memberData[field]}
+                onChange={(e) => setMemberData({ ...memberData, [field]: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee8cee]/40 focus:border-[#800080]"
+                required
+              />
+            </div>
+          ))}
+
+          {/* Role Select */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
             <Listbox
@@ -133,24 +98,25 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
               onChange={(value) => setMemberData({ ...memberData, role: value })}
             >
               <div className="relative">
-                <Listbox.Button className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
-                  <span>{memberData.role || "Select a role"}</span>
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                <Listbox.Button className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee8cee]/40 focus:border-[#800080] flex justify-between items-center">
+                  <span>{memberData.role}</span>
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
                 </Listbox.Button>
-                <Listbox.Options className="absolute mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                <Listbox.Options className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
                   {roles.map((role) => (
                     <Listbox.Option
                       key={role}
                       value={role}
                       className={({ active }) =>
-                        `cursor-pointer px-4 py-2 text-sm ${active ? "bg-blue-100 text-blue-900" : "text-gray-700"
+                        `cursor-pointer px-4 py-2 text-sm ${
+                          active ? "bg-purple-100 text-purple-900" : "text-gray-800"
                         }`
                       }
                     >
                       {({ selected }) => (
                         <span className="flex justify-between items-center">
                           {role.charAt(0).toUpperCase() + role.slice(1)}
-                          {selected && <Check className="w-4 h-4 text-blue-500" />}
+                          {selected && <Check className="w-4 h-4 text-purple-600" />}
                         </span>
                       )}
                     </Listbox.Option>
@@ -159,26 +125,27 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
               </div>
             </Listbox>
           </div>
-          {/* Buttons */}
-          <div className="flex justify-end gap-4 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-              disabled={loading}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-white bg-primary rounded-md hover:bg-blue-700 transition-colors"
-              disabled={loading}
-            >
-              {loading ? "Adding..." : "Add User"}
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+
+        {/* Actions */}
+        <div className="mt-6 flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-gray-300 text-black px-6 py-2 rounded-lg hover:bg-gray-400 font-semibold"
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white px-6 py-2 rounded-lg hover:from-[#700070] hover:to-[#d17ad1] font-semibold shadow"
+            disabled={loading}
+          >
+            {loading ? "Adding..." : "Add User"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
