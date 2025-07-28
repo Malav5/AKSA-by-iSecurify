@@ -11,7 +11,7 @@ const RiskManagement = ({ hideViewAll = false }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 p-4 md:p-6 lg:p-8 rounded-2xl text-gray-800 space-y-4 md:space-y-6">
+    <div className="bg-white p-4 md:p-6 lg:p-8 rounded-2xl text-gray-800 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">

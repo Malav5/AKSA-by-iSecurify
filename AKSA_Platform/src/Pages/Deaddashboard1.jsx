@@ -65,13 +65,13 @@ const Deaddashboard1 = () => {
             </button>
           </div> */}
 
-          <div className="mt-6 space-y-6">
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+          <div className="mt-6 space-y-6 bg-white ">
+     
               <RiskDashboard />
-            </div>
+    
           </div>
 
-          <div className="my-6 space-y-6 bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+          <div className="my-6 space-y-6 bg-white">
             <div className="p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 mb-10">
               <ComplianceScoreCard />
               <div className="col-span-2">

@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import AddMemberModal from "./AddMemberModal";
 import QueAns from "./QueAns";
-import { 
-  FiFileText, 
-  FiBook, 
-  FiTrendingUp, 
-  FiFolder, 
+import {
+  FiFileText,
+  FiBook,
+  FiTrendingUp,
+  FiFolder,
   FiUsers,
-  FiShield
+  FiShield,
 } from "react-icons/fi";
 
 const OptionsMenu = () => {
@@ -92,23 +92,27 @@ const OptionsMenu = () => {
       buttonGradient: "from-indigo-600 to-purple-600",
       buttonHover: "from-indigo-700 to-purple-700",
       buttonLabel: "View my issues",
-      path: "/issuePage",
+      path: "/issues",
     },
   ];
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 p-4 md:p-6 lg:p-8 bg-white rounded-lg shadow-sm border border-gray-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 p-4 md:p-6 lg:p-8 bg-white">
         {cardData.map((card, index) => (
           <div
             key={index}
             className={`bg-white p-6 md:p-8 rounded-2xl text-gray-800 flex flex-col text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 h-full border-2 ${card.borderColor} relative overflow-hidden group`}
           >
             {/* Background decoration */}
-            <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${card.gradient} rounded-full -translate-y-10 translate-x-10 opacity-10 group-hover:opacity-20 transition-opacity duration-300`}></div>
-            
+            <div
+              className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${card.gradient} rounded-full -translate-y-10 translate-x-10 opacity-10 group-hover:opacity-20 transition-opacity duration-300`}
+            ></div>
+
             {/* Icon container */}
-            <div className={`w-20 h-20 md:w-24 md:h-24 mb-6 rounded-2xl mx-auto flex items-center justify-center bg-gradient-to-br ${card.gradient} shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-110`}>
+            <div
+              className={`w-20 h-20 md:w-24 md:h-24 mb-6 rounded-2xl mx-auto flex items-center justify-center bg-gradient-to-br ${card.gradient} shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-110`}
+            >
               <span className="text-white">{card.icon}</span>
             </div>
 
@@ -127,6 +131,10 @@ const OptionsMenu = () => {
                   <Link
                     to={card.path}
                     className={`bg-gradient-to-r ${card.buttonGradient} hover:${card.buttonHover} text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm md:text-base inline-block w-full`}
+                    onClick={(e) => {
+                      // Debugging - remove in production
+                      console.log(`Navigating to ${card.path}`);
+                    }}
                   >
                     {card.buttonLabel}
                   </Link>
@@ -141,23 +149,19 @@ const OptionsMenu = () => {
               </div>
             </div>
 
-            {/* Hover effect overlay */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}></div>
+            {/* Hover overlay */}
+            <div
+              className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
+            ></div>
           </div>
         ))}
       </div>
 
-      {showAddMember && (
-        <AddMemberModal onClose={() => setShowAddMember(false)} />
-      )}
-
+      {showAddMember && <AddMemberModal onClose={() => setShowAddMember(false)} />}
       {showQuestionnaire && (
         <QueAns
           onCancel={() => setShowQuestionnaire(false)}
-          setQuestionnaireSubmitted={() => {
-            setShowQuestionnaire(false);
-            // Optional: handle post-submit logic
-          }}
+          setQuestionnaireSubmitted={() => setShowQuestionnaire(false)}
         />
       )}
     </>
