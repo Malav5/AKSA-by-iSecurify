@@ -366,7 +366,7 @@ router.get("/admin-user-assignments", authMiddleware, async (req, res) => {
   try {
     const assignments = await UserSubadminAssignment.find()
       .populate('subadminId', 'firstName lastName email')
-      .populate('userIds', 'firstName lastName email createdAt isEmailVerified');
+      .populate('userIds', 'firstName lastName email createdAt isEmailVerified plan');
 
     const formattedAssignments = assignments.map(assignment => ({
       admin: {
@@ -379,7 +379,8 @@ router.get("/admin-user-assignments", authMiddleware, async (req, res) => {
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
         createdAt: user.createdAt,
-        isEmailVerified: user.isEmailVerified
+        isEmailVerified: user.isEmailVerified,
+        plan: user.plan || "Freemium"
       })),
       assignmentCreatedAt: assignment.createdAt
     }));
