@@ -2,6 +2,14 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import AddMemberModal from "./AddMemberModal";
 import QueAns from "./QueAns";
+import { 
+  FiFileText, 
+  FiBook, 
+  FiTrendingUp, 
+  FiFolder, 
+  FiUsers,
+  FiShield
+} from "react-icons/fi";
 
 const OptionsMenu = () => {
   const [showAddMember, setShowAddMember] = useState(false);
@@ -11,7 +19,7 @@ const OptionsMenu = () => {
     {
       title: "Assessment",
       subtitle: "Conduct an assessment of your Cybersecurity controls.",
-      icon: "📝",
+      icon: <FiFileText className="w-10 h-10" />,
       gradient: "from-blue-500 to-cyan-500",
       bgGradient: "from-blue-50 to-cyan-50",
       borderColor: "border-blue-200",
@@ -24,7 +32,7 @@ const OptionsMenu = () => {
     {
       title: "Policies Library",
       subtitle: "Download Security Policy Templates from our policy library.",
-      icon: "📘",
+      icon: <FiBook className="w-10 h-10" />,
       gradient: "from-purple-500 to-pink-500",
       bgGradient: "from-purple-50 to-pink-50",
       borderColor: "border-purple-200",
@@ -37,7 +45,7 @@ const OptionsMenu = () => {
     {
       title: "Risk Manager",
       subtitle: "Build your risk register, assign risk ownership and track remediation tasks.",
-      icon: "📈",
+      icon: <FiTrendingUp className="w-10 h-10" />,
       gradient: "from-orange-500 to-red-500",
       bgGradient: "from-orange-50 to-red-50",
       borderColor: "border-orange-200",
@@ -50,7 +58,7 @@ const OptionsMenu = () => {
     {
       title: "Task Manager",
       subtitle: "Assign tasks to your Security team and keep track of priorities and due dates.",
-      icon: "🗂️",
+      icon: <FiFolder className="w-10 h-10" />,
       gradient: "from-emerald-500 to-teal-500",
       bgGradient: "from-emerald-50 to-teal-50",
       borderColor: "border-emerald-200",
@@ -63,7 +71,7 @@ const OptionsMenu = () => {
     {
       title: "Add Member",
       subtitle: "Add new team members and assign their roles and permissions.",
-      icon: "👥",
+      icon: <FiUsers className="w-10 h-10" />,
       gradient: "from-green-500 to-emerald-500",
       bgGradient: "from-green-50 to-emerald-50",
       borderColor: "border-green-200",
@@ -76,7 +84,7 @@ const OptionsMenu = () => {
     {
       title: "Issues Management",
       subtitle: "Manage, assign and follow up your company issues.",
-      icon: "🛡️",
+      icon: <FiShield className="w-10 h-10" />,
       gradient: "from-indigo-500 to-purple-500",
       bgGradient: "from-indigo-50 to-purple-50",
       borderColor: "border-indigo-200",
@@ -90,7 +98,7 @@ const OptionsMenu = () => {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 p-4 md:p-6 lg:p-8 bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 p-4 md:p-6 lg:p-8 bg-white rounded-lg shadow-sm border border-gray-100">
         {cardData.map((card, index) => (
           <div
             key={index}
@@ -101,7 +109,7 @@ const OptionsMenu = () => {
             
             {/* Icon container */}
             <div className={`w-20 h-20 md:w-24 md:h-24 mb-6 rounded-2xl mx-auto flex items-center justify-center bg-gradient-to-br ${card.gradient} shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-110`}>
-              <span className="text-3xl md:text-4xl drop-shadow-sm">{card.icon}</span>
+              <span className="text-white">{card.icon}</span>
             </div>
 
             {/* Content */}

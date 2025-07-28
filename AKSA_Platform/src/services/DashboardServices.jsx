@@ -50,36 +50,52 @@ export const fetchDNSDetails = async (domain) => {
 };
 
 export const fetchHttpHeaders = async (domain) => {
-  const res = await axios.get(`${BASE_URL}/headers`, {
-    params: { url: domain },
-    headers: {
-      "Content-Type": "application/json",
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-  return res.data;
+  try {
+    const res = await axios.get(`${BASE_URL}/headers`, {
+      params: { url: domain },
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    });
+    console.log("HTTP Headers response:", res.data);
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching HTTP headers:", err.message);
+    return null;
+  }
 };
 
 export const fetchHttpSecurity = async (domain) => {
-  const res = await axios.get(`${BASE_URL}/http-security`, {
-    params: { url: domain },
-    headers: {
-      "Content-Type": "application/json",
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-  return res.data;
+  try {
+    const res = await axios.get(`${BASE_URL}/http-security`, {
+      params: { url: domain },
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching HTTP security:", err.message);
+    return null;
+  }
 };
 
 export const fetchTlsInfo = async (domain) => {
-  const res = await axios.get(`${BASE_URL}/tls`, {
-    params: { url: domain },
-    headers: {
-      "Content-Type": "application/json",
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-  return res.data;
+  try {
+    const res = await axios.get(`${BASE_URL}/tls`, {
+      params: { url: domain },
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching TLS info:", err.message);
+    return null;
+  }
 };
 
 
@@ -105,25 +121,36 @@ export const fetchLinkedPages = async (domain) => {
 };
 
 export const fetchCarbonData = async (domain) => {
-  const res = await axios.get(`${BASE_URL}/carbon`, {
-    params: { url: domain },
-    headers: {
-      "Content-Type": "application/json",
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-  return res.data;
+  try {
+    const res = await axios.get(`${BASE_URL}/carbon`, {
+      params: { url: domain },
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching carbon data:", err.message);
+    return null;
+  }
 };
 
 export const fetchSocialTags = async (domain) => {
-  const res = await axios.get(`${BASE_URL}/social-tags`, {
-    params: { url: domain },
-    headers: {
-      "Content-Type": "application/json",
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-  return res.data;
+  try {
+    const res = await axios.get(`${BASE_URL}/social-tags`, {
+      params: { url: domain },
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    });
+    console.log("Social Tags response:", res.data);
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching social tags:", err.message);
+    return null;
+  }
 };
 
 // Fixed fetchRiskData function

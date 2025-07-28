@@ -41,8 +41,6 @@ const CreateTask = ({ onClose }) => {
   const loadMembers = async () => {
     try {
       const response = await userServices.fetchMembers();
-      console.log("API response:", response);
-      // Handle both { users: [...] } and [...]
       let users = [];
       if (Array.isArray(response)) {
         users = response;
@@ -74,7 +72,7 @@ const CreateTask = ({ onClose }) => {
       <label className="block text-gray-600 font-medium mb-1">{label}</label>
       <Listbox value={value} onChange={onChange}>
         <div className="relative">
-          <Listbox.Button className="w-full border border-gray-300 rounded px-4 py-2 flex justify-between items-center text-left">
+          <Listbox.Button className="w-full border border-gray-300 rounded px-4 py-2 flex justify-between items-center text-left focus:outline-none focus-visible:border-[#800080] focus-visible:ring-2 focus-visible:ring-[#ee8cee]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
             <span>{value || `Select ${label.toLowerCase()}`}</span>
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </Listbox.Button>
@@ -91,7 +89,7 @@ const CreateTask = ({ onClose }) => {
                   value={option}
                   className={({ active }) =>
                     `cursor-pointer select-none px-4 py-2 ${
-                      active ? "bg-blue-100" : ""
+                      active ? "bg-[#f9ecf9] text-[#800080]" : "text-gray-900"
                     }`
                   }
                 >
@@ -101,9 +99,8 @@ const CreateTask = ({ onClose }) => {
                         selected ? "font-medium" : "font-normal"
                       }`}
                     >
-                      {option}{" "}
-                      {selected && (
-                        <Check className="inline w-4 h-4 ml-2 text-blue-500" />
+                      {option} {selected && (
+                        <Check className="inline w-4 h-4 ml-2 text-[#800080]" />
                       )}
                     </span>
                   )}
@@ -118,7 +115,7 @@ const CreateTask = ({ onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 backdrop-blur-sm"
       onClick={onClose}
     >
       <form
@@ -127,7 +124,7 @@ const CreateTask = ({ onClose }) => {
           e.preventDefault();
           handleFormSubmit();
         }}
-        className={`bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full transform transition-transform duration-600 ease-out ${
+        className={`bg-white/90 rounded-2xl shadow-2xl p-8 max-w-4xl w-full transform transition-transform duration-600 ease-out ${
           visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20"
         }`}
       >
@@ -225,14 +222,14 @@ const CreateTask = ({ onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="bg-gray-300 text-black px-6 py-2 rounded hover:bg-gray-400"
+            className="bg-gray-300 text-black px-6 py-2 rounded-lg hover:bg-gray-400 font-semibold"
             disabled={loading}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="bg-primary text-white px-6 py-2 rounded hover:bg-blue-700"
+            className="bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white px-6 py-2 rounded-lg hover:from-[#700070] hover:to-[#d17ad1] font-semibold shadow"
             disabled={loading}
           >
             {loading ? "Saving..." : "Create Task"}

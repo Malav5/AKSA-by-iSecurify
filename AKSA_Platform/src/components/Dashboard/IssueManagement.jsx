@@ -64,7 +64,7 @@ const IssueManagement = ({ hideViewAll = false }) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm p-6 border border-gray-100 text-gray-800 p-4 md:p-6 lg:p-8">
+    <div className="w-full bg-white rounded-lg shadow-sm border border-gray-100 text-gray-800 p-4 md:p-6 lg:p-8">
       <div>
         <div className="flex justify-between items-center mb-6 md:mb-8">
           <div className="flex items-center gap-3">
@@ -74,7 +74,7 @@ const IssueManagement = ({ hideViewAll = false }) => {
           {!hideViewAll && (
             <Link
               to="/issues"
-              className="bg-gradient-to-r from-[#800080] to-[#a242a2] text-white rounded-xl px-4 md:px-6 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:from-purple-700 hover:to-blue-700"
+              className="bg-gradient-to-r from-[#800080] to-[#a242a2] text-white rounded-xl px-4 md:px-6 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               View All Issues
             </Link>
@@ -155,22 +155,31 @@ const IssueManagement = ({ hideViewAll = false }) => {
               />
             </div>
             
-            <div className="mt-6 space-y-3 text-sm md:text-base text-gray-700">
-              <div className="flex items-center justify-between bg-purple-50 rounded-lg p-3 border border-purple-200">
-                <span className="font-medium">To Do</span>
-                <span className="text-purple-600 font-bold">{toDoCount}</span>
+            <div className="mt-6 space-y-4 text-sm md:text-base text-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <span className="font-medium text-gray-700">To Do</span>
+                </div>
+                <span className="text-purple-600 font-bold text-lg">{toDoCount}</span>
               </div>
-              <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <span className="font-medium">Unassigned</span>
-                <span className="text-gray-600 font-bold">{unassignedCount}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                  <span className="font-medium text-gray-700">Unassigned</span>
+                </div>
+                <span className="text-gray-600 font-bold text-lg">{unassignedCount}</span>
               </div>
-              <div className="flex items-center justify-between bg-blue-50 rounded-lg p-3 border border-blue-200">
-                <span className="font-medium">In Progress</span>
-                <span className="text-blue-600 font-bold">{inProgressCount}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="font-medium text-gray-700">In Progress</span>
+                </div>
+                <span className="text-blue-600 font-bold text-lg">{inProgressCount}</span>
               </div>
             </div>
             
-            <div className="mt-4 p-3 bg-purple-50 rounded-xl border border-purple-200">
+            <div className="mt-6 p-3 bg-purple-50 rounded-xl border border-purple-200">
               <p className="text-xs md:text-sm text-purple-700 font-medium">
                 💡 The current status of your issues
               </p>

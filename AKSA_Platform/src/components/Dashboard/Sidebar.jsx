@@ -5,6 +5,7 @@ import axios from "axios";
 import "../../index.css";
 import Pricing from "../Home/Pricing";
 import ModalPortal from "../ui/ModalPortal";
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -108,34 +109,35 @@ const Sidebar = () => {
 
       {/* Sidebar - Mobile and Desktop */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 lg:w-56 xl:w-64 bg-white border-r border-gray-200 flex flex-col h-screen transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}>
+        } shadow-2xl lg:shadow-none`}>
         {/* Top Section */}
         <div className="mr-2 md:mr-4 flex-1">
-          <div className="flex items-center justify-center mb-4 md:mb-6 mt-2 md:mt-3 bg-white">
+          <div className="flex items-center justify-center mb-4 md:mb-6 mt-2 md:mt-3 bg-transparent">
             <div className="flex items-baseline space-x-1 md:space-x-2">
-              <h1 className="text-2xl md:text-3xl font-semibold">AKSA</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-primary drop-shadow-sm">AKSA</h1>
               <div className="flex items-center space-x-1">
-                <span className="text-sm md:text-base">By</span>
-                <img src="/logo1_cut.png" alt="Logo" className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="text-sm md:text-base">iSecurify</span>
+                <span className="text-sm md:text-base font-medium">By</span>
+                <img src="/logo1_cut.png" alt="Logo" className="h-4 w-4 md:h-5 md:w-5 rounded-full border border-gray-200 shadow-sm" />
+                <span className="text-sm md:text-base font-medium">iSecurify</span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-center my-4 md:my-6">
-            {user ? (
-              <img
-                src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.companyName || "User"
-                  }`}
-                alt="Profile"
-                className="w-16 h-16 md:w-20 md:h-20 rounded-full"
-              />
-            ) : (
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-500 text-xs md:text-sm">Loading...</span>
-              </div>
-            )}
-            <span className="font-semibold mt-2 text-sm md:text-base text-center px-2">
+          <div className="flex flex-col items-center my-6">
+            <div className="bg-gradient-to-br from-[#e88ae8] via-white to-[#e9a6e9] p-1 rounded-full shadow-md">
+              {user ? (
+                <img
+                  src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.companyName || "User"}`}
+                  alt="Profile"
+                  className="w-20 h-20 rounded-full border-4 border-white shadow-lg object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Loading...</span>
+                </div>
+              )}
+            </div>
+            <span className="font-semibold mt-3 text-base text-center px-2 text-gray-800">
               {user?.companyName || "Loading..."}
             </span>
           </div>
@@ -145,12 +147,13 @@ const Sidebar = () => {
               <div
                 key={idx}
                 onClick={() => handleNavClick(item)}
-                className={`flex items-center space-x-2 cursor-pointer px-3 md:px-4 py-2 rounded-md transition-all duration-200 text-sm md:text-base ${isActive(item.path)
-                  ? "bg-secondary text-primary hover:bg-secondary/80"
-                  : "text-gray-700 hover:bg-[#fff3ff]"
+                className={`flex items-center space-x-3 cursor-pointer px-4 py-2 rounded-lg transition-all duration-200 text-base font-medium group
+                  ${isActive(item.path)
+                    ? "bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white shadow-md"
+                    : "text-gray-700 hover:bg-[#f9ecf9] hover:shadow hover:text-[#800080]"
                   }`}
               >
-                <item.Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+                <item.Icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 ${isActive(item.path) ? "text-white" : "text-gray-700 group-hover:text-[#800080]"}`} />
                 <span>{item.label}</span>
               </div>
             ))}

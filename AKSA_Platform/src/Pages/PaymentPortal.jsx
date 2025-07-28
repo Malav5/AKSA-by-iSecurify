@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 const PaymentPortal = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { plan } = location.state || {};
+  const { plan, upgradeForUser, userEmail, userName } = location.state || {};
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
 
@@ -25,15 +25,79 @@ const PaymentPortal = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      await axios.patch(
-        "http://localhost:3000/api/auth/update-plan", // Adjust endpoint as needed
-        { plan },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      showSuccess("Plan upgraded successfully!");
-      setTimeout(() => navigate("/dashboard"), 1200);
+      console.log("Starting payment confirmation...", { upgradeForUser, userEmail, plan });
+      
+      if (upgradeForUser && userEmail) {
+        // Upgrade for specific user
+        try {
+          console.log("Fetching users list...");
+          // First, find the user by email to get their ID
+          const userResponse = await axios.get(
+            "http://localhost:3000/api/agentMap/users-with-role-user",
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          
+          console.log("Users response:", userResponse.data);
+          const user = userResponse.data.users.find(u => u.email === userEmail);
+          console.log("Found user:", user);
+          
+          if (!user) {
+            throw new Error("User not found in the system");
+          }
+
+          console.log("Upgrading user plan...", { userId: user._id, plan });
+          // Update the specific user's plan
+          const upgradeResponse = await axios.put(
+            `http://localhost:3000/api/agentMap/upgrade-user-plan/${user._id}`,
+            { plan },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          
+          console.log("Upgrade response:", upgradeResponse.data);
+          if (upgradeResponse.data.message) {
+            showSuccess(`Plan upgraded successfully for ${userName}!`);
+          } else {
+            showSuccess(`Plan upgraded successfully for ${userName}!`);
+          }
+          setTimeout(() => navigate("/dashboard"), 1200);
+        } catch (error) {
+          console.error("User upgrade error:", error);
+          if (error.response?.status === 404) {
+            showError("User not found or API endpoint not available");
+          } else if (error.response?.status === 403) {
+            showError("You don't have permission to upgrade user plans");
+          } else if (error.response?.status === 400) {
+            showError("Invalid plan selected");
+          } else {
+            showError("Failed to upgrade user plan. Please try again.");
+          }
+        }
+      } else {
+        // Upgrade current user's plan
+        try {
+          console.log("Upgrading current user plan...", { plan });
+          const response = await axios.patch(
+            "http://localhost:3000/api/auth/update-plan",
+            { plan },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          console.log("Self upgrade response:", response.data);
+          showSuccess("Plan upgraded successfully!");
+          setTimeout(() => navigate("/dashboard"), 1200);
+        } catch (error) {
+          console.error("Self upgrade error:", error);
+          if (error.response?.status === 404) {
+            showError("API endpoint not available");
+          } else if (error.response?.status === 401) {
+            showError("Authentication failed. Please login again.");
+          } else {
+            showError("Failed to update plan. Please try again.");
+          }
+        }
+      }
     } catch (err) {
-      showError("Failed to update plan: " + (err.response?.data?.error || err.message));
+      console.error("Payment confirmation error:", err);
+      showError("Failed to process payment. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -88,7 +152,16 @@ const PaymentPortal = () => {
         return (
           <div className="space-y-4 text-center">
             <p className="text-sm sm:text-base text-gray-700 mb-4">Scan the QR code or enter UPI ID to pay:</p>
-            <img src="https://via.placeholder.com/150" alt="UPI QR Code" className="mx-auto mb-4 border border-gray-300 rounded-lg w-32 h-32 sm:w-40 sm:h-40" />
+            <div className="mx-auto mb-4 border border-gray-300 rounded-lg w-32 h-32 sm:w-40 sm:h-40 bg-gray-100 flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gray-300 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zm12 0h2a1 1 0 001-1V6a1 1 0 00-1-1h-2a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z" />
+                  </svg>
+                </div>
+                <span className="text-xs text-gray-500">QR Code</span>
+              </div>
+            </div>
             <input
               type="text"
               placeholder="yourupiid@bank"
@@ -161,11 +234,15 @@ const PaymentPortal = () => {
           {/* Hero Content */}
           <div className="relative z-10 max-w-md mx-auto text-center lg:text-left">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 lg:mb-6">
-              Secure Your Plan
+              {upgradeForUser ? `Upgrade ${userName}'s Plan` : 'Secure Your Plan'}
             </h2>
-            <p className="text-base sm:text-lg text-gray-300 leading-relaxed">
-              Finalize your subscription to the <span className="font-bold text-teal-300">{plan}</span> plan.
-            </p>
+            {upgradeForUser && (
+              <div className="mt-4 p-3 bg-blue-900 bg-opacity-50 rounded-lg border border-blue-400">
+                <p className="text-blue-200 text-sm">
+                  <strong>Upgrading for:</strong> {userName} ({userEmail})
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -174,7 +251,14 @@ const PaymentPortal = () => {
           <div className="w-full max-w-md space-y-4 sm:space-y-6">
             <div className="text-center lg:text-left">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2">Complete Your Payment</h2>
-              <p className="text-sm sm:text-base text-gray-500">Selected Plan: <span className="font-semibold text-[#800080]">{plan}</span></p>
+              <p className="text-sm sm:text-base text-gray-500">
+                Selected Plan: <span className="font-semibold text-[#800080]">{plan}</span>
+                {upgradeForUser && (
+                  <span className="block mt-1">
+                    For: <span className="font-semibold text-[#800080]">{userName}</span>
+                  </span>
+                )}
+              </p>
             </div>
 
             {/* Payment Method Selection */}
@@ -212,7 +296,7 @@ const PaymentPortal = () => {
               disabled={loading}
               className="w-full px-4 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-[#6a006a] focus:outline-none focus:ring-2 focus:ring-[#800080] focus:ring-opacity-50 transition duration-200 ease-in-out transform hover:scale-105 text-sm sm:text-base"
             >
-              {loading ? "Processing..." : "Confirm Payment"}
+              {loading ? "Processing..." : upgradeForUser ? "Upgrade User Plan" : "Confirm Payment"}
             </button>
 
             <button

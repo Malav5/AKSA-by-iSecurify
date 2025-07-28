@@ -239,15 +239,66 @@ router.post("/add-user", authMiddleware, async (req, res) => {
 // Get all users with role 'user'
 router.get("/users-with-role-user", async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }, "_id email firstName lastName");
+    const users = await User.find({ role: "user" }, "_id email firstName lastName plan createdAt");
     const formatted = users.map(u => ({
       _id: u._id,
       email: u.email,
-      name: `${u.firstName} ${u.lastName}`.trim()
+      name: `${u.firstName} ${u.lastName}`.trim(),
+      plan: u.plan || "Freemium",
+      createdAt: u.createdAt
     }));
     res.json({ users: formatted });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch users", details: err.message });
+  }
+});
+
+// Upgrade user plan
+router.put("/upgrade-user-plan/:userId", authMiddleware, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { plan } = req.body;
+    const currentUserId = req.userId;
+
+    // Get the current user to check their role
+    const currentUser = await User.findById(currentUserId);
+    if (!currentUser) {
+      return res.status(404).json({ error: "Current user not found" });
+    }
+
+    // Check if the current user is authorized (admin or subadmin)
+    if (currentUser.role !== "admin" && currentUser.role !== "subadmin") {
+      return res.status(403).json({ error: "Not authorized to upgrade user plans" });
+    }
+
+    // Validate plan
+    const validPlans = ["Freemium", "Aditya", "Ayush", "Moksha"];
+    if (!validPlans.includes(plan)) {
+      return res.status(400).json({ error: "Invalid plan. Must be one of: Freemium, Aditya, Ayush, Moksha" });
+    }
+
+    // Find and update the user
+    const userToUpdate = await User.findById(userId);
+    if (!userToUpdate) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update the user's plan
+    userToUpdate.plan = plan;
+    await userToUpdate.save();
+
+    res.json({ 
+      message: "Plan upgraded successfully", 
+      user: {
+        _id: userToUpdate._id,
+        email: userToUpdate.email,
+        name: `${userToUpdate.firstName} ${userToUpdate.lastName}`.trim(),
+        plan: userToUpdate.plan
+      }
+    });
+  } catch (err) {
+    console.error("Plan upgrade error:", err);
+    res.status(500).json({ error: "Failed to upgrade user plan", details: err.message });
   }
 });
 

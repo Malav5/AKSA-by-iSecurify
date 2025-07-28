@@ -28,7 +28,7 @@ const TaskDetail = ({ task, onClose }) => {
 
   const renderField = (label, field, editable = true) => (
     <div>
-      <h4 className="text-sm font-medium text-gray-500 mb-1">{label}</h4>
+      <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">{label}</h4>
       {editMode && editable ? (
         <input
           className="w-full border px-3 py-1.5 rounded"
@@ -42,8 +42,8 @@ const TaskDetail = ({ task, onClose }) => {
   );
 
   return (
-    <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl w-full mx-4">
+    <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-white/90 rounded-2xl shadow-2xl p-8 max-w-3xl w-full mx-4">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Task Details</h2>
           <button
@@ -67,7 +67,7 @@ const TaskDetail = ({ task, onClose }) => {
 
         <div className="grid grid-cols-2 gap-6 mt-6">
           <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Created On</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Created On</h4>
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-gray-400" />
               <p className="text-gray-900">
@@ -76,7 +76,7 @@ const TaskDetail = ({ task, onClose }) => {
             </div>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Updated On</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Updated On</h4>
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-gray-400" />
               <p className="text-gray-900">
@@ -90,7 +90,7 @@ const TaskDetail = ({ task, onClose }) => {
         <div className="flex justify-end gap-4 mt-8">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+            className="px-5 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
           >
             Close
           </button>
@@ -98,14 +98,14 @@ const TaskDetail = ({ task, onClose }) => {
             <button
               onClick={handleSave}
               disabled={loading}
-              className="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700"
+              className="px-5 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 font-semibold"
             >
               {loading ? "Saving..." : "Save Changes"}
             </button>
           ) : (
             <button
               onClick={() => setEditMode(true)}
-              className="px-4 py-2 text-white bg-primary rounded-md hover:bg-primary/90"
+              className="px-5 py-2 text-white bg-gradient-to-r from-[#800080] to-[#ee8cee] rounded-lg hover:from-[#700070] hover:to-[#d17ad1] font-semibold shadow"
             >
               Edit Task
             </button>

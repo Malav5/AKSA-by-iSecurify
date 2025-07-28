@@ -5,8 +5,8 @@ const IssueDetail = ({ risk, onClose }) => {
   if (!risk) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-5xl w-full mx-4 overflow-y-auto max-h-[90vh]">
+    <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-white/90 rounded-2xl shadow-2xl p-8 max-w-5xl w-full mx-4 overflow-y-auto max-h-[90vh] scrollbar-hide">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Alert Detail</h2>
           <button
@@ -19,60 +19,60 @@ const IssueDetail = ({ risk, onClose }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Alert ID</h4>
-            <p className="text-gray-900">{risk.id}</p>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Alert ID</h4>
+            <p className="text-gray-900 font-mono">{risk.id}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Agent</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Agent</h4>
             <p className="text-gray-900">{risk.agent}</p>
           </div>
           <div className="md:col-span-2">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Title</h4>
-            <p className="text-gray-900">{risk.title}</p>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Title</h4>
+            <p className="text-gray-900 font-semibold text-lg">{risk.title}</p>
           </div>
           <div className="md:col-span-2">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Description</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Description</h4>
             <p className="text-gray-900 whitespace-pre-wrap">{risk.description}</p>
           </div>
           <div className="md:col-span-2">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Remediation</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Remediation</h4>
             <p className="text-gray-900 whitespace-pre-wrap">{risk.remediation}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Level</h4>
-            <p className="text-gray-900">{risk.level}</p>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Level</h4>
+            <p className="text-gray-900 font-bold">{risk.level}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Group</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Group</h4>
             <p className="text-gray-900">{risk.group}</p>
           </div>
           <div className="md:col-span-2">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">MITRE Techniques</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">MITRE Techniques</h4>
             <p className="text-gray-900">{risk.mitreTechniques?.join(", ") || "None"}</p>
           </div>
           <div className="md:col-span-2">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Compliance</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Compliance</h4>
             <p className="text-gray-900 whitespace-pre-wrap">{risk.compliance || "Not Available"}</p>
           </div>
           <div className="md:col-span-2">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Commands</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Commands</h4>
             <p className="text-gray-900 whitespace-pre-wrap">{risk.commands?.join("\n") || "N/A"}</p>
           </div>
           <div className="md:col-span-2">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Timestamp</h4>
+            <h4 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Timestamp</h4>
             <p className="text-gray-900">{new Date(risk.timestamp).toLocaleString()}</p>
           </div>
         </div>
 
-        <div className="flex justify-end gap-4 mt-6">
+        <div className="flex justify-end gap-4 mt-8">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+            className="px-5 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
           >
             Close
           </button>
           <button
-            className="px-4 py-2 text-white bg-primary rounded-md hover:bg-primary/90 transition-colors"
+            className="px-5 py-2 text-white bg-gradient-to-r from-[#800080] to-[#ee8cee] rounded-lg hover:from-[#700070] hover:to-[#d17ad1] transition-colors font-semibold shadow"
           >
             Edit Issue
           </button>

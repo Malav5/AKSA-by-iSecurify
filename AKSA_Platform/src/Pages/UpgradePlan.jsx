@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import {
     Globe,
@@ -98,33 +98,32 @@ const plans = [
             "Custom Dashboard",
             "Priority Feature Requests"
         ],
-        icon: <Server className="w-6 h-6 text-green-500" />,
-        bestFor: "Enterprises & agencies",
+        icon: <Server className="w-6 h-6 text-yellow-500" />,
+        bestFor: "Enterprise organizations",
         scanFrequency: "Real-time",
         users: "Unlimited users",
         highlights: [
-            "Enterprise solution",
-            "Custom security",
+            "Enterprise grade",
+            "Custom solutions",
             "Dedicated support"
         ]
-    },
+    }
 ];
 
 const FeatureIcon = ({ icon, label }) => (
-    <div className="flex items-center gap-2 mb-1">
-        <div className="text-primary">{icon}</div>
-        <span className="text-xs text-gray-500">{label}</span>
+    <div className="flex items-center gap-2 text-sm text-gray-600">
+        {icon}
+        <span>{label}</span>
     </div>
 );
 
 const PlanHighlights = ({ highlights }) => (
-    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-        <h4 className="text-xs font-semibold text-gray-500 mb-2">HIGHLIGHTS</h4>
-        <ul className="space-y-2">
-            {highlights.map((highlight, index) => (
-                <li key={index} className="flex items-start gap-2">
-                    <Zap className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-xs text-gray-700">{highlight}</span>
+    <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+        <ul className="space-y-1">
+            {highlights.map((highlight, idx) => (
+                <li key={idx} className="text-xs text-gray-600 flex items-center gap-2">
+                    <div className="w-1 h-1 bg-primary rounded-full"></div>
+                    {highlight}
                 </li>
             ))}
         </ul>
@@ -132,42 +131,42 @@ const PlanHighlights = ({ highlights }) => (
 );
 
 const FeatureComparison = () => (
-    <div className="mt-16 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 className="text-xl font-bold text-gray-900 mb-6">Feature Comparison</h3>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="md:col-span-1">
-                <div className="font-medium text-gray-500 text-sm mb-4">FEATURES</div>
-                <ul className="space-y-4 text-sm text-gray-700">
-                    <li className="h-8 flex items-center">User Accounts</li>
-                    <li className="h-8 flex items-center">Scan Frequency</li>
-                    <li className="h-8 flex items-center">Support</li>
-                    <li className="h-8 flex items-center">API Access</li>
-                    <li className="h-8 flex items-center">Data Retention</li>
-                    <li className="h-8 flex items-center">Reporting</li>
-                </ul>
-            </div>
+    <div className="mt-16">
+        <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Feature Comparison</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan, index) => (
-                <div key={index} className="text-center">
-                    <div className="font-medium text-sm mb-4">{plan.name}</div>
-                    <ul className="space-y-4 text-sm">
-                        <li className="h-8 flex items-center justify-center">{plan.users}</li>
-                        <li className="h-8 flex items-center justify-center">{plan.scanFrequency}</li>
-                        <li className="h-8 flex items-center justify-center">
-                            {plan.name === "Moksha" ? "24/7 Dedicated" : 
-                             plan.name === "Ayush" ? "24/7 Priority" : 
-                             plan.name === "Aditya" ? "Priority Email" : "Email"}
+                <div key={index} className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <div className="text-center mb-6">
+                        <h4 className="text-lg font-bold text-gray-900 mb-2">{plan.name}</h4>
+                        <span className="text-2xl font-bold text-primary">${plan.price}</span>
+                        <span className="text-gray-500">/month</span>
+                    </div>
+                    <ul className="space-y-3">
+                        <li className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Domain Scans</span>
+                            <span className="text-sm font-medium">{plan.name === "Moksha" ? "Unlimited" : 
+                                plan.name === "Ayush" ? "15/month" : 
+                                plan.name === "Aditya" ? "5/month" : "1/month"}</span>
                         </li>
-                        <li className="h-8 flex items-center justify-center">
-                            {plan.name === "Freemium" ? "None" : 
-                             plan.name === "Aditya" ? "Basic" : "Full"}
+                        <li className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Users</span>
+                            <span className="text-sm font-medium">{plan.users}</span>
                         </li>
-                        <li className="h-8 flex items-center justify-center">
-                            {plan.name === "Moksha" ? "1 Year" : 
-                             plan.name === "Ayush" ? "30 Days" : "None"}
+                        <li className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Support</span>
+                            <span className="text-sm font-medium">{plan.name === "Moksha" ? "24/7 Dedicated" : 
+                                plan.name === "Ayush" ? "24/7 Priority" : 
+                                plan.name === "Aditya" ? "24h Response" : "48h Response"}</span>
                         </li>
-                        <li className="h-8 flex items-center justify-center">
-                            {plan.name === "Moksha" ? "White Label" : 
-                             plan.name === "Ayush" ? "Advanced" : "Basic"}
+                        <li className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">API Access</span>
+                            <span className="text-sm font-medium">{plan.name === "Freemium" ? "Basic" : 
+                                plan.name === "Aditya" ? "Basic" : "Full"}</span>
+                        </li>
+                        <li className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Security Level</span>
+                            <span className="text-sm font-medium">{plan.name === "Moksha" ? "Enterprise" : 
+                                plan.name === "Ayush" ? "Advanced" : "Basic"}</span>
                         </li>
                     </ul>
                 </div>
@@ -178,22 +177,36 @@ const FeatureComparison = () => (
 
 const UpgradePlan = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [currentPlan, setCurrentPlan] = useState("Freemium");
+    const [upgradeForUser, setUpgradeForUser] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
 
     useEffect(() => {
-        // Fetch the user's current plan from the backend
-        const fetchUserPlan = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                const res = await axios.get("/api/auth/user", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setCurrentPlan(res.data.user.plan || "Freemium");
-            } catch (err) {
-                setCurrentPlan("Freemium");
-            }
-        };
-        fetchUserPlan();
+        // Check if this is for upgrading a specific user
+        if (location.state?.upgradeForUser) {
+            setUpgradeForUser(true);
+            setUserInfo({
+                email: location.state.userEmail,
+                name: location.state.userName,
+                currentPlan: location.state.currentPlan
+            });
+            setCurrentPlan(location.state.currentPlan);
+        } else {
+            // Fetch the current user's plan from the backend
+            const fetchUserPlan = async () => {
+                try {
+                    const token = localStorage.getItem("token");
+                    const res = await axios.get("/api/auth/user", {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setCurrentPlan(res.data.user.plan || "Freemium");
+                } catch (err) {
+                    setCurrentPlan("Freemium");
+                }
+            };
+            fetchUserPlan();
+        }
 
         const cards = document.querySelectorAll(".price-card");
         cards.forEach((card, index) => {
@@ -204,34 +217,51 @@ const UpgradePlan = () => {
                 card.style.transform = "translateY(0)";
             }, 200 * (index + 1));
         });
-    }, []);
+    }, [location.state]);
 
     const handleCardClick = (planName) => {
         if (planName !== currentPlan) {
-            navigate("/payment-portal", { state: { plan: planName } });
+            if (upgradeForUser) {
+                // Navigate to payment portal with user upgrade info
+                navigate("/payment-portal", { 
+                    state: { 
+                        plan: planName,
+                        upgradeForUser: true,
+                        userEmail: userInfo.email,
+                        userName: userInfo.name
+                    } 
+                });
+            } else {
+                // Regular plan upgrade
+                navigate("/payment-portal", { state: { plan: planName } });
+            }
         }
     };
 
     return (
         <div className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white" id="upgrade-plan">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <div className="mb-8">
-        <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-sm text-primary font-medium hover:underline hover:text-[#700070] transition"
-        >
-            ← Back
-        </button>
-    </div>
+                <div className="mb-8">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center text-sm text-primary font-medium hover:underline hover:text-[#700070] transition"
+                    >
+                        ← Back
+                    </button>
+                </div>
 
+                {/* Hero Content */}
                 <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                        Choose Your Security Plan
+                        {upgradeForUser ? `Upgrade Plan for ${userInfo?.name}` : "Choose Your Security Plan"}
                     </h2>
-                    <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                        Protect your digital assets with our comprehensive security solutions. 
-                        Upgrade to unlock advanced features and enterprise-grade protection.
-                    </p>
+                    {upgradeForUser && (
+                        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <p className="text-blue-800">
+                                <strong>Current Plan:</strong> {userInfo?.currentPlan} | <strong>Email:</strong> {userInfo?.email}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
@@ -287,7 +317,7 @@ const UpgradePlan = () => {
                                 className={`w-full py-2 sm:py-3 rounded-lg transition-all duration-300 text-sm sm:text-base font-medium ${plan.name === currentPlan ? "bg-gray-300 text-gray-400 cursor-not-allowed" : "bg-primary text-white hover:bg-[#700070] hover:scale-105 transform"}`}
                                 disabled={plan.name === currentPlan}
                             >
-                                {plan.name === currentPlan ? "Current Plan" : "Upgrade"}
+                                {plan.name === currentPlan ? "Current Plan" : upgradeForUser ? "Upgrade User" : "Upgrade"}
                             </button>
                         </div>
                     ))}

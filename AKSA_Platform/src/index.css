@@ -6,7 +6,7 @@
   --secondary-color: #f9ecf9; 
   --trail-color: #fad4fa;
   --trail-color1: #d323d3;
-  --primary-text-color: #d181d1; 
+  --primary-text-color: #ee8cee; 
 }
 
 /* Base Styles */
@@ -39,6 +39,14 @@
 
 .accent-primary {
   accent-color: var(--primary-color);
+}
+
+.hover-text-primary:hover {
+  color: var(--primary-color);
+}
+
+.hover-bg-secondary:hover {
+  background-color: var(--secondary-color);
 }
 
 /* Smooth Scrolling */
@@ -192,6 +200,54 @@ html {
 }
 
 /* End custom scrollbar styles */
+
+/* Custom Scrollbar Styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Enhanced scrollbar for Linked Pages */
+.linked-pages-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.linked-pages-scroll::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 4px;
+  margin: 2px 0;
+}
+
+.linked-pages-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #6366f1, #8b5cf6);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.linked-pages-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #4f46e5, #7c3aed);
+  transform: scale(1.1);
+}
+
+/* Firefox scrollbar styles */
+.linked-pages-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #6366f1 #f8fafc;
+}
 
 @layer utilities {
   .animate-fade-in-up-message {

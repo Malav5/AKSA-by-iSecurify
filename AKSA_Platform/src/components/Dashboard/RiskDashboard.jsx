@@ -128,8 +128,8 @@ const RiskDashboard = () => {
       return (
         <div className="flex flex-col items-center justify-center h-full">
           <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-400 animate-ping"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#800080] border-t-[#d181d1]"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#d181d1] animate-ping"></div>
           </div>
           <span className="text-gray-600 text-sm mt-4 font-medium">
             Analyzing security data...
@@ -192,7 +192,7 @@ const RiskDashboard = () => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-100 to-transparent rounded-full -translate-y-16 translate-x-16 opacity-50"></div>
           
           <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6 text-gray-800">
-            Security Score
+            Domain Score
           </h2>
 
           <div className="w-52 h-52 md:w-64 md:h-64 relative">
@@ -210,12 +210,12 @@ const RiskDashboard = () => {
             <p className="text-sm text-gray-500 mt-2">
               Last updated: {new Date().toLocaleDateString()}
             </p>
-            <div className="flex items-center justify-center mt-3">
+            {/* <div className="flex items-center justify-center mt-3">
               <div className="w-6 h-6 bg-purple-600 rounded-full mr-2"></div>
               <p className="text-xs text-gray-400 font-medium">
                 Powered by Mastercard
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
 

@@ -126,7 +126,7 @@ export default function IssuesTable() {
   const currentAlerts = filteredAlerts.slice(startIndex, endIndex);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 max-w-full overflow-hidden">
+    <div className="bg-white rounded-2xl shadow p-6 max-w-full overflow-hidden border border-gray-100">
       {/* Search & Filter */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div className="relative w-full md:w-96">
@@ -135,20 +135,20 @@ export default function IssuesTable() {
           </div>
           <input
             type="text"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2.5 focus:ring-2 focus:ring-[#800080] focus:border-[#800080]"
             placeholder="Search alerts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+        <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white rounded-lg text-sm font-medium shadow hover:from-[#700070] hover:to-[#d17ad1] transition">
           <Filter className="h-4 w-4" />
           Filter
         </button>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
         <table className="w-full text-sm text-left">
           <thead className="text-sm uppercase bg-gray-100 text-gray-700">
             <tr>
@@ -169,16 +169,16 @@ export default function IssuesTable() {
             {currentAlerts.map((alert) => (
               <tr
                 key={alert.id}
-                className="border-t border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="border-t border-gray-200 hover:bg-[#f9ecf9] transition-colors cursor-pointer group"
                 onClick={() => setSelectedAlert(alert)}
               >
                 <td className="px-4 py-3 font-medium text-primary flex items-center gap-2">
                   <BadgeCheck className="w-4 h-4 text-primary" />
                   {alert.id}
                 </td>
-                <td className="px-4 py-3 text-gray-600">{alert.title}</td>
+                <td className="px-4 py-3 text-gray-700 group-hover:text-[#800080] font-semibold transition-colors">{alert.title}</td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getLevelColor(alert.level)}`}>
+                  <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${getLevelColor(alert.level)}`}>
                     {alert.level}
                   </span>
                 </td>
@@ -191,7 +191,6 @@ export default function IssuesTable() {
                 <td className="px-4 py-3 text-gray-600">{alert.devicesAffected}</td>
                 <td className="px-4 py-3 text-gray-600">{alert.policy}</td>
                 <td className="px-4 py-3 text-gray-600">{alert.group}</td>
-
                 {/* Headless UI Dropdown */}
                 <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   <UserAssignmentDropdown
@@ -200,7 +199,6 @@ export default function IssuesTable() {
                     onChange={(val) => handleAssignUser(alert.id, val)}
                   />
                 </td>
-
                 <td className="px-4 py-3 text-gray-600">
                   {new Date(alert.timestamp).toLocaleDateString("en-GB", {
                     day: "2-digit",
