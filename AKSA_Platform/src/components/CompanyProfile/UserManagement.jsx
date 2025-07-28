@@ -4,7 +4,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showSuccess, showError } from "../ui/toast"; // adjust path as needed
 import { userServices } from "../../services/UserServices";
-import { Users, UserPlus } from "lucide-react";
+import { Users, UserPlus, Crown, Globe, Lock, Shield, ArrowUp, RefreshCw } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const UserManagement = ({
   showAddMemberModal,
@@ -13,17 +14,57 @@ const UserManagement = ({
   const [members, setMembers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const selectAllRef = useRef();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Plan icons mapping
+  const planIcons = {
+    "Freemium": <Shield className="w-4 h-4 text-gray-500" />,
+    "Aditya": <Globe className="w-4 h-4 text-blue-500" />,
+    "Ayush": <Lock className="w-4 h-4 text-purple-500" />,
+    "Moksha": <Crown className="w-4 h-4 text-yellow-500" />
+  };
+
+  const planColors = {
+    "Freemium": "bg-gray-100 text-gray-700",
+    "Aditya": "bg-blue-100 text-blue-700",
+    "Ayush": "bg-purple-100 text-purple-700",
+    "Moksha": "bg-yellow-100 text-yellow-700"
+  };
 
   // Fetch users from backend
   const fetchMembers = async () => {
-    const users = await userServices.fetchMembers();
-    setMembers(users);
+    setRefreshing(true);
+    try {
+      const users = await userServices.fetchMembers();
+      setMembers(users);
+    } catch (error) {
+      showError("Failed to fetch users");
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   useEffect(() => {
     fetchMembers();
   }, []);
+
+  // Refresh data when component comes into focus (e.g., after returning from payment portal)
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchMembers();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  // Refresh data when location changes (e.g., returning from another page)
+  useEffect(() => {
+    fetchMembers();
+  }, [location.pathname]);
 
   useEffect(() => {
     // Update indeterminate state
@@ -72,6 +113,23 @@ const UserManagement = ({
     }
   };
 
+  const handleUpgradePlan = (user) => {
+    // Navigate to the UpgradePlan page with user information
+    navigate("/upgrade-plan", { 
+      state: { 
+        upgradeForUser: true,
+        userEmail: user.email,
+        userName: user.name,
+        currentPlan: user.plan
+      } 
+    });
+  };
+
+  const handleRefresh = () => {
+    fetchMembers();
+    showSuccess("User list refreshed");
+  };
+
   return (
     <div className="w-full px-2 animate-fade-in-up">
       <ToastContainer position="top-right" autoClose={2000} />
@@ -84,7 +142,16 @@ const UserManagement = ({
             <p className="text-gray-500">Manage your organization's members, roles, and permissions.</p>
           </div>
         </div>
-        <div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 disabled:opacity-50"
+            title="Refresh user list"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
           <button
             className="bg-primary text-white font-semibold px-6 py-3 rounded-lg text-lg flex items-center gap-2 shadow hover:bg-[#700070] transition-all duration-200"
             onClick={() => setShowAddMemberModal(true)}
@@ -109,7 +176,7 @@ const UserManagement = ({
               <th className="px-4 py-3 font-semibold text-gray-700">Member name</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Email</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Role</th>
-              <th className="px-4 py-3 font-semibold text-gray-700">Status</th>
+              <th className="px-4 py-3 font-semibold text-gray-700">Plan</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Actions</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Date added</th>
             </tr>
@@ -120,6 +187,7 @@ const UserManagement = ({
               let role = member.role || "user";
               let email = member.email;
               let createdAt = member.createdAt;
+              let plan = member.plan || "Freemium";
               return (
                 <tr key={idx} className="hover:bg-purple-50 transition-colors duration-200">
                   <td className="px-4 py-3">
@@ -141,19 +209,30 @@ const UserManagement = ({
                     <span className={`px-3 py-1 rounded-lg text-sm font-semibold ${role?.toLowerCase() === 'admin' ? 'bg-secondary text-primary' : 'bg-gray-200 text-gray-700'}`}>{role}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-teal-400 transition"></div>
-                    </label>
+                    <div className="flex items-center gap-2">
+                      {planIcons[plan]}
+                      <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${planColors[plan]}`}>
+                        {plan}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      className="text-red-500 hover:text-red-700"
-                      title="Delete"
-                      onClick={() => handleDelete(member._id)}
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2-2z" /></svg>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors"
+                        title="Upgrade Plan"
+                        onClick={() => handleUpgradePlan(member)}
+                      >
+                        Upgrade Plan
+                      </button>
+                      <button
+                        className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition-colors"
+                        title="Delete"
+                        onClick={() => handleDelete(member._id)}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a2 2 0 0 1 2-2z" /></svg>
+                      </button>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-gray-700">{createdAt ? new Date(createdAt).toLocaleString() : ""}</td>
                 </tr>

@@ -74,4 +74,34 @@ export const userServices = {
         }
     },
 
+    // Upgrade user plan
+    upgradeUserPlan: async (userId, newPlan) => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await api.put(`/agentMap/upgrade-user-plan/${userId}`, 
+                { plan: newPlan },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            return response.data; // { message: "Plan upgraded successfully" }
+        } catch (error) {
+            console.error("Error upgrading user plan:", error.message);
+            throw error;
+        }
+    },
+
+    // Get available plans
+    getAvailablePlans: async () => {
+        try {
+            const response = await api.get("/plans");
+            return response.data || [];
+        } catch (error) {
+            console.error("Error fetching plans:", error.message);
+            return [];
+        }
+    },
+
 };
