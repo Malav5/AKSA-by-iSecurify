@@ -151,7 +151,27 @@ const Signup = () => {
             </div>
 
             {error && <div className="bg-red-100 text-red-600 p-3 sm:p-4 rounded-lg border border-red-200 text-sm sm:text-base">{error}</div>}
-            {success && <div className="bg-green-100 text-green-700 p-3 sm:p-4 rounded-lg border border-green-200 text-sm sm:text-base">{success}</div>}
+            {success && (
+              <div className="bg-green-100 text-green-700 p-3 sm:p-4 rounded-lg border border-green-200 text-sm sm:text-base">
+                {success}
+                <div className="mt-3 flex flex-col gap-2">
+                  <a
+                    href="intent://#Intent;package=com.google.android.gm;scheme=mailto;end"
+                    className="text-primary underline hover:text-[#700070] transition"
+                    style={{ display: 'inline-block' }}
+                  >
+                    Open Gmail App (Android)
+                  </a>
+                  <a
+                    href="https://mail.google.com/"
+                    className="text-primary underline hover:text-[#700070] transition"
+                    style={{ display: 'inline-block' }}
+                  >
+                    Open Gmail in Browser
+                  </a>
+                </div>
+              </div>
+            )}
 
             <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
               {/* Name Fields - Stack on mobile, side by side on larger screens */}
