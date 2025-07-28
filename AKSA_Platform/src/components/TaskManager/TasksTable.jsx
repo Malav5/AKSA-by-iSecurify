@@ -299,7 +299,7 @@ export default function TasksTable() {
               {currentTasks.map((task) => (
                 <tr
                   key={task._id}
-                  className="border-t border-gray-200 hover:bg-[#f9ecf9] transition-colors group"
+                  className="border-t border-gray-200 hover:bg-gray-50 transition-colors group"
                 >
                   <td
                     className="px-4 py-2 font-medium text-primary cursor-pointer flex items-center gap-2"

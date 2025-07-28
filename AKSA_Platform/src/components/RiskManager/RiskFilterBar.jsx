@@ -103,7 +103,7 @@ const RiskFiltersBar = ({ onFilterChange, onCreateRisk, riskCount }) => {
        
         <button
           onClick={onCreateRisk}
-          className="bg-primary text-white font-semibold px-4 py-2 rounded shadow"
+           className="bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white font-semibold px-5 py-2 rounded-lg shadow hover:from-[#700070] hover:to-[#d17ad1] flex items-center gap-2 transition"
         >
           + Create Risk
         </button>

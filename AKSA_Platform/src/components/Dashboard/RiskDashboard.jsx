@@ -183,7 +183,7 @@ const RiskDashboard = () => {
 
   return (
     <div className="w-full p-4 md:p-6 pt-6 md:pt-8 text-gray-900">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Security Analysis Results</h2>
+              <h2 className="text-gray-800 font-bold text-xl md:text-2xl mb-4">Security Analysis Results</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 mb-10">
         {/* Domain Score Panel */}

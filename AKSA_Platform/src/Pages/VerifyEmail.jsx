@@ -51,7 +51,7 @@ const VerifyEmail = () => {
 
                 // Redirect to dashboard after 3 seconds
                 setTimeout(() => {
-                    navigate("/dashboard");
+                    navigate("/deaddashboard");
                 }, 3000);
             } else {
                 if (data.error.includes("expired")) {
@@ -177,7 +177,7 @@ const VerifyEmail = () => {
                                 </p>
                             </div>
                             <button
-                                onClick={() => navigate("/dashboard")}
+                                onClick={() => navigate("/deaddashboard")}
                                 className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition duration-200"
                             >
                                 Go to Dashboard

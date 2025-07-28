@@ -106,7 +106,7 @@ export default function RisksTable() {
   );
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 max-w-full overflow-hidden">
+    <div className="bg-white rounded-2xl shadow p-6 border border-gray-100 max-w-full overflow-hidden">
       {/* Search */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div className="relative w-full md:w-96">

@@ -201,7 +201,7 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
           </p>
           <button
             onClick={() => setShowQuestionnaire(true)}
-            className="mt-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="mt-4 bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white rounded-xl px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
             Start Assessment
           </button>

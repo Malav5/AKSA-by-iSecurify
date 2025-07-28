@@ -64,7 +64,7 @@ const IssueManagement = ({ hideViewAll = false }) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm border border-gray-100 text-gray-800 p-4 md:p-6 lg:p-8">
+    <div className="w-full bg-white text-gray-800 p-4 md:p-6 lg:p-8">
       <div>
         <div className="flex justify-between items-center mb-6 md:mb-8">
           <div className="flex items-center gap-3">
