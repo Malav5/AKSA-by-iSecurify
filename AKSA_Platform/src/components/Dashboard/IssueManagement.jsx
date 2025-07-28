@@ -22,7 +22,7 @@ const IssueManagement = ({ hideViewAll = false }) => {
   // 🔵 Static Bar Data
   const barData = [
     { name: "Low", value: 6, color: "#10B981" },
-    { name: "Medium", value: 4, color: "#FACC15" },
+    { name: "Medium", value: 4, color: "#F59E0B" },
     { name: "High", value: 3, color: "#F97316" },
     { name: "Critical", value: 2, color: "#EF4444" },
   ];
@@ -47,143 +47,227 @@ const IssueManagement = ({ hideViewAll = false }) => {
   const unassignedCount = 4;
   const inProgressCount = 6;
 
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white border border-gray-200 rounded-xl shadow-xl px-4 py-3 backdrop-blur-sm">
+          <p className="font-bold text-gray-800 text-sm">{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} className="text-gray-600 text-sm">
+              {entry.name}: <span className="font-bold" style={{ color: entry.color }}>{entry.value}</span>
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="w-full bg-white text-gray-800 p-3 md:p-4 lg:p-6 rounded-lg shadow">
+    <div className="w-full bg-white rounded-lg shadow-sm p-6 border border-gray-100 text-gray-800 p-4 md:p-6 lg:p-8">
       <div>
-        <div className="flex justify-between items-center mb-3 md:mb-4">
-          <h2 className="text-xl md:text-2xl font-bold">Issues Management</h2>
+        <div className="flex justify-between items-center mb-6 md:mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-8 bg-gradient-to-b from-red-500 to-orange-600 rounded-full"></div>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Issues Management</h2>
+          </div>
           {!hideViewAll && (
             <Link
               to="/issues"
-              className="text-primary cursor-pointer underline text-sm md:text-base"
+              className="bg-gradient-to-r from-[#800080] to-[#a242a2] text-white rounded-xl px-4 md:px-6 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:from-purple-700 hover:to-blue-700"
             >
-              View all
+              View All Issues
             </Link>
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Bar Chart */}
-          <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl p-3 md:p-4 shadow-xl border border-purple-100">
-            <h3 className="font-semibold mb-2 text-sm md:text-base">Open Issues by Criticality</h3>
-            <ResponsiveContainer width="100%" height={180}>
+          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100 relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-100 to-transparent rounded-full -translate-y-12 translate-x-12 opacity-50"></div>
+            
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-2 h-6 bg-emerald-500 rounded-full"></div>
+              <h3 className="font-bold text-lg md:text-xl text-gray-800">
+                Open Issues by Criticality
+              </h3>
+            </div>
+            
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={barData}>
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
-                <Tooltip />
-                <Bar dataKey="value">
+                <XAxis 
+                  dataKey="name" 
+                  tick={{ fontSize: 12, fontWeight: 600 }} 
+                  tickLine={false}
+                />
+                <YAxis 
+                  allowDecimals={false} 
+                  tick={{ fontSize: 12, fontWeight: 600 }} 
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {barData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-            <p className="mt-3 md:mt-4 font-bold text-center text-sm md:text-base">
-              This week: 15 Open Issues
-            </p>
-            <div className="mt-2 md:mt-3 text-xs md:text-sm bg-white border-custom rounded-lg p-2 text-primary cursor-pointer">
-              💡 All your open issues by criticality
+            
+            <div className="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+              <p className="font-bold text-center text-base md:text-lg text-emerald-800">
+                This week: 15 Open Issues
+              </p>
+            </div>
+            
+            <div className="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-200">
+              <p className="text-xs md:text-sm text-blue-700 font-medium">
+                💡 All your open issues by criticality level
+              </p>
             </div>
           </div>
 
           {/* Circular Progress */}
-          <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl p-3 md:p-4 shadow-xl flex flex-col items-center justify-center border border-purple-100">
-            <h3 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Current Status</h3>
-            <div className="w-24 h-24 md:w-32 md:h-32">
+          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100 flex flex-col items-center justify-center relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-purple-100 to-transparent rounded-full translate-y-10 -translate-x-10 opacity-50"></div>
+            
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-2 h-6 bg-purple-500 rounded-full"></div>
+              <h3 className="font-bold text-lg md:text-xl text-gray-800">
+                Current Status
+              </h3>
+            </div>
+            
+            <div className="w-32 h-32 md:w-40 md:h-40 relative">
               <CircularProgressbar
                 value={issueScore}
                 text={`${issueScore}`}
                 styles={buildStyles({
-                  textColor: "#6B21A8",
-                  pathColor: "#C084FC",
-                  trailColor: "#EDE9FE",
-                  textSize: "16px",
+                  textColor: "#7C3AED",
+                  pathColor: "#A855F7",
+                  trailColor: "#F3E8FF",
+                  textSize: "24px",
+                  fontWeight: "bold",
+                  strokeLinecap: "round",
                 })}
               />
             </div>
-            <div className="mt-3 md:mt-4 space-y-1 text-xs md:text-sm text-gray-700">
-              <p>
-                <span className="text-purple-500 font-bold">{toDoCount}</span>{" "}
-                To Do
-              </p>
-              <p>
-                <span className="text-gray-500 font-bold">
-                  {unassignedCount}
-                </span>{" "}
-                Unassigned
-              </p>
-              <p>
-                <span className="text-gray-400 font-bold">
-                  {inProgressCount}
-                </span>{" "}
-                In Progress
-              </p>
+            
+            <div className="mt-6 space-y-3 text-sm md:text-base text-gray-700">
+              <div className="flex items-center justify-between bg-purple-50 rounded-lg p-3 border border-purple-200">
+                <span className="font-medium">To Do</span>
+                <span className="text-purple-600 font-bold">{toDoCount}</span>
+              </div>
+              <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <span className="font-medium">Unassigned</span>
+                <span className="text-gray-600 font-bold">{unassignedCount}</span>
+              </div>
+              <div className="flex items-center justify-between bg-blue-50 rounded-lg p-3 border border-blue-200">
+                <span className="font-medium">In Progress</span>
+                <span className="text-blue-600 font-bold">{inProgressCount}</span>
+              </div>
             </div>
-            <div className="mt-2 md:mt-3 text-xs md:text-sm bg-white border-custom rounded-lg p-2 text-primary cursor-pointer">
-              💡 The current status of your issues
+            
+            <div className="mt-4 p-3 bg-purple-50 rounded-xl border border-purple-200">
+              <p className="text-xs md:text-sm text-purple-700 font-medium">
+                💡 The current status of your issues
+              </p>
             </div>
           </div>
 
           {/* Line Chart */}
-          <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl p-3 md:p-4 shadow-xl border border-purple-100">
-            <h3 className="font-semibold mb-2 text-sm md:text-base">Trend by Criticality</h3>
-            <div className="flex justify-end mb-1">
-              <button
-                className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded mr-1 md:mr-2 ${
-                  viewMode === "weeks"
-                    ? "bg-gray-200 text-gray-700"
-                    : "text-gray-500"
-                }`}
-                onClick={() => setViewMode("weeks")}
-              >
-                Weeks
-              </button>
-              <button
-                className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded ${
-                  viewMode === "months"
-                    ? "bg-gray-200 text-gray-700"
-                    : "text-gray-500"
-                }`}
-                onClick={() => setViewMode("months")}
-              >
-                Months
-              </button>
+          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100 relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute bottom-0 right-0 w-28 h-28 bg-gradient-to-tl from-orange-100 to-transparent rounded-full translate-y-14 translate-x-14 opacity-50"></div>
+            
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-2 h-6 bg-orange-500 rounded-full"></div>
+              <h3 className="font-bold text-lg md:text-xl text-gray-800">
+                Trend by Criticality
+              </h3>
             </div>
-            <ResponsiveContainer width="100%" height={180}>
+            
+            <div className="flex justify-end mb-4">
+              <div className="bg-gray-100 rounded-xl p-1">
+                <button
+                  className={`text-xs md:text-sm px-3 md:px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    viewMode === "weeks"
+                      ? "bg-white text-gray-800 shadow-md"
+                      : "text-gray-600 hover:text-gray-800"
+                  }`}
+                  onClick={() => setViewMode("weeks")}
+                >
+                  Weeks
+                </button>
+                <button
+                  className={`text-xs md:text-sm px-3 md:px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    viewMode === "months"
+                      ? "bg-white text-gray-800 shadow-md"
+                      : "text-gray-600 hover:text-gray-800"
+                  }`}
+                  onClick={() => setViewMode("months")}
+                >
+                  Months
+                </button>
+              </div>
+            </div>
+            
+            <ResponsiveContainer width="100%" height={200}>
               <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <XAxis 
+                  dataKey="label" 
+                  tick={{ fontSize: 12, fontWeight: 600 }} 
+                  tickLine={false}
+                />
+                <YAxis 
+                  allowDecimals={false} 
+                  tick={{ fontSize: 12, fontWeight: 600 }} 
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="low"
                   stroke="#10B981"
+                  strokeWidth={3}
                   name="Low"
+                  dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="medium"
-                  stroke="#FACC15"
+                  stroke="#F59E0B"
+                  strokeWidth={3}
                   name="Medium"
+                  dot={{ fill: "#F59E0B", strokeWidth: 2, r: 4 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="high"
                   stroke="#F97316"
+                  strokeWidth={3}
                   name="High"
+                  dot={{ fill: "#F97316", strokeWidth: 2, r: 4 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="critical"
                   stroke="#EF4444"
+                  strokeWidth={3}
                   name="Critical"
+                  dot={{ fill: "#EF4444", strokeWidth: 2, r: 4 }}
                 />
               </LineChart>
             </ResponsiveContainer>
-            <div className="mt-2 md:mt-3 text-xs md:text-sm bg-white border-custom rounded-lg p-2 text-primary cursor-pointer">
-              💡 How your issues are trending over time
+            
+            <div className="mt-4 p-3 bg-orange-50 rounded-xl border border-orange-200">
+              <p className="text-xs md:text-sm text-orange-700 font-medium">
+                💡 How your issues are trending over time
+              </p>
             </div>
           </div>
         </div>

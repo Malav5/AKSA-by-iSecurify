@@ -65,10 +65,10 @@ const RiskDashboard = () => {
         let color = "#6b7280";
         if (score >= 8) {
           grade = "A";
-          color = "#22c55e";
+          color = "#10b981";
         } else if (score >= 6) {
           grade = "B";
-          color = "#eab308";
+          color = "#f59e0b";
         } else if (score >= 4) {
           grade = "C";
           color = "#f97316";
@@ -77,7 +77,7 @@ const RiskDashboard = () => {
           color = "#ef4444";
         } else if (score >= 0) {
           grade = "F";
-          color = "#991b1b";
+          color = "#dc2626";
         }
 
         setRiskGrade(grade);
@@ -111,13 +111,28 @@ const RiskDashboard = () => {
     );
   };
 
+  const getRatingColor = (rating) => {
+    const colorMap = {
+      A: "bg-emerald-100 text-emerald-800 border-emerald-200",
+      B: "bg-amber-100 text-amber-800 border-amber-200",
+      C: "bg-orange-100 text-orange-800 border-orange-200",
+      D: "bg-red-100 text-red-800 border-red-200",
+      F: "bg-red-200 text-red-900 border-red-300",
+      "N/A": "bg-gray-100 text-gray-600 border-gray-200",
+    };
+    return colorMap[rating] || colorMap["N/A"];
+  };
+
   const renderScoreDisplay = () => {
     if (isLoading) {
       return (
         <div className="flex flex-col items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#800080] mb-3"></div>
-          <span className="text-gray-500 text-sm">
-            Loading security data...
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-400 animate-ping"></div>
+          </div>
+          <span className="text-gray-600 text-sm mt-4 font-medium">
+            Analyzing security data...
           </span>
         </div>
       );
@@ -125,11 +140,11 @@ const RiskDashboard = () => {
 
     if (hasError || riskScore === null) {
       return (
-        <div className="flex flex-col items-center justify-center h-full text-center p-4">
-          <div className="text-gray-400 mb-2">
+        <div className="flex flex-col items-center justify-center h-full text-center p-6">
+          <div className="bg-red-50 rounded-full p-4 mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-10 w-10"
+              className="h-8 w-8 text-red-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -142,9 +157,9 @@ const RiskDashboard = () => {
               />
             </svg>
           </div>
-          <p className="text-gray-600 font-medium">Data not available</p>
-          <p className="text-gray-400 text-sm mt-1">
-            Failed to load domain score
+          <p className="text-gray-700 font-semibold text-lg">Data Unavailable</p>
+          <p className="text-gray-500 text-sm mt-2">
+            Unable to load domain security score
           </p>
         </div>
       );
@@ -157,100 +172,106 @@ const RiskDashboard = () => {
         styles={buildStyles({
           textColor: gradeColor,
           pathColor: gradeColor,
-          trailColor: "#d1d5db",
+          trailColor: "#f3f4f6",
           textSize: "2.5rem",
           strokeLinecap: "round",
+          pathTransitionDuration: 1,
         })}
       />
     );
   };
 
   return (
-    <div className="w-full bg-white p-3 md:p-4 pt-4 md:pt-6 text-gray-900 rounded-2xl shadow-xl">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+    <div className="w-full p-4 md:p-6 pt-6 md:pt-8 text-gray-900">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Security Analysis Results</h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 mb-10">
         {/* Domain Score Panel */}
-        <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-2xl shadow-xl flex flex-col items-center justify-center p-3 md:p-4 border border-purple-100">
-          <h2 className="text-sm md:text-base font-semibold mb-2 md:mb-3">
-            Domain Score
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center justify-center p-6 md:p-8 relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-100 to-transparent rounded-full -translate-y-16 translate-x-16 opacity-50"></div>
+          
+          <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6 text-gray-800">
+            Security Score
           </h2>
 
-          <div className="w-48 h-48 md:w-60 md:h-60">
+          <div className="w-52 h-52 md:w-64 md:h-64 relative">
             {renderScoreDisplay()}
           </div>
 
-          <p className="text-lg md:text-xl font-medium mt-3 md:mt-5">
-            {isLoading
-              ? "..."
-              : riskScore !== null
-              ? `${riskScore} / 10`
-              : "N/A"}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">
-            Last updated: {new Date().toLocaleDateString()}
-          </p>
-          <p className="text-[10px] text-gray-400 mt-0.5">
-            Powered by Mastercard
-          </p>
+          <div className="text-center mt-6">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900">
+              {isLoading
+                ? "..."
+                : riskScore !== null
+                ? `${riskScore.toFixed(1)} / 10`
+                : "N/A"}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Last updated: {new Date().toLocaleDateString()}
+            </p>
+            <div className="flex items-center justify-center mt-3">
+              <div className="w-6 h-6 bg-purple-600 rounded-full mr-2"></div>
+              <p className="text-xs text-gray-400 font-medium">
+                Powered by Mastercard
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Domain Ratings Box */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-4 md:p-6">
-          <div className="mb-4 md:mb-6 grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 text-xs md:text-sm text-gray-700 font-medium">
-            <div className="border border-gray-300 rounded px-2 md:px-3 py-2 text-center bg-gray-50">
-              <div className="text-gray-500 text-xs mb-1">Industry Rating</div>
-              <div className="text-gray-900 font-semibold">
-                {industryInfo.industryRating}
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+          {/* Industry Info Cards */}
+          <div className="mb-8">
+            <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-4">
+              Industry Comparison
+            </h3>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+                <div className="text-blue-600 text-xs font-semibold mb-1">Industry Rating</div>
+                <div className="text-blue-900 font-bold text-lg">{industryInfo.industryRating}</div>
               </div>
-            </div>
-            <div className="border border-gray-300 rounded px-2 md:px-3 py-2 text-center bg-gray-50">
-              <div className="text-gray-500 text-xs mb-1">Industry Average</div>
-              <div className="text-gray-900 font-semibold">
-                {industryInfo.industryAverage}
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
+                <div className="text-green-600 text-xs font-semibold mb-1">Industry Average</div>
+                <div className="text-green-900 font-bold text-lg">{industryInfo.industryAverage}</div>
               </div>
-            </div>
-            <div className="border border-gray-300 rounded px-2 md:px-3 py-2 text-center bg-gray-50">
-              <div className="text-gray-500 text-xs mb-1">Percentile Rank</div>
-              <div className="text-gray-900 font-semibold">
-                {industryInfo.percentileRank}
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+                <div className="text-purple-600 text-xs font-semibold mb-1">Percentile Rank</div>
+                <div className="text-purple-900 font-bold text-lg">{industryInfo.percentileRank}</div>
               </div>
-            </div>
-            <div className="border border-gray-300 rounded px-2 md:px-3 py-2 text-center bg-gray-50">
-              <div className="text-gray-500 text-xs mb-1">Industry Type</div>
-              <div className="text-gray-900 font-semibold text-xs">
-                {industryInfo.industryType}
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
+                <div className="text-orange-600 text-xs font-semibold mb-1">Industry Type</div>
+                <div className="text-orange-900 font-bold text-sm leading-tight">{industryInfo.industryType}</div>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <div>
-              <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 border-b border-gray-200 pb-1">
+              <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <div className="w-2 h-8 bg-blue-500 rounded-full mr-3"></div>
                 Domain Ratings
               </h3>
-              <div className="space-y-2 md:space-y-3">
-                {metricsLeft.map((item) => (
+              <div className="space-y-3">
+                {metricsLeft.map((item, index) => (
                   <div
                     key={item.domain}
-                    className="flex justify-between items-center rounded-lg p-2 md:p-3 shadow-sm bg-gray-50 hover:bg-green-50 transition-colors duration-300 cursor-pointer"
+                    className="group flex justify-between items-center rounded-xl p-4 bg-gray-50 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 cursor-pointer border border-gray-200 hover:border-blue-300 hover:shadow-md transform hover:scale-[1.02]"
                   >
-                    <span className="text-gray-800 font-medium text-xs md:text-sm">
+                    <span className="text-gray-800 font-semibold text-sm md:text-base">
                       {item.domain}
                     </span>
-                    <div className="flex items-center gap-1 md:gap-2">
+                    <div className="flex items-center gap-3">
                       {getStars(item.rating)}
                       <span
-                        className={`px-1.5 md:px-2 py-0.5 text-xs rounded-full font-semibold ${
-                          item.rating === "A"
-                            ? "bg-green-200 text-green-800"
-                            : "bg-yellow-200 text-yellow-800"
-                        }`}
+                        className={`px-3 py-1 text-xs rounded-full font-bold border ${getRatingColor(item.rating)}`}
                       >
                         {item.rating}
                       </span>
-                      <span className="text-gray-600 font-semibold text-xs md:text-sm">
+                      <span className="text-gray-700 font-bold text-sm md:text-base">
                         {item.score.toFixed(1)}
                       </span>
-                      <span className="text-green-400 font-bold text-sm md:text-lg">
+                      <span className="text-blue-500 font-bold text-lg group-hover:translate-x-1 transition-transform duration-200">
                         →
                       </span>
                     </div>
@@ -260,34 +281,37 @@ const RiskDashboard = () => {
             </div>
 
             <div>
-              <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 border-b border-gray-200 pb-1">
+              <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <div className="w-2 h-8 bg-purple-500 rounded-full mr-3"></div>
                 Other Domains
               </h3>
-              <div className="space-y-2 md:space-y-3">
-                {metricsRight.map((item) => (
+              <div className="space-y-3">
+                {metricsRight.map((item, index) => (
                   <div
                     key={item.domain}
-                    className="flex justify-between items-center rounded-lg p-2 md:p-3 shadow-sm bg-gray-50 hover:bg-green-50 transition-colors duration-300 cursor-pointer"
+                    className="group flex justify-between items-center rounded-xl p-4 bg-gray-50 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300 cursor-pointer border border-gray-200 hover:border-purple-300 hover:shadow-md transform hover:scale-[1.02]"
                   >
-                    <span className="text-gray-800 font-medium text-xs md:text-sm">
+                    <span className="text-gray-800 font-semibold text-sm md:text-base">
                       {item.domain}
                     </span>
-                    <div className="flex items-center gap-1 md:gap-2">
+                    <div className="flex items-center gap-3">
                       {getStars(item.rating)}
-                      <span className="px-1.5 md:px-2 py-0.5 text-xs rounded-full font-semibold bg-green-200 text-green-800">
+                      <span
+                        className={`px-3 py-1 text-xs rounded-full font-bold border ${getRatingColor(item.rating)}`}
+                      >
                         {item.rating}
                       </span>
-                      <span className="text-gray-600 font-semibold text-xs md:text-sm">
+                      <span className="text-gray-700 font-bold text-sm md:text-base">
                         {item.score.toFixed(1)}
                       </span>
-                      <span className="text-green-400 font-bold text-sm md:text-lg">
+                      <span className="text-purple-500 font-bold text-lg group-hover:translate-x-1 transition-transform duration-200">
                         →
                       </span>
                     </div>
                   </div>
                 ))}
               </div>
-            </div> 
+            </div>
           </div>
         </div>
       </div>
