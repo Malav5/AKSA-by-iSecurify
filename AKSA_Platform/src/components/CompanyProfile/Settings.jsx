@@ -19,6 +19,9 @@ const Settings = () => {
   const [privacyAnalytics, setPrivacyAnalytics] = useState(true);
   const [privacyMarketing, setPrivacyMarketing] = useState(false);
 
+  // Get current user role (you'll need to implement this based on your auth system)
+  const currentRole = localStorage.getItem("role") || "user"; // Default to 'user' if not set
+
   const handleUpgrade = () => {
     navigate("/upgrade-plan");
   };
@@ -59,23 +62,17 @@ const Settings = () => {
     }
   };
 
-  // Theme toggle logic (placeholder)
   const handleThemeToggle = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
     showToast(`Switched to ${theme === "light" ? "dark" : "light"} mode`, "success");
-    // Add real theme logic here
   };
 
-  // Download data (placeholder)
   const handleDownloadData = () => {
     showToast("Your data download will start soon (placeholder)", "info");
-    // Add real download logic here
   };
 
-  // Log out all sessions (placeholder)
   const handleLogoutAll = () => {
     showToast("Logged out of all devices (placeholder)", "success");
-    // Add real session management logic here
   };
 
   return (
@@ -198,14 +195,16 @@ const Settings = () => {
         </label>
       </div>
 
-      {/* Existing action buttons */}
+      {/* Action buttons - Conditionally render Upgrade button */}
       <div className="flex flex-col md:flex-row gap-4">
-        <button
-          className="border border-primary text-primary rounded-lg px-6 py-3 text-lg font-semibold hover:bg-purple-50 transition mb-4 md:mb-0 shadow"
-          onClick={handleUpgrade}
-        >
-          Upgrade My Plan
-        </button>
+        {currentRole !== "user" && (
+          <button
+            className="border border-primary text-primary rounded-lg px-6 py-3 text-lg font-semibold hover:bg-purple-50 transition mb-4 md:mb-0 shadow"
+            onClick={handleUpgrade}
+          >
+            Upgrade My Plan
+          </button>
+        )}
         <button
           className="border border-gray-400 rounded-lg px-6 py-3 text-lg font-semibold text-gray-700 hover:bg-gray-100 transition mb-4 md:mb-0 shadow"
           onClick={handleCancelMembership}
