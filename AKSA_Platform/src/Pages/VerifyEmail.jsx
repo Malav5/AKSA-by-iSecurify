@@ -5,7 +5,7 @@ import { CheckCircle, XCircle, Mail, RefreshCw } from "lucide-react";
 const VerifyEmail = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const [status, setStatus] = useState("verifying"); // verifying, success, error, expired
+    const [status, setStatus] = useState("verifying"); // verifying, success, error, expired, resent
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState("");
@@ -90,7 +90,7 @@ const VerifyEmail = () => {
 
             if (response.ok) {
                 setMessage(data.message);
-                setStatus("success");
+                setStatus("resent");
             } else {
                 setMessage(data.error || "Failed to resend verification email.");
                 setStatus("error");
@@ -107,6 +107,8 @@ const VerifyEmail = () => {
         switch (status) {
             case "success":
                 return <CheckCircle className="w-16 h-16 text-green-500" />;
+            case "resent":
+                return <CheckCircle className="w-16 h-16 text-blue-500" />;
             case "error":
             case "expired":
                 return <XCircle className="w-16 h-16 text-red-500" />;
@@ -119,6 +121,8 @@ const VerifyEmail = () => {
         switch (status) {
             case "success":
                 return "text-green-600";
+            case "resent":
+                return "text-blue-600";
             case "error":
             case "expired":
                 return "text-red-600";
@@ -152,6 +156,7 @@ const VerifyEmail = () => {
                     <h2 className={`text-2xl font-bold mb-4 ${getStatusColor()}`}>
                         {status === "verifying" && "Verifying Your Email"}
                         {status === "success" && "Email Verified!"}
+                        {status === "resent" && "Email Sent!"}
                         {status === "error" && "Verification Failed"}
                         {status === "expired" && "Link Expired"}
                     </h2>
@@ -182,6 +187,22 @@ const VerifyEmail = () => {
                             >
                                 Go to Dashboard
                             </button>
+                        </div>
+                    )}
+
+                    {status === "resent" && (
+                        <div className="space-y-4">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <p className="text-blue-700 text-sm">
+                                    A new verification email has been sent to your inbox. Please check your email and click the verification link.
+                                </p>
+                            </div>
+                            <Link
+                                to="/login"
+                                className="block w-full text-center bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
+                            >
+                                Back to Login
+                            </Link>
                         </div>
                     )}
 
