@@ -24,40 +24,41 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Email already exists" });
     }
 
+    // Hash password
+    const hashed = await bcrypt.hash(password, 10);
+
     // Generate verification token
     const verificationToken = generateVerificationToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Store registration data temporarily (in memory or temporary storage)
-    // For now, we'll store it in a temporary object - in production you might want to use Redis or similar
-    const tempRegistrationData = {
+    // Create new user with isEmailVerified = false
+    const newUser = new User({
       firstName,
       lastName,
       companyName,
       email,
       phoneNumber,
-      password,
-      verificationToken,
-      verificationExpires,
-      createdAt: new Date()
-    };
+      passwordHash: hashed,
+      plan: "Freemium",
+      emailVerificationToken: verificationToken,
+      emailVerificationExpires: verificationExpires,
+      isEmailVerified: false
+    });
 
-    // Store in temporary storage (you might want to use Redis in production)
-    global.tempRegistrations = global.tempRegistrations || {};
-    global.tempRegistrations[verificationToken] = tempRegistrationData;
+    await newUser.save();
 
     // Send verification email
     const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken);
 
     if (!emailSent) {
-      // If email fails to send, remove from temp storage
-      delete global.tempRegistrations[verificationToken];
+      // If email fails to send, delete the user and return error
+      await User.findByIdAndDelete(newUser._id);
       return res.status(500).json({ error: "Failed to send verification email. Please try again." });
     }
 
-    // Return success message without creating user in database yet
+    // Return success message
     return res.status(201).json({
-      message: "Registration initiated! Please check your email to verify your account and complete registration.",
+      message: "Registration successful! Please check your email to verify your account.",
     });
   } catch (err) {
     console.error("Register error:", err);
@@ -74,73 +75,65 @@ router.post("/verify-email", async (req, res) => {
       return res.status(400).json({ error: "Verification token is required" });
     }
 
-    // Check if token exists in temporary registrations
-    const tempRegistration = global.tempRegistrations?.[token];
+    // Find user with this verification token
+    const user = await User.findOne({
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() }
+    });
 
-    if (!tempRegistration) {
+    console.log("Verification attempt:", {
+      token: token ? token.substring(0, 10) + "..." : "null",
+      userFound: !!user,
+      userEmail: user?.email
+    });
+
+    if (!user) {
       return res.status(400).json({ error: "Invalid or expired verification token" });
     }
 
-    // Check if token has expired
-    if (new Date() > tempRegistration.verificationExpires) {
-      // Remove expired registration
-      delete global.tempRegistrations[token];
-      return res.status(400).json({ error: "Verification token has expired" });
-    }
-
-    // Check if user already exists (in case of duplicate registration attempts)
-    const existingUser = await User.findOne({ email: tempRegistration.email });
-    if (existingUser) {
-      // Remove from temp storage
-      delete global.tempRegistrations[token];
-      return res.status(400).json({ error: "User already exists with this email" });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(tempRegistration.password, 10);
-
-    // Create new user in database
-    const newUser = new User({
-      firstName: tempRegistration.firstName,
-      lastName: tempRegistration.lastName,
-      companyName: tempRegistration.companyName,
-      email: tempRegistration.email,
-      phoneNumber: tempRegistration.phoneNumber,
-      passwordHash: hashedPassword,
-      plan: "Freemium",
-      isEmailVerified: true, // User is verified since they clicked the link
-      createdAt: tempRegistration.createdAt
-    });
-
-    await newUser.save();
-
-    // Remove from temporary storage
-    delete global.tempRegistrations[token];
+    // Mark email as verified and clear verification token
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
 
     // Generate JWT token for automatic login
     const jwtToken = jwt.sign(
-      { userId: newUser._id, plan: newUser.plan },
+      { userId: user._id, plan: user.plan },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
+    console.log("Verification successful:", { email: user.email, userId: user._id });
+
     return res.json({
-      message: "Email verified successfully! Account created and ready to use.",
+      message: "Email verified successfully! Account is now ready to use.",
       token: jwtToken,
       user: {
-        _id: newUser._id,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        companyName: newUser.companyName,
-        plan: newUser.plan,
-        role: newUser.role,
-        isEmailVerified: newUser.isEmailVerified,
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        companyName: user.companyName,
+        plan: user.plan,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
       },
     });
   } catch (err) {
     console.error("Email verification error:", err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("Error details:", {
+      message: err.message,
+      stack: err.stack,
+      code: err.code,
+      keyPattern: err.keyPattern,
+      keyValue: err.keyValue
+    });
+    return res.status(500).json({
+      error: "Server error",
+      details: err.message,
+      code: err.code
+    });
   }
 });
 
@@ -153,18 +146,14 @@ router.post("/resend-verification", async (req, res) => {
       return res.status(400).json({ error: "Email is required" });
     }
 
-    // Check if user already exists in database
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: "User already exists. Please login instead." });
+    // Find user in database
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found. Please register first." });
     }
 
-    // Find the registration in temporary storage
-    const tempRegistrations = global.tempRegistrations || {};
-    const existingRegistration = Object.values(tempRegistrations).find(reg => reg.email === email);
-
-    if (!existingRegistration) {
-      return res.status(404).json({ error: "No pending registration found for this email. Please register first." });
+    if (user.isEmailVerified) {
+      return res.status(400).json({ error: "Email is already verified. Please login instead." });
     }
 
     // Generate new verification token
@@ -173,30 +162,18 @@ router.post("/resend-verification", async (req, res) => {
 
     // Generate a new password
     const newPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).toUpperCase().slice(-4) + "!1";
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Remove old registration and create new one
-    const oldToken = Object.keys(tempRegistrations).find(key => tempRegistrations[key].email === email);
-    if (oldToken) {
-      delete tempRegistrations[oldToken];
-    }
-
-    // Create new temporary registration with updated data
-    const updatedRegistration = {
-      ...existingRegistration,
-      password: newPassword,
-      verificationToken: newVerificationToken,
-      verificationExpires: verificationExpires,
-      createdAt: new Date()
-    };
-
-    tempRegistrations[newVerificationToken] = updatedRegistration;
+    // Update user with new token and password
+    user.emailVerificationToken = newVerificationToken;
+    user.emailVerificationExpires = verificationExpires;
+    user.passwordHash = hashedPassword;
+    await user.save();
 
     // Send verification email with new password
-    const emailSent = await sendVerificationEmail(email, existingRegistration.firstName, newPassword, newVerificationToken);
+    const emailSent = await sendVerificationEmail(email, user.firstName, newPassword, newVerificationToken);
 
     if (!emailSent) {
-      // Remove from temp storage if email fails
-      delete tempRegistrations[newVerificationToken];
       return res.status(500).json({ error: "Failed to send verification email. Please try again." });
     }
 
@@ -248,6 +225,34 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Debug endpoint to check temp registrations (remove in production)
+router.get("/debug-temp-registrations", (req, res) => {
+  try {
+    if (!global.tempRegistrations) {
+      global.tempRegistrations = {};
+    }
+
+    const tempRegistrations = global.tempRegistrations;
+    const count = Object.keys(tempRegistrations).length;
+    const registrations = Object.keys(tempRegistrations).map(token => ({
+      token: token.substring(0, 10) + "...",
+      email: tempRegistrations[token].email,
+      expires: tempRegistrations[token].verificationExpires,
+      firstName: tempRegistrations[token].firstName
+    }));
+
+    res.json({
+      count,
+      registrations,
+      globalKeys: Object.keys(global).filter(key => key.includes('temp')),
+      tempRegistrationsType: typeof global.tempRegistrations,
+      tempRegistrationsKeys: Object.keys(tempRegistrations)
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, stack: err.stack });
   }
 });
 
