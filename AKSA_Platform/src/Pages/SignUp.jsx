@@ -57,36 +57,46 @@ const Signup = () => {
         return;
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("currentUser", data.user.email);
+      // Handle email verification flow
+      if (data.message && data.message.includes("check your email")) {
+        setSuccess("Registration successful! Please check your email to verify your account before logging in.");
+        // Don't redirect - user needs to verify email first
+        return;
+      }
 
-      const userPrefix = data.user.email.split('@')[0];
-      localStorage.removeItem(`${userPrefix}_savedDomain`);
-      localStorage.removeItem(`${userPrefix}_domainChecked`);
-      localStorage.removeItem(`${userPrefix}_domainCheckResult`);
-      localStorage.removeItem(`${userPrefix}_questionnaireSubmitted`);
-      localStorage.removeItem(`${userPrefix}_domainHealthAnswers`);
-      localStorage.removeItem(`${userPrefix}_domainHealthScore`);
-      localStorage.removeItem(`${userPrefix}_domainHealthStatus`);
-      localStorage.removeItem(`${userPrefix}_recommendedProducts`);
+      // If no verification required (fallback for existing flow)
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("currentUser", data.user.email);
 
-      setSuccess("Signup successful! Redirecting...");
-      setTimeout(async () => {
-        // Check if user has domains
-        try {
-          const res = await axios.get("/api/domains", {
-            headers: { Authorization: `Bearer ${data.token}` }
-          });
-          const userDomains = res.data.filter(domain => domain.userEmail === data.user.email);
-          if (userDomains.length > 0) {
-            navigate("/dashboard");
-          } else {
+        const userPrefix = data.user.email.split('@')[0];
+        localStorage.removeItem(`${userPrefix}_savedDomain`);
+        localStorage.removeItem(`${userPrefix}_domainChecked`);
+        localStorage.removeItem(`${userPrefix}_domainCheckResult`);
+        localStorage.removeItem(`${userPrefix}_questionnaireSubmitted`);
+        localStorage.removeItem(`${userPrefix}_domainHealthAnswers`);
+        localStorage.removeItem(`${userPrefix}_domainHealthScore`);
+        localStorage.removeItem(`${userPrefix}_domainHealthStatus`);
+        localStorage.removeItem(`${userPrefix}_recommendedProducts`);
+
+        setSuccess("Signup successful! Redirecting...");
+        setTimeout(async () => {
+          // Check if user has domains
+          try {
+            const res = await axios.get("/api/domains", {
+              headers: { Authorization: `Bearer ${data.token}` }
+            });
+            const userDomains = res.data.filter(domain => domain.userEmail === data.user.email);
+            if (userDomains.length > 0) {
+              navigate("/dashboard");
+            } else {
+              navigate("/deaddashboard");
+            }
+          } catch (err) {
             navigate("/deaddashboard");
           }
-        } catch (err) {
-          navigate("/deaddashboard");
-        }
-      }, 1000);
+        }, 1000);
+      }
     } catch (err) {
       setError("Something went wrong. Please try again.");
     } finally {

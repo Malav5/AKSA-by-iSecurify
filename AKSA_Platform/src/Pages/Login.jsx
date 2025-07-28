@@ -41,6 +41,13 @@ const Login = () => {
 
       if (!res.ok) {
         const errData = await res.json();
+
+        // Handle email verification requirement
+        if (errData.needsVerification) {
+          setError("Please verify your email before logging in. Check your inbox for a verification link.");
+          return;
+        }
+
         throw new Error(errData.error || "Login failed");
       }
 
@@ -155,11 +162,10 @@ const Login = () => {
             {/* Alert Messages */}
             {(error || success) && (
               <div
-                className={`p-3 sm:p-4 rounded-lg mb-4 text-sm sm:text-base font-medium ${
-                  error
+                className={`p-3 sm:p-4 rounded-lg mb-4 text-sm sm:text-base font-medium ${error
                     ? "bg-red-100 text-red-700 border border-red-200"
                     : "bg-green-100 text-green-700 border border-green-200"
-                }`}
+                  }`}
               >
                 {error || success}
               </div>

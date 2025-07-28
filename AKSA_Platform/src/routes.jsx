@@ -25,6 +25,7 @@ import AdminDashboard from "./Pages/AdminDashboard";
 import UpgradePlan from "./Pages/UpgradePlan";
 import DeadDashboard from "./Pages/DeadDashboard";
 import Deaddashboard1 from "./Pages/Deaddashboard1";
+import VerifyEmail from "./Pages/VerifyEmail";
 const AppRoutes = () => {
   // Role-based dashboard selection
   const role = localStorage.getItem('role');
@@ -54,6 +55,7 @@ const AppRoutes = () => {
       <Route path="/upgrade-plan" element={<UpgradePlan />} />
       <Route path="/deaddashboard" element={<DeadDashboard />} />
       <Route path="/dead-dashboard" element={<Dashboard />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
 
 
     </Routes>
