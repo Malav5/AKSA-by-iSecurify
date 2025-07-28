@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import QueAns, { questions as questionnaireQuestions } from "./QueAns";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 const QUESTION_LABELS = Array.from({ length: 20 }, (_, i) => `C${i + 1}`);
 
@@ -64,14 +65,31 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const SolutionTooltip = ({ solution }) => (
-  <div className="absolute z-20 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 w-48 md:w-56 -top-2 left-full ml-3 backdrop-blur-sm">
-    <h3 className="font-bold text-gray-800 mb-2 text-sm">
-      {solution}
-    </h3>
-    <p className="text-xs text-gray-600 leading-relaxed">{SOLUTION_DESCRIPTIONS[solution]}</p>
-  </div>
-);
+const SolutionTooltip = ({ solution, position, buttonRect }) => {
+  if (!buttonRect) return null;
+
+  const tooltipStyle = {
+    position: 'fixed',
+    zIndex: 99999,
+    top: buttonRect.top + buttonRect.height / 2,
+    left: position === "right" ? buttonRect.right + 12 : buttonRect.left - 200,
+    transform: 'translateY(-50%)',
+  };
+
+  const tooltipContent = (
+    <div 
+      className="bg-white border border-gray-200 rounded-xl shadow-2xl p-4 w-48 md:w-56 backdrop-blur-sm"
+      style={tooltipStyle}
+    >
+      <h3 className="font-bold text-gray-800 mb-2 text-sm">
+        {solution}
+      </h3>
+      <p className="text-xs text-gray-600 leading-relaxed">{SOLUTION_DESCRIPTIONS[solution]}</p>
+    </div>
+  );
+
+  return createPortal(tooltipContent, document.body);
+};
 
 const SuggestedProducts = ({ domain }) => {
   const navigate = useNavigate();
@@ -87,6 +105,8 @@ const SuggestedProducts = ({ domain }) => {
   const [answers, setAnswers] = useState({});
   const [selectedSolutions, setSelectedSolutions] = useState([]);
   const [hoveredSolution, setHoveredSolution] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState("right");
+  const [buttonRect, setButtonRect] = useState(null);
 
   const loadAnswersAndData = () => {
     const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
@@ -139,6 +159,27 @@ const SuggestedProducts = ({ domain }) => {
 
   const handleBuyClick = () => {
     navigate("/upgrade-plan");
+  };
+
+  const handleSolutionHover = (solution, event) => {
+    const button = event.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    
+    // Check if tooltip would go off screen to the right
+    if (rect.right + 200 > windowWidth) {
+      setTooltipPosition("left");
+    } else {
+      setTooltipPosition("right");
+    }
+    
+    setButtonRect(rect);
+    setHoveredSolution(solution);
+  };
+
+  const handleSolutionLeave = () => {
+    setHoveredSolution(null);
+    setButtonRect(null);
   };
 
   return (
@@ -226,8 +267,8 @@ const SuggestedProducts = ({ domain }) => {
               <button
                 key={sol}
                 onClick={() => handleSolutionClick(sol)}
-                onMouseEnter={() => setHoveredSolution(sol)}
-                onMouseLeave={() => setHoveredSolution(null)}
+                onMouseEnter={(e) => handleSolutionHover(sol, e)}
+                onMouseLeave={handleSolutionLeave}
                 className={`relative rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md transition-all duration-300 transform hover:scale-105 ${
                   selectedSolutions.includes(sol)
                     ? "bg-gradient-to-r from-[#800080] to-[#a242a2] text-white hover:from-purple-700 hover:to-blue-700 shadow-lg"
@@ -235,7 +276,6 @@ const SuggestedProducts = ({ domain }) => {
                 }`}
               >
                 {sol}
-                {hoveredSolution === sol && <SolutionTooltip solution={sol} />}
               </button>
             ))}
           </div>
@@ -249,6 +289,15 @@ const SuggestedProducts = ({ domain }) => {
           )}
         </div>
       </div>
+
+      {/* Render tooltip using portal */}
+      {hoveredSolution && (
+        <SolutionTooltip 
+          solution={hoveredSolution} 
+          position={tooltipPosition}
+          buttonRect={buttonRect}
+        />
+      )}
 
       {/* Questionnaire Modal */}
       {showQuestionnaire && (

@@ -98,7 +98,7 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8 w-full relative overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-100 to-transparent rounded-full -translate-y-16 translate-x-16 opacity-50"></div>
       

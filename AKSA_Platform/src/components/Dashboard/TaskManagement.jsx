@@ -120,7 +120,7 @@ const TaskManagement = ({ hideViewAll = false }) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm p-6 border border-gray-100 text-gray-800 p-4 md:p-6 lg:p-8">
+    <div className="w-full bg-white rounded-lg shadow-sm border border-gray-100 text-gray-800 p-4 md:p-6 lg:p-8">
       <div>
         <div className="flex justify-between items-center mb-6 md:mb-8">
           <div className="flex items-center gap-3">
@@ -130,7 +130,7 @@ const TaskManagement = ({ hideViewAll = false }) => {
           {!hideViewAll && (
             <Link 
               to="/task-manager" 
-              className="bg-gradient-to-r from-[#800080] to-[#a242a2] text-white rounded-xl px-4 md:px-6 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:from-blue-700 hover:to-indigo-700"
+              className="bg-gradient-to-r from-[#800080] to-[#a242a2] text-white rounded-xl px-4 md:px-6 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               View All Tasks
             </Link>
@@ -207,22 +207,31 @@ const TaskManagement = ({ hideViewAll = false }) => {
               />
             </div>
             
-            <div className="mt-6 space-y-3 text-sm md:text-base text-gray-700">
-              <div className="flex items-center justify-between bg-blue-50 rounded-lg p-3 border border-blue-200">
-                <span className="font-medium">To Do</span>
-                <span className="text-blue-600 font-bold">{statusCounts["To Do"]}</span>
+            <div className="mt-6 space-y-4 text-sm md:text-base text-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="font-medium text-gray-700">To Do</span>
+                </div>
+                <span className="text-blue-600 font-bold text-lg">{statusCounts["To Do"]}</span>
               </div>
-              <div className="flex items-center justify-between bg-amber-50 rounded-lg p-3 border border-amber-200">
-                <span className="font-medium">In Progress</span>
-                <span className="text-amber-600 font-bold">{statusCounts["In Progress"]}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                  <span className="font-medium text-gray-700">In Progress</span>
+                </div>
+                <span className="text-amber-600 font-bold text-lg">{statusCounts["In Progress"]}</span>
               </div>
-              <div className="flex items-center justify-between bg-emerald-50 rounded-lg p-3 border border-emerald-200">
-                <span className="font-medium">Done</span>
-                <span className="text-emerald-600 font-bold">{statusCounts["Done"]}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                  <span className="font-medium text-gray-700">Done</span>
+                </div>
+                <span className="text-emerald-600 font-bold text-lg">{statusCounts["Done"]}</span>
               </div>
             </div>
             
-            <div className="mt-4 p-3 bg-indigo-50 rounded-xl border border-indigo-200">
+            <div className="mt-6 p-3 bg-indigo-50 rounded-xl border border-indigo-200">
               <p className="text-xs md:text-sm text-indigo-700 font-medium">
                 📈 Progress made toward completion
               </p>
