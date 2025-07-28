@@ -74,23 +74,45 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
   };
 
   const getScoreColor = () => {
-    if (complianceScore === null) return "text-gray-500"; // Or a neutral color
-    if (complianceScore >= 90) return "text-green-600";
+    if (complianceScore === null) return "text-gray-500";
+    if (complianceScore >= 90) return "text-emerald-600";
     if (complianceScore >= 75) return "text-blue-600";
-    if (complianceScore >= 50) return "text-yellow-600";
+    if (complianceScore >= 50) return "text-amber-600";
     return "text-red-600";
   };
 
+  const getScoreBgColor = () => {
+    if (complianceScore === null) return "bg-gray-100";
+    if (complianceScore >= 90) return "bg-emerald-50";
+    if (complianceScore >= 75) return "bg-blue-50";
+    if (complianceScore >= 50) return "bg-amber-50";
+    return "bg-red-50";
+  };
+
+  const getScoreBorderColor = () => {
+    if (complianceScore === null) return "border-gray-200";
+    if (complianceScore >= 90) return "border-emerald-200";
+    if (complianceScore >= 75) return "border-blue-200";
+    if (complianceScore >= 50) return "border-amber-200";
+    return "border-red-200";
+  };
+
   return (
-    <div className="bg-white shadow rounded-lg p-3 md:p-4 lg:p-6 w-full max-w-xl mx-auto">
-      <div className="flex items-center justify-between mb-4 md:mb-6">
-        <h2 className="text-gray-800 font-semibold text-base md:text-lg text-left">
-          Compliance Score
-        </h2>
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8 w-full relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-100 to-transparent rounded-full -translate-y-16 translate-x-16 opacity-50"></div>
+      
+      <div className="flex items-center justify-between mb-6 md:mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-3 h-8 bg-gradient-to-b from-[#800080] to-[#d181d1] rounded-full"></div>
+          <h2 className="text-gray-800 font-bold text-xl md:text-2xl">
+            Compliance Score
+          </h2>
+        </div>
         {/* Retake Assessment Button */}
         <button
           onClick={() => setShowQuestionnaire(true)}
-          className="text-primary rounded-md px-2 md:px-3 py-1 text-xs md:text-sm font-medium shadow-sm hover:bg-primary/10 transition-colors"
+          className="bg-gradient-to-r from-[#800080] to-[#a242a2] text-white rounded-xl px-4 md:px-6 py-2 md:py-3 text-sm md:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
         >
           Retake Assessment
         </button>
@@ -98,44 +120,91 @@ export const ComplianceScoreCard = ({ questionnaireVersion }) => {
 
       {questionnaireSubmitted ? (
         <>
-          <div className="relative w-full flex justify-center">
-            <div className="w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] h-[120px] sm:h-[150px] md:h-[175px] lg:h-[200px] bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 rounded-t-full relative">
-              <div className="absolute inset-0 flex flex-col justify-center items-center mt-6 sm:mt-8 md:mt-10">
-                <span
-                  className={`text-3xl sm:text-4xl md:text-5xl font-bold ${getScoreColor()}`}
-                >
-                  {complianceLevel()}
-                </span>
-                <span className="text-base md:text-lg font-medium text-gray-800 mt-1">
-                  {complianceScore !== null ? `${complianceScore}/100` : ""}
-                </span>
+          <div className="relative w-full flex justify-center mb-6">
+            <div className="relative">
+              {/* Main gauge */}
+              <div className="w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] h-[140px] sm:h-[160px] md:h-[180px] lg:h-[200px] bg-gradient-to-r from-red-500 via-yellow-400 to-emerald-500 rounded-t-full relative shadow-lg">
+                <div className="absolute inset-0 flex flex-col justify-center items-center mt-8 sm:mt-10 md:mt-12">
+                  <span
+                    className={`text-4xl sm:text-5xl md:text-6xl font-bold drop-shadow-lg ${getScoreColor()}`}
+                  >
+                    {complianceLevel()}
+                  </span>
+                  <span className="text-lg md:text-xl font-semibold text-gray-800 mt-2 drop-shadow-sm">
+                    {complianceScore !== null ? `${complianceScore}/100` : ""}
+                  </span>
+                </div>
               </div>
+              
+              {/* Gauge reflection effect */}
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent via-white/10 to-transparent rounded-t-full"></div>
             </div>
           </div>
 
-          <div className="flex justify-between px-6 sm:px-8 md:px-16 mt-3 md:mt-4 text-gray-700 font-medium text-xs md:text-sm">
-            <span>D</span>
-            <span>C</span>
-            <span>B</span>
-            <span>A</span>
+          {/* Grade labels */}
+          <div className="flex justify-between px-8 sm:px-12 md:px-16 mb-6 text-gray-700 font-bold text-sm md:text-base">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-red-600">D</span>
+              <div className="w-1 h-4 bg-red-500 rounded-full"></div>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-amber-600">C</span>
+              <div className="w-1 h-4 bg-amber-500 rounded-full"></div>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-blue-600">B</span>
+              <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-emerald-600">A</span>
+              <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
+            </div>
           </div>
 
           {complianceScore !== null && (
-            <div className="mt-3 md:mt-4 space-y-2">
-              <div
-                className={`text-center font-semibold text-xs md:text-sm lg:text-base ${getScoreColor()}`}
-              >
-                {healthStatus}
-              </div>
-              <div className="text-center text-xs md:text-sm text-gray-600">
-                Based on your questionnaire responses
+            <div className={`mt-6 p-6 rounded-2xl border-2 ${getScoreBgColor()} ${getScoreBorderColor()}`}>
+              <div className="text-center">
+                <div
+                  className={`font-bold text-base md:text-lg mb-2 ${getScoreColor()}`}
+                >
+                  {healthStatus}
+                </div>
+                <div className="text-sm md:text-base text-gray-600">
+                  Based on your questionnaire responses
+                </div>
               </div>
             </div>
           )}
         </>
       ) : (
-        <div className="text-gray-500 mt-4 text-center font-medium text-xs md:text-sm lg:text-base">
-          Complete the questionnaire to get your compliance score
+        <div className="text-center py-12">
+          <div className="bg-gray-50 rounded-full p-6 mb-4 inline-block">
+            <svg
+              className="w-12 h-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <p className="text-gray-600 font-semibold text-lg md:text-xl mb-2">
+            Complete Assessment
+          </p>
+          <p className="text-gray-500 text-sm md:text-base">
+            Take the questionnaire to get your compliance score
+          </p>
+          <button
+            onClick={() => setShowQuestionnaire(true)}
+            className="mt-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            Start Assessment
+          </button>
         </div>
       )}
 
