@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const authMiddleware = require("../middleware/authmiddleware");
-const { generateVerificationToken, sendVerificationEmail } = require("../utils/emailService");
+const { generateVerificationToken, sendVerificationEmail, sendResendVerificationEmail } = require("../utils/emailService");
 
 const router = express.Router();
 
@@ -24,50 +24,40 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Email already exists" });
     }
 
-    // Hash password
-    const hashed = await bcrypt.hash(password, 10);
-
     // Generate verification token
     const verificationToken = generateVerificationToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Create new user
-    const newUser = new User({
+    // Store registration data temporarily (in memory or temporary storage)
+    // For now, we'll store it in a temporary object - in production you might want to use Redis or similar
+    const tempRegistrationData = {
       firstName,
       lastName,
       companyName,
       email,
       phoneNumber,
-      passwordHash: hashed,
-      plan: "Freemium",
-      emailVerificationToken: verificationToken,
-      emailVerificationExpires: verificationExpires,
-    });
+      password,
+      verificationToken,
+      verificationExpires,
+      createdAt: new Date()
+    };
 
-    await newUser.save();
+    // Store in temporary storage (you might want to use Redis in production)
+    global.tempRegistrations = global.tempRegistrations || {};
+    global.tempRegistrations[verificationToken] = tempRegistrationData;
 
     // Send verification email
-    const emailSent = await sendVerificationEmail(email, firstName, verificationToken);
+    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken);
 
     if (!emailSent) {
-      // If email fails to send, delete the user and return error
-      await User.findByIdAndDelete(newUser._id);
+      // If email fails to send, remove from temp storage
+      delete global.tempRegistrations[verificationToken];
       return res.status(500).json({ error: "Failed to send verification email. Please try again." });
     }
 
-    // Return success message without token (user needs to verify email first)
+    // Return success message without creating user in database yet
     return res.status(201).json({
-      message: "Registration successful! Please check your email to verify your account.",
-      user: {
-        _id: newUser._id,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        companyName: newUser.companyName,
-        plan: newUser.plan,
-        role: newUser.role,
-        isEmailVerified: newUser.isEmailVerified,
-      },
+      message: "Registration initiated! Please check your email to verify your account and complete registration.",
     });
   } catch (err) {
     console.error("Register error:", err);
@@ -84,40 +74,68 @@ router.post("/verify-email", async (req, res) => {
       return res.status(400).json({ error: "Verification token is required" });
     }
 
-    const user = await User.findOne({
-      emailVerificationToken: token,
-      emailVerificationExpires: { $gt: Date.now() }
-    });
+    // Check if token exists in temporary registrations
+    const tempRegistration = global.tempRegistrations?.[token];
 
-    if (!user) {
+    if (!tempRegistration) {
       return res.status(400).json({ error: "Invalid or expired verification token" });
     }
 
-    // Mark email as verified and clear verification token
-    user.isEmailVerified = true;
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpires = undefined;
-    await user.save();
+    // Check if token has expired
+    if (new Date() > tempRegistration.verificationExpires) {
+      // Remove expired registration
+      delete global.tempRegistrations[token];
+      return res.status(400).json({ error: "Verification token has expired" });
+    }
+
+    // Check if user already exists (in case of duplicate registration attempts)
+    const existingUser = await User.findOne({ email: tempRegistration.email });
+    if (existingUser) {
+      // Remove from temp storage
+      delete global.tempRegistrations[token];
+      return res.status(400).json({ error: "User already exists with this email" });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(tempRegistration.password, 10);
+
+    // Create new user in database
+    const newUser = new User({
+      firstName: tempRegistration.firstName,
+      lastName: tempRegistration.lastName,
+      companyName: tempRegistration.companyName,
+      email: tempRegistration.email,
+      phoneNumber: tempRegistration.phoneNumber,
+      passwordHash: hashedPassword,
+      plan: "Freemium",
+      isEmailVerified: true, // User is verified since they clicked the link
+      createdAt: tempRegistration.createdAt
+    });
+
+    await newUser.save();
+
+    // Remove from temporary storage
+    delete global.tempRegistrations[token];
 
     // Generate JWT token for automatic login
     const jwtToken = jwt.sign(
-      { userId: user._id, plan: user.plan },
+      { userId: newUser._id, plan: newUser.plan },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
     return res.json({
-      message: "Email verified successfully!",
+      message: "Email verified successfully! Account created and ready to use.",
       token: jwtToken,
       user: {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        companyName: user.companyName,
-        plan: user.plan,
-        role: user.role,
-        isEmailVerified: user.isEmailVerified,
+        _id: newUser._id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        companyName: newUser.companyName,
+        plan: newUser.plan,
+        role: newUser.role,
+        isEmailVerified: newUser.isEmailVerified,
       },
     });
   } catch (err) {
@@ -135,33 +153,54 @@ router.post("/resend-verification", async (req, res) => {
       return res.status(400).json({ error: "Email is required" });
     }
 
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    // Check if user already exists in database
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists. Please login instead." });
     }
 
-    if (user.isEmailVerified) {
-      return res.status(400).json({ error: "Email is already verified" });
+    // Find the registration in temporary storage
+    const tempRegistrations = global.tempRegistrations || {};
+    const existingRegistration = Object.values(tempRegistrations).find(reg => reg.email === email);
+
+    if (!existingRegistration) {
+      return res.status(404).json({ error: "No pending registration found for this email. Please register first." });
     }
 
     // Generate new verification token
-    const verificationToken = generateVerificationToken();
+    const newVerificationToken = generateVerificationToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Update user with new token
-    user.emailVerificationToken = verificationToken;
-    user.emailVerificationExpires = verificationExpires;
-    await user.save();
+    // Generate a new password
+    const newPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).toUpperCase().slice(-4) + "!1";
 
-    // Send verification email
-    const emailSent = await sendVerificationEmail(email, user.firstName, verificationToken);
+    // Remove old registration and create new one
+    const oldToken = Object.keys(tempRegistrations).find(key => tempRegistrations[key].email === email);
+    if (oldToken) {
+      delete tempRegistrations[oldToken];
+    }
+
+    // Create new temporary registration with updated data
+    const updatedRegistration = {
+      ...existingRegistration,
+      password: newPassword,
+      verificationToken: newVerificationToken,
+      verificationExpires: verificationExpires,
+      createdAt: new Date()
+    };
+
+    tempRegistrations[newVerificationToken] = updatedRegistration;
+
+    // Send verification email with new password
+    const emailSent = await sendVerificationEmail(email, existingRegistration.firstName, newPassword, newVerificationToken);
 
     if (!emailSent) {
+      // Remove from temp storage if email fails
+      delete tempRegistrations[newVerificationToken];
       return res.status(500).json({ error: "Failed to send verification email. Please try again." });
     }
 
-    return res.json({ message: "Verification email sent successfully!" });
+    return res.json({ message: "Verification email sent successfully! Your password has been reset and included in the email." });
   } catch (err) {
     console.error("Resend verification error:", err);
     return res.status(500).json({ error: "Server error" });

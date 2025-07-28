@@ -58,6 +58,32 @@ async function syncWazuhAgents() {
 // Schedule sync every 30 seconds
 cron.schedule('*/30 * * * * *', syncWazuhAgents);
 
+// Function to cleanup expired registrations
+function cleanupExpiredRegistrations() {
+  try {
+    const tempRegistrations = global.tempRegistrations || {};
+    const now = new Date();
+    let cleanedCount = 0;
+
+    Object.keys(tempRegistrations).forEach(token => {
+      const registration = tempRegistrations[token];
+      if (registration.verificationExpires && now > registration.verificationExpires) {
+        delete tempRegistrations[token];
+        cleanedCount++;
+      }
+    });
+
+    if (cleanedCount > 0) {
+      console.log(`[Cleanup] Removed ${cleanedCount} expired registrations at ${now.toISOString()}`);
+    }
+  } catch (err) {
+    console.error('[Cleanup] Failed to cleanup expired registrations:', err.message);
+  }
+}
+
+// Schedule cleanup every hour
+cron.schedule('0 * * * *', cleanupExpiredRegistrations);
+
 // Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/domains", require("./routes/domains"));
