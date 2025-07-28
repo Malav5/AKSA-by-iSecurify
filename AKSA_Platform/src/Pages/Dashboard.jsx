@@ -334,7 +334,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen overflow-hidden bg-gradient-to-br from-white via-purple-50 to-blue-50">
       {/* Sidebar - Now responsive with mobile menu */}
       <Sidebar />
 
@@ -357,7 +357,7 @@ const Dashboard = () => {
                 value={domainName}
                 onChange={handleDomainChange}
                 onKeyDown={handleKeyDown}
-                className="w-full p-3 sm:p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base"
+                className="w-full p-3 sm:p-3 border border-purple-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base bg-gradient-to-r from-white via-purple-50 to-blue-50"
               />
               {domainName && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -386,7 +386,7 @@ const Dashboard = () => {
 
               <button
                 onClick={() => setShowQuestionnaire(true)}
-                className="bg-gray-800 text-white px-4 sm:px-6 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 transition-colors duration-200 text-sm sm:text-base"
+                className="bg-gradient-to-r from-primary to-blue-500 text-white px-4 sm:px-6 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors duration-200 text-sm sm:text-base"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
@@ -399,7 +399,7 @@ const Dashboard = () => {
 
           {/* Loading State - Improved mobile layout */}
           {apiLoading ? (
-            <div className="flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] shadow-sm m-3 sm:m-6 rounded-lg bg-white p-4 sm:p-6">
+            <div className="flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] shadow-sm m-3 sm:m-6 rounded-lg bg-gradient-to-br from-white via-purple-50 to-blue-50 p-4 sm:p-6 border border-purple-100">
               <Loader2 className="w-8 h-8 sm:w-12 sm:h-12 text-primary animate-spin mb-3 sm:mb-4" />
               <p className="text-base sm:text-lg text-gray-600 text-center">Analyzing domain security...</p>
               <p className="text-xs sm:text-sm text-gray-400 mt-2 text-center">This may take a few moments</p>
@@ -407,20 +407,22 @@ const Dashboard = () => {
           ) : isDomainChecked ? (
             /* Domain Analysis Results - Improved mobile layout */
             <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
-              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-gray-100">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">Domain Analysis Results</h2>
+              <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-lg shadow-xl p-4 sm:p-6 border border-purple-100">
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                  <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">Security Analysis Results</span>
+                </h2>
                 <RiskDashboard domain={domainName} />
               </div>
             </div>
           ) : (
             /* Blank Risk Dashboard - Improved mobile layout */
-            <div className="mt-4 sm:mt-6 bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-gray-100">
+            <div className="mt-4 sm:mt-6 bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-lg shadow-xl p-4 sm:p-6 border border-purple-100">
               <BlankRiskDashboard />
             </div>
           )}
 
           {/* Compliance Score and Services Section - Improved responsive grid */}
-          <div className="my-4 sm:my-6 space-y-4 sm:space-y-6 bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-gray-100">
+          <div className="my-4 sm:my-6 space-y-4 sm:space-y-6 bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-lg shadow-xl p-4 sm:p-6 border border-purple-100">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6 mb-6 sm:mb-10">
               {questionnaireSubmitted && domainName ? (
                 <ComplianceScoreCard
@@ -447,10 +449,18 @@ const Dashboard = () => {
           {/* Management Sections - Improved mobile layout */}
           {isDomainChecked && (
             <div className="space-y-4 sm:space-y-6">
-              <IssueManagement />
-              <TaskManagement />
-              <RiskMangement />
-              <OptionsMenu />
+              <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-lg shadow-xl p-4 sm:p-6 border border-purple-100">
+                <IssueManagement />
+              </div>
+              <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-lg shadow-xl p-4 sm:p-6 border border-purple-100">
+                <TaskManagement />
+              </div>
+              <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-lg shadow-xl p-4 sm:p-6 border border-purple-100">
+                <RiskMangement />
+              </div>
+              <div className="bg-gradient-to-br from-white via-purple-50 to-blue-50 rounded-lg shadow-xl p-4 sm:p-6 border border-purple-100">
+                <OptionsMenu />
+              </div>
             </div>
           )}
 
