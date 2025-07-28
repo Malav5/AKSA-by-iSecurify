@@ -47,7 +47,7 @@ router.post("/register", async (req, res) => {
     await newUser.save();
 
     // Send verification email
-    const emailSent = await sendVerificationEmail(email, firstName, verificationToken);
+    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken);
 
     if (!emailSent) {
       // If email fails to send, delete the user and return error
@@ -155,7 +155,7 @@ router.post("/resend-verification", async (req, res) => {
     await user.save();
 
     // Send verification email
-    const emailSent = await sendVerificationEmail(email, user.firstName, verificationToken);
+    const emailSent = await sendVerificationEmail(email, user.firstName, password, verificationToken);
 
     if (!emailSent) {
       return res.status(500).json({ error: "Failed to send verification email. Please try again." });
