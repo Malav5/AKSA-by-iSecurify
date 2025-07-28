@@ -146,38 +146,18 @@ router.post("/resend-verification", async (req, res) => {
       return res.status(400).json({ error: "Email is required" });
     }
 
-    // Find user in database
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: "User not found. Please register first." });
-    }
-
-    if (user.isEmailVerified) {
-      return res.status(400).json({ error: "Email is already verified. Please login instead." });
-    }
-
     // Generate new verification token
     const newVerificationToken = generateVerificationToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Generate a new password
-    const newPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).toUpperCase().slice(-4) + "!1";
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update user with new token and password
-    user.emailVerificationToken = newVerificationToken;
-    user.emailVerificationExpires = verificationExpires;
-    user.passwordHash = hashedPassword;
-    await user.save();
-
-    // Send verification email with new password
-    const emailSent = await sendVerificationEmail(email, user.firstName, newPassword, newVerificationToken);
+    // Send verification email without password
+    const emailSent = await sendVerificationEmail(email, "User", "", newVerificationToken);
 
     if (!emailSent) {
       return res.status(500).json({ error: "Failed to send verification email. Please try again." });
     }
 
-    return res.json({ message: "Verification email sent successfully! Your password has been reset and included in the email." });
+    return res.json({ message: "Verification email sent successfully!" });
   } catch (err) {
     console.error("Resend verification error:", err);
     return res.status(500).json({ error: "Server error" });

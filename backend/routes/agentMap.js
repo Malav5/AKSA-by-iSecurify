@@ -10,7 +10,9 @@ const AgentUserAssignment = require("../models/AgentUserAssignment");
 const bcrypt = require('bcryptjs');
 const Manager = require("../models/Manager");
 const SubadminManagerAssignment = require("../models/SubadminManagerAssignment");
+const UserSubadminAssignment = require("../models/UserSubadminAssignment");
 const authMiddleware = require("../middleware/authmiddleware");
+const { generateVerificationToken, sendVerificationEmail } = require("../utils/emailService");
 
 // Register agent mapping
 router.post("/register-agent", async (req, res) => {
@@ -208,30 +210,135 @@ router.post("/add-user", authMiddleware, async (req, res) => {
     if (existing) {
       return res.status(409).json({ error: "User with this email already exists" });
     }
-    // Fetch admin user to get companyName and plan
-    let companyName = undefined;
-    let plan = undefined;
-    if (req.userId) {
-      const admin = await User.findById(req.userId);
-      if (admin) {
-        if (admin.companyName) companyName = admin.companyName;
-        if (admin.plan) plan = admin.plan;
+
+    // STEP 1: Fetch current user's email from JWT token
+    let currentUser = null;
+    let currentUserEmail = null;
+    // Try to extract email from JWT token
+    const authHeader = req.headers.authorization;
+    let jwtEmail = null;
+    if (authHeader) {
+      try {
+        const token = authHeader.split(" ")[1];
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.decode(token);
+        jwtEmail = decoded.email;
+      } catch (e) {
+        // ignore
       }
     }
-    // Hash the password
+    // Prefer JWT email, fallback to req.userId lookup if not found
+    if (jwtEmail) {
+      currentUser = await User.findOne({ email: jwtEmail });
+      currentUserEmail = jwtEmail;
+    } else if (req.userId) {
+      // fallback: try to find by userId
+      currentUser = await User.findById(req.userId);
+      currentUserEmail = currentUser ? currentUser.email : null;
+    }
+    if (!currentUser) {
+      console.log("Current user not found in database by email or id");
+      return res.status(404).json({ error: "Current user not found in database" });
+    }
+    console.log("Current user found:", {
+      _id: currentUser._id,
+      email: currentUser.email,
+      role: currentUser.role,
+      companyName: currentUser.companyName,
+      plan: currentUser.plan
+    });
+    if (currentUser.role !== 'admin' && currentUser.role !== 'subadmin') {
+      console.log("Current user doesn't have permission. Role:", currentUser.role);
+      return res.status(403).json({ error: "You don't have permission to add users. Only admins and subadmins can add users." });
+    }
+
+    // STEP 2: Create new user with current user's company and plan
     const hashed = await bcrypt.hash(password, 10);
+    const verificationToken = generateVerificationToken();
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
     const newUser = new User({
       firstName,
       lastName,
       email,
       passwordHash: hashed,
       role: 'user',
-      companyName, // assign from admin if available
-      plan, // assign plan from admin
+      companyName: currentUser.companyName, // Use current user's company
+      plan: currentUser.plan, // Use current user's plan
+      emailVerificationToken: verificationToken,
+      emailVerificationExpires: verificationExpires,
+      isEmailVerified: false
     });
     await newUser.save();
-    res.status(201).json({ message: "User added", user: { firstName, lastName, email, companyName, plan } });
+    console.log("STEP 2: New user created:", {
+      _id: newUser._id,
+      email: newUser.email,
+      companyName: newUser.companyName,
+      plan: newUser.plan
+    });
+
+    // Send verification email
+    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken);
+    if (!emailSent) {
+      // If email fails to send, delete the user and return error
+      await User.findByIdAndDelete(newUser._id);
+      return res.status(500).json({ error: "Failed to send verification email. Please try again." });
+    }
+
+    // STEP 3: Store the user with the subadmin (current user) in UserSubadminAssignment
+    try {
+      console.log("STEP 3: Creating assignment - Current user (subadmin):", {
+        subadminId: currentUser._id,
+        subadminEmail: currentUser.email,
+        subadminRole: currentUser.role
+      });
+      console.log("STEP 3: New user to be assigned:", {
+        userId: newUser._id,
+        userEmail: newUser.email
+      });
+      // Check if assignment already exists for this subadmin
+      let assignment = await UserSubadminAssignment.findOne({ subadminId: currentUser._id });
+      if (assignment) {
+        console.log("Found existing assignment, adding new user to it");
+        assignment.userIds.push(newUser._id);
+        await assignment.save();
+        console.log("User successfully added to existing assignment");
+      } else {
+        console.log("Creating new assignment for subadmin");
+        const newAssignment = new UserSubadminAssignment({
+          subadminId: currentUser._id,
+          userIds: [newUser._id]
+        });
+        await newAssignment.save();
+        console.log("New assignment created successfully");
+      }
+      console.log("STEP 3: Assignment completed successfully");
+    } catch (assignmentErr) {
+      console.error("Failed to create assignment:", assignmentErr);
+      console.error("Assignment error details:", {
+        message: assignmentErr.message,
+        stack: assignmentErr.stack
+      });
+      // Don't fail the entire operation if assignment fails
+    }
+    // Success response
+    res.status(201).json({
+      message: "User added successfully! Verification email has been sent to the user.",
+      user: {
+        firstName,
+        lastName,
+        email,
+        companyName: currentUser.companyName,
+        plan: currentUser.plan
+      },
+      addedBy: {
+        subadminId: currentUser._id,
+        subadminEmail: currentUser.email,
+        subadminRole: currentUser.role
+      }
+    });
   } catch (err) {
+    console.error("Add user error:", err);
     res.status(500).json({ error: "Failed to add user", details: err.message });
   }
 });
@@ -239,17 +346,194 @@ router.post("/add-user", authMiddleware, async (req, res) => {
 // Get all users with role 'user'
 router.get("/users-with-role-user", async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }, "_id email firstName lastName plan createdAt");
+    const users = await User.find({ role: "user" }, "_id email firstName lastName plan createdAt isEmailVerified");
     const formatted = users.map(u => ({
       _id: u._id,
       email: u.email,
       name: `${u.firstName} ${u.lastName}`.trim(),
       plan: u.plan || "Freemium",
-      createdAt: u.createdAt
+      createdAt: u.createdAt,
+      isEmailVerified: u.isEmailVerified
     }));
     res.json({ users: formatted });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch users", details: err.message });
+  }
+});
+
+// Get admin-user assignments (to track which admin added which users)
+router.get("/admin-user-assignments", authMiddleware, async (req, res) => {
+  try {
+    const assignments = await UserSubadminAssignment.find()
+      .populate('subadminId', 'firstName lastName email')
+      .populate('userIds', 'firstName lastName email createdAt isEmailVerified');
+
+    const formattedAssignments = assignments.map(assignment => ({
+      admin: {
+        _id: assignment.subadminId._id,
+        name: `${assignment.subadminId.firstName} ${assignment.subadminId.lastName}`,
+        email: assignment.subadminId.email
+      },
+      users: assignment.userIds.map(user => ({
+        _id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        createdAt: user.createdAt,
+        isEmailVerified: user.isEmailVerified
+      })),
+      assignmentCreatedAt: assignment.createdAt
+    }));
+
+    res.json({ assignments: formattedAssignments });
+  } catch (err) {
+    console.error("Failed to fetch admin-user assignments:", err);
+    res.status(500).json({ error: "Failed to fetch admin-user assignments", details: err.message });
+  }
+});
+
+// Get users added by specific admin
+router.get("/admin-users/:adminId", authMiddleware, async (req, res) => {
+  try {
+    const { adminId } = req.params;
+
+    const assignment = await UserSubadminAssignment.findOne({ subadminId: adminId })
+      .populate('userIds', 'firstName lastName email createdAt isEmailVerified plan');
+
+    if (!assignment) {
+      return res.json({ users: [] });
+    }
+
+    const users = assignment.userIds.map(user => ({
+      _id: user._id,
+      name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      createdAt: user.createdAt,
+      isEmailVerified: user.isEmailVerified,
+      plan: user.plan
+    }));
+
+    res.json({ users });
+  } catch (err) {
+    console.error("Failed to fetch admin's users:", err);
+    res.status(500).json({ error: "Failed to fetch admin's users", details: err.message });
+  }
+});
+
+// Debug endpoint to check all UserSubadminAssignment records
+router.get("/debug-assignments", async (req, res) => {
+  try {
+    const assignments = await UserSubadminAssignment.find()
+      .populate('subadminId', 'firstName lastName email')
+      .populate('userIds', 'firstName lastName email');
+
+    res.json({
+      count: assignments.length,
+      assignments: assignments.map(a => ({
+        _id: a._id,
+        subadminId: a.subadminId,
+        userIds: a.userIds,
+        createdAt: a.createdAt
+      }))
+    });
+  } catch (err) {
+    console.error("Debug assignments error:", err);
+    res.status(500).json({ error: "Failed to fetch assignments", details: err.message });
+  }
+});
+
+// Debug endpoint to check current user's token
+router.get("/debug-current-user", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+
+    // Also check if there are any users in the database
+    const allUsers = await User.find({}, '_id email role firstName lastName');
+
+    res.json({
+      reqUserId: req.userId,
+      user: user ? {
+        _id: user._id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName
+      } : null,
+      allUsers: allUsers.map(u => ({
+        _id: u._id,
+        email: u.email,
+        role: u.role,
+        name: `${u.firstName} ${u.lastName}`
+      })),
+      message: "Current user ID from token and all users in database"
+    });
+  } catch (err) {
+    console.error("Debug current user error:", err);
+    res.status(500).json({ error: "Failed to get current user", details: err.message });
+  }
+});
+
+// Test endpoint to manually create a UserSubadminAssignment
+router.post("/test-create-assignment", authMiddleware, async (req, res) => {
+  try {
+    const { testUserId } = req.body;
+
+    if (!testUserId) {
+      return res.status(400).json({ error: "testUserId is required" });
+    }
+
+    console.log("Testing assignment creation:", {
+      adminId: req.userId,
+      testUserId: testUserId
+    });
+
+    // Check if assignment already exists for this admin
+    let assignment = await UserSubadminAssignment.findOne({ subadminId: req.userId });
+
+    if (assignment) {
+      console.log("Found existing assignment, adding test user");
+      assignment.userIds.push(testUserId);
+      await assignment.save();
+      console.log("Test user added to existing assignment");
+    } else {
+      console.log("Creating new assignment for test");
+      const newAssignment = new UserSubadminAssignment({
+        subadminId: req.userId,
+        userIds: [testUserId]
+      });
+      await newAssignment.save();
+      console.log("New test assignment created");
+    }
+
+    res.json({
+      message: "Test assignment created successfully",
+      adminId: req.userId,
+      testUserId: testUserId
+    });
+  } catch (err) {
+    console.error("Test assignment creation error:", err);
+    res.status(500).json({ error: "Failed to create test assignment", details: err.message });
+  }
+});
+
+// Debug endpoint to check JWT token content
+router.get("/debug-token", authMiddleware, async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(" ")[1];
+
+    // Decode JWT token without verification to see content
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.decode(token);
+
+    res.json({
+      token: token ? token.substring(0, 20) + "..." : "No token",
+      decoded: decoded,
+      reqUserId: req.userId,
+      message: "JWT token content"
+    });
+  } catch (err) {
+    console.error("Debug token error:", err);
+    res.status(500).json({ error: "Failed to decode token", details: err.message });
   }
 });
 
@@ -287,8 +571,8 @@ router.put("/upgrade-user-plan/:userId", authMiddleware, async (req, res) => {
     userToUpdate.plan = plan;
     await userToUpdate.save();
 
-    res.json({ 
-      message: "Plan upgraded successfully", 
+    res.json({
+      message: "Plan upgraded successfully",
       user: {
         _id: userToUpdate._id,
         email: userToUpdate.email,

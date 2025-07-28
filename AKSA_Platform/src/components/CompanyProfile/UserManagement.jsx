@@ -12,6 +12,7 @@ const UserManagement = ({
   setShowAddMemberModal,
 }) => {
   const [members, setMembers] = useState([]);
+  const [adminAssignments, setAdminAssignments] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -34,12 +35,32 @@ const UserManagement = ({
     "Moksha": "bg-yellow-100 text-yellow-700"
   };
 
+  // Fetch admin-user assignments
+  const fetchAdminAssignments = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/agentMap/admin-user-assignments", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAdminAssignments(data.assignments || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch admin assignments:", error);
+    }
+  };
+
   // Fetch users from backend
   const fetchMembers = async () => {
     setRefreshing(true);
     try {
       const users = await userServices.fetchMembers();
       setMembers(users);
+      // Also fetch admin assignments
+      await fetchAdminAssignments();
     } catch (error) {
       showError("Failed to fetch users");
     } finally {
@@ -115,14 +136,25 @@ const UserManagement = ({
 
   const handleUpgradePlan = (user) => {
     // Navigate to the UpgradePlan page with user information
-    navigate("/upgrade-plan", { 
-      state: { 
+    navigate("/upgrade-plan", {
+      state: {
         upgradeForUser: true,
         userEmail: user.email,
         userName: user.name,
         currentPlan: user.plan
-      } 
+      }
     });
+  };
+
+  // Helper function to find which admin added a specific user
+  const getAdminForUser = (userId) => {
+    for (const assignment of adminAssignments) {
+      const userInAssignment = assignment.users.find(user => user._id === userId);
+      if (userInAssignment) {
+        return assignment.admin;
+      }
+    }
+    return null;
   };
 
   const handleRefresh = () => {
@@ -177,6 +209,8 @@ const UserManagement = ({
               <th className="px-4 py-3 font-semibold text-gray-700">Email</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Role</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Plan</th>
+              <th className="px-4 py-3 font-semibold text-gray-700">Status</th>
+              <th className="px-4 py-3 font-semibold text-gray-700">Added By</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Actions</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Date added</th>
             </tr>
@@ -188,6 +222,9 @@ const UserManagement = ({
               let email = member.email;
               let createdAt = member.createdAt;
               let plan = member.plan || "Freemium";
+              let isEmailVerified = member.isEmailVerified;
+              const adminInfo = getAdminForUser(member._id);
+
               return (
                 <tr key={idx} className="hover:bg-purple-50 transition-colors duration-200">
                   <td className="px-4 py-3">
@@ -215,6 +252,24 @@ const UserManagement = ({
                         {plan}
                       </span>
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${isEmailVerified
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                      {isEmailVerified ? 'Verified' : 'Pending'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-700">
+                    {adminInfo ? (
+                      <div className="text-sm">
+                        <div className="font-medium">{adminInfo.name}</div>
+                        <div className="text-gray-500">{adminInfo.email}</div>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">Unknown</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
