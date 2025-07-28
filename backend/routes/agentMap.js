@@ -399,10 +399,24 @@ router.get("/manager-subadmins/:managerId", async (req, res) => {
 
 router.delete("/delete-user/:id", async (req, res) => {
   try {
+    // Find the user to get their email
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userEmail = user.email;
+
+    // Delete all domains for this user (case-insensitive)
+    await require('../models/domain').deleteMany({ userEmail: { $regex: `^${userEmail}$`, $options: 'i' } });
+    // Delete all agent assignments for this user (case-insensitive)
+    await require('../models/AgentUserAssignment').deleteMany({ userEmail: { $regex: `^${userEmail}$`, $options: 'i' } });
+    // (Add more deletions here if you have other user-linked collections)
+
+    // Delete the user
     await User.findByIdAndDelete(req.params.id);
-    res.json({ message: "User deleted successfully" });
+    res.json({ message: "User and all related data deleted successfully" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to delete user" });
+    res.status(500).json({ error: "Failed to delete user and related data" });
   }
 });
 
