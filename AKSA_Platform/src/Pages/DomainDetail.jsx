@@ -71,34 +71,34 @@ const InfoRow = ({ title, value, badge, tooltip, status }) => {
   return (
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 border-b border-gray-100 last:border-b-0 group hover:bg-gray-50 rounded-lg px-2 -mx-2 transition-colors duration-200">
       <div className="flex items-center gap-2 mb-1 sm:mb-0">
-        {tooltip ? (
-          <Tooltip text={tooltip}>
+      {tooltip ? (
+        <Tooltip text={tooltip}>
             <span className="font-medium text-gray-700 underline decoration-dotted text-xs sm:text-sm flex items-center gap-1">
-              {title}
-              <Info className="w-3 h-3 text-gray-400" />
-            </span>
-          </Tooltip>
-        ) : (
-          <span className="font-medium text-gray-700 text-xs sm:text-sm">
             {title}
+              <Info className="w-3 h-3 text-gray-400" />
           </span>
-        )}
-        {badge && (
-          <span
+        </Tooltip>
+      ) : (
+        <span className="font-medium text-gray-700 text-xs sm:text-sm">
+          {title}
+        </span>
+      )}
+      {badge && (
+        <span
             className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold ${badge.color} bg-opacity-10 border border-opacity-20`}
-          >
-            {badge.text}
-          </span>
-        )}
-      </div>
+        >
+          {badge.text}
+        </span>
+      )}
+    </div>
       <div className="flex items-center gap-2 max-w-full sm:max-w-xs text-left sm:text-right">
         {getStatusIcon(status)}
         <span className={`truncate text-xs sm:text-sm ${getStatusColor(status)}`}>
           {value}
         </span>
-      </div>
     </div>
-  );
+  </div>
+);
 };
 
 // Enhanced SectionCard with gradient backgrounds and better styling
@@ -286,7 +286,7 @@ const DomainSelector = ({ selected, setSelected, domainList, open, setOpen, hand
               ))}
           </ul>
         )}
-      </div>
+    </div>
       
       {/* Add New Domain */}
       <div className="flex-1 min-w-[200px] max-w-[280px]">
@@ -558,7 +558,7 @@ const DomainDetail = () => {
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
               <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-full p-6 mb-6 inline-block">
                 <Globe className="w-12 h-12 text-purple-600" />
-              </div>
+                  </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">
                 No Domain Selected
               </h3>
@@ -569,7 +569,7 @@ const DomainDetail = () => {
                 <StatusBadge status="info" text="Domain Analysis" />
                 <StatusBadge status="info" text="Security Insights" />
                 <StatusBadge status="info" text="Performance Metrics" />
-              </div>
+                  </div>
             </div>
           </div>
         </div>
@@ -590,9 +590,9 @@ const DomainDetail = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-8 bg-gradient-to-b from-[#800080] to-[#d181d1] rounded-full"></div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
                   Domain Details: {selected}
-                </h1>
+              </h1>
               </div>
               <button
                 onClick={() => navigate("/dashboard")}
@@ -652,9 +652,9 @@ const DomainDetail = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-8 bg-gradient-to-b from-[#800080] to-[#d181d1] rounded-full"></div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
                   Domain Details: {selected}
-                </h1>
+              </h1>
               </div>
               <button
                 onClick={() => navigate("/dashboard")}
@@ -683,7 +683,7 @@ const DomainDetail = () => {
               <div className="flex items-center gap-3">
                 <div className="bg-red-100 rounded-full p-2">
                   <AlertTriangle className="w-5 h-5 text-red-600" />
-                </div>
+                  </div>
                 <div>
                   <strong className="font-bold text-lg">Error!</strong>
                   <span className="block sm:inline ml-2">{error}</span>
@@ -709,9 +709,9 @@ const DomainDetail = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
             <div className="flex items-center gap-3">
               <div className="w-3 h-8 bg-gradient-to-b from-[#800080] to-[#d181d1] rounded-full"></div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
                 Domain Details: {selected}
-              </h1>
+            </h1>
             </div>
             <button
               onClick={() => navigate("/dashboard")}
@@ -980,7 +980,7 @@ const DomainDetail = () => {
                       ? linkedPages.internal.map((page, index) => (
                           <div key={index} className="py-0.5 text-xs border-b border-gray-200 last:border-b-0 leading-tight">
                             <span className="text-indigo-600 font-medium">•</span> {page}
-                          </div>
+                </div>
                         ))
                       : <div className="text-gray-400 italic">No internal pages found</div>
                     }

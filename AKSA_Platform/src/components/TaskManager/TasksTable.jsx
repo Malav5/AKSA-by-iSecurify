@@ -202,14 +202,14 @@ export default function TasksTable() {
   }, [menuTaskId, currentTasks]);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 max-w-full overflow-hidden">
+    <div className="bg-white rounded-2xl shadow p-6 max-w-full overflow-hidden border border-gray-100">
       <div className="flex flex-wrap gap-4 mb-4">
         <div>
           <label className="mr-2 font-semibold">Assigned To:</label>
           <select
             value={assignedTo}
             onChange={(e) => setAssignedTo(e.target.value)}
-            className="bg-secondary text-black rounded px-3 py-2"
+            className="bg-gray-50 border border-gray-300 text-gray-800 rounded px-3 py-2 focus:ring-2 focus:ring-[#800080] focus:border-[#800080]"
           >
             <option value="">All</option>
             {users.map((user) => (
@@ -224,7 +224,7 @@ export default function TasksTable() {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="bg-secondary text-black rounded px-3 py-2"
+            className="bg-gray-50 border border-gray-300 text-gray-800 rounded px-3 py-2 focus:ring-2 focus:ring-[#800080] focus:border-[#800080]"
           >
             <option value="">All</option>
             {statuses.map((s) => (
@@ -239,7 +239,7 @@ export default function TasksTable() {
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
-            className="bg-secondary text-black rounded px-3 py-2"
+            className="bg-gray-50 border border-gray-300 text-gray-800 rounded px-3 py-2 focus:ring-2 focus:ring-[#800080] focus:border-[#800080]"
           >
             <option value="">All</option>
             {priorities.map((p) => (
@@ -250,7 +250,7 @@ export default function TasksTable() {
           </select>
         </div>
         <div className="relative w-full md:w-96">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="h-4 w-4 text-gray-400" />
           </div>
           <input
@@ -258,34 +258,38 @@ export default function TasksTable() {
             placeholder="Search tasks..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 p-2.5 border rounded"
+            className="w-full pl-10 p-2.5 border border-gray-300 rounded bg-gray-50 focus:ring-2 focus:ring-[#800080] focus:border-[#800080]"
           />
         </div>
       </div>
-      <div className="overflow-x-auto border border-gray-200 rounded">
+      <div className="overflow-x-auto border border-gray-200 rounded-xl">
         <div className="max-h-[400px] overflow-y-auto scrollbar-hide">
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
               <tr>
-                {["name", "criticality", "priority", "status", "assignee"].map(
-                  (field) => (
-                    <th
-                      key={field}
-                      className="px-4 py-3 cursor-pointer hover:bg-gray-200"
-                      onClick={() => handleSort(field)}
-                    >
-                      <div className="flex items-center gap-1 capitalize">
-                        {field}
-                        {sortField === field &&
-                          (sortDirection === "asc" ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          ))}
-                      </div>
-                    </th>
-                  )
-                )}
+                {[
+                  "name",
+                  "criticality",
+                  "priority",
+                  "status",
+                  "assignee",
+                ].map((field) => (
+                  <th
+                    key={field}
+                    className="px-4 py-3 cursor-pointer hover:bg-gray-200"
+                    onClick={() => handleSort(field)}
+                  >
+                    <div className="flex items-center gap-1 capitalize">
+                      {field}
+                      {sortField === field &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        ))}
+                    </div>
+                  </th>
+                ))}
                 <th className="px-4 py-3">Created</th>
                 <th className="px-4 py-3">Updated</th>
                 <th className="px-4 py-3 sr-only">Actions</th>
@@ -295,7 +299,7 @@ export default function TasksTable() {
               {currentTasks.map((task) => (
                 <tr
                   key={task._id}
-                  className="border-t border-gray-200 hover:bg-gray-50"
+                  className="border-t border-gray-200 hover:bg-[#f9ecf9] transition-colors group"
                 >
                   <td
                     className="px-4 py-2 font-medium text-primary cursor-pointer flex items-center gap-2"
@@ -305,7 +309,7 @@ export default function TasksTable() {
                   </td>
                   <td className="px-4 py-2">
                     <span
-                      className={`px-2 py-1 text-xs rounded ${getCriticalityStyle(
+                      className={`px-2 py-1 text-xs rounded font-semibold ${getCriticalityStyle(
                         task.criticality
                       )}`}
                     >
@@ -314,7 +318,7 @@ export default function TasksTable() {
                   </td>
                   <td className="px-4 py-2">
                     <span
-                      className={`px-2 py-1 text-xs rounded ${getPriorityStyle(
+                      className={`px-2 py-1 text-xs rounded font-semibold ${getPriorityStyle(
                         task.priority
                       )}`}
                     >
@@ -323,7 +327,7 @@ export default function TasksTable() {
                   </td>
                   <td className="px-4 py-2">
                     <span
-                      className={`px-2 py-1 text-xs rounded ${getStatusStyle(
+                      className={`px-2 py-1 text-xs rounded font-semibold ${getStatusStyle(
                         task.status
                       )}`}
                     >
@@ -393,7 +397,6 @@ export default function TasksTable() {
           </table>
         </div>
       </div>
-
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -403,7 +406,6 @@ export default function TasksTable() {
         rowsPerPageOptions={[5, 10, 20, 50]}
         totalItems={filteredTasks.length}
       />
-
       {selectedTask && (
         <TaskDetail
           task={selectedTask}

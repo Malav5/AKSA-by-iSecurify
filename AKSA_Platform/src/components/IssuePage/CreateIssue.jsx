@@ -79,7 +79,7 @@ const CreateIssue = ({ issueData, setIssueData, onClose }) => {
   const CustomDropdown = ({ value, onChange, options, placeholder }) => (
     <Listbox value={value} onChange={onChange}>
       <div className="relative">
-        <Listbox.Button className="relative w-full cursor-default rounded bg-white py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+        <Listbox.Button className="relative w-full cursor-default rounded bg-white py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus-visible:border-[#800080] focus-visible:ring-2 focus-visible:ring-[#ee8cee]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:text-sm">
           <span className={`block truncate ${!value ? "text-gray-400" : ""}`}>
             {value || placeholder}
           </span>
@@ -96,7 +96,7 @@ const CreateIssue = ({ issueData, setIssueData, onClose }) => {
               key={option.id}
               className={({ active }) =>
                 `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                  active ? "bg-secondary text-primary" : "text-gray-900"
+                  active ? "bg-[#f9ecf9] text-[#800080]" : "text-gray-900"
                 }`
               }
               value={option.name}
@@ -111,7 +111,7 @@ const CreateIssue = ({ issueData, setIssueData, onClose }) => {
                     {option.name}
                   </span>
                   {selected ? (
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#800080]">
                       <CheckIcon className="h-5 w-5" aria-hidden="true" />
                     </span>
                   ) : null}
@@ -126,14 +126,13 @@ const CreateIssue = ({ issueData, setIssueData, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-gray-900/50 bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-gray-900/50 bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm"
       onClick={onClose}
     >
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
-        className={`bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full
-        transform transition-transform duration-600 ease-out
+        className={`bg-white/90 rounded-2xl shadow-2xl p-8 max-w-4xl w-full scrollbar-hide transform transition-transform duration-600 ease-out
         ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-20"}`}
       >
         <div className="flex justify-between items-center mb-6">
@@ -245,7 +244,7 @@ const CreateIssue = ({ issueData, setIssueData, onClose }) => {
             <label className="block font-medium text-gray-600 mb-1">
               Change log
             </label>
-            <div className="border border-gray-200 rounded p-4">
+            <div className="border border-gray-200 rounded p-4 bg-white/80">
               {(!issueData.changeLog || issueData.changeLog.length === 0) && (
                 <p className="text-gray-500 italic">
                   You don't have any notes yet...
@@ -267,7 +266,7 @@ const CreateIssue = ({ issueData, setIssueData, onClose }) => {
                 <button
                   type="button"
                   onClick={handleAddNote}
-                  className="bg-primary text-white px-4 py-2 rounded-r hover:bg-blue-700"
+                  className="bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white px-4 py-2 rounded-r hover:from-[#700070] hover:to-[#d17ad1] transition"
                 >
                   Add
                 </button>
@@ -281,13 +280,13 @@ const CreateIssue = ({ issueData, setIssueData, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="bg-gray-300 text-black px-6 py-2 rounded hover:bg-gray-400"
+            className="bg-gray-300 text-black px-6 py-2 rounded-lg hover:bg-gray-400 font-semibold"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="bg-primary text-white px-6 py-2 rounded hover:bg-blue-700"
+            className="bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white px-6 py-2 rounded-lg hover:from-[#700070] hover:to-[#d17ad1] font-semibold shadow"
             disabled={loading}
           >
             {loading ? "Creating..." : "Create issue"}
