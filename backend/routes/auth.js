@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const authMiddleware = require("../middleware/authmiddleware");
-const { generateVerificationToken, sendVerificationEmail, sendResendVerificationEmail } = require("../utils/emailService");
+const { generateVerificationToken, sendVerificationEmail, sendResendVerificationEmail, sendAgentSetupEmail } = require("../utils/emailService");
 
 const router = express.Router();
 
@@ -96,6 +96,15 @@ router.post("/verify-email", async (req, res) => {
     user.emailVerificationToken = undefined;
     user.emailVerificationExpires = undefined;
     await user.save();
+
+    // Send agent setup instructions email
+    const setupEmailSent = await sendAgentSetupEmail(user.email, user.firstName, user.companyName);
+    if (!setupEmailSent) {
+      console.log("Failed to send agent setup email to:", user.email);
+      // Don't fail the verification process if setup email fails
+    } else {
+      console.log("Agent setup email sent successfully to:", user.email);
+    }
 
     // Generate JWT token for automatic login
     const jwtToken = jwt.sign(
