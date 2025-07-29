@@ -11,6 +11,7 @@ import UserManagement from "../CompanyProfile/UserManagement";
 import NotificationSettings from "../CompanyProfile/NotificationSettings";
 import axios from "axios";
 import { userServices } from "../../services/UserServices";
+import { createPortal } from "react-dom";
 // Import icons for tabs
 import { User, ShieldCheck, Bell, Settings as Cog, Users } from "lucide-react";
 
@@ -25,6 +26,10 @@ const ICONS = {
 const CompanyProfile = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("member"); // default
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [user, setUser] = useState(null);
+  const userMenuRef = useRef();
+  const userButtonRef = useRef();
   const [profileData, setProfileData] = useState({
     logo: "/logo2.png",
     name: "Allianz Cloud",
@@ -94,14 +99,62 @@ const CompanyProfile = () => {
         const data = await userServices.getUser();
         setRole(data.user?.role || null);
         setUserPlan(data.user?.plan || null);
+        setUser(data.user);
       } catch (err) {
         const user = JSON.parse(localStorage.getItem("user"));
         setRole(user?.role || null);
         setUserPlan(user?.plan || null);
+        setUser(user);
       }
     };
 
     fetchUser();
+  }, []);
+
+  // Fetch user info for dropdown
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:3000/api/auth/user",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setUser(response.data.user);
+      } catch (err) {
+        console.error("Failed to fetch user info", err);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  const toggleUserMenu = () => {
+    setShowUserMenu((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const isOutsideUserMenu =
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target) &&
+        userButtonRef.current &&
+        !userButtonRef.current.contains(event.target);
+
+      if (isOutsideUserMenu) setShowUserMenu(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -227,33 +280,85 @@ const CompanyProfile = () => {
             <path fill="#a78bfa" fillOpacity="0.2" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z" />
           </svg>
           {/* Tabs */}
-          <nav className="relative flex space-x-2 md:space-x-6 mb-6 bg-white/80 backdrop-blur-lg px-4 py-3 rounded-2xl shadow-lg z-10" style={{ overflow: 'visible' }}>
-            {/* Glider */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 h-[44px] bg-primary rounded-full z-0 transition-all duration-300"
-              style={{
-                left: gliderStyle.left,
-                width: gliderStyle.width,
-                pointerEvents: 'none',
-                boxShadow: '0 4px 24px 0 rgba(128,0,128,0.10)',
-              }}
-            />
-            {visibleTabs.map((tab) => (
+          <nav className="relative flex items-center justify-between space-x-1 md:space-x-6 mb-8 bg-white/80 backdrop-blur-lg px-1 py-3 rounded-2xl shadow-lg z-10" style={{ overflow: 'visible' }}>
+            {/* Left side - Tab buttons */}
+            <div className="flex space-x-2 md:space-x-6">
+              {/* Glider */}
+              <div
+                className="absolute top-1/2 -translate-y-1/2  h-[44px] bg-primary rounded-full z-0 transition-all duration-300"
+                style={{
+                  left: gliderStyle.left,
+                  width: gliderStyle.width,
+                  pointerEvents: 'none',
+                  boxShadow: '0 4px 24px 0 rgba(128,0,128,0.10)',
+                }}
+              />
+              {visibleTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  ref={el => tabRefs.current[tab.key] = el}
+                  className={`relative flex items-center justify-center gap-2 h-12 px-6 rounded-full font-semibold transition-all duration-200 focus:outline-none text-base z-10
+                    ${activeTab === tab.key
+                      ? "text-white"
+                      : "text-gray-700 hover:bg-primary/10 hover:text-primary"}
+                  `}
+                  onClick={() => setActiveTab(tab.key)}
+                  style={{ background: 'transparent', minWidth: 0 }}
+                >
+                  <span className="flex items-center justify-center h-5">{ICONS[tab.key]}</span>
+                  <span className="flex items-center justify-center h-5 leading-none">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Right side - User Menu */}
+            <div className="relative">
               <button
-                key={tab.key}
-                ref={el => tabRefs.current[tab.key] = el}
-                className={`relative flex items-center gap-1 px-5 py-2 rounded-full font-semibold transition-all duration-200 focus:outline-none text-base z-10
-                  ${activeTab === tab.key
-                    ? "text-white"
-                    : "text-gray-700 hover:bg-primary/10 hover:text-primary"}
-                `}
-                onClick={() => setActiveTab(tab.key)}
-                style={{ background: 'transparent' }}
+                ref={userButtonRef}
+                onClick={toggleUserMenu}
+                className="flex items-center space-x-2"
               >
-                {ICONS[tab.key]}
-                {tab.label}
+                {user ? (
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-lg sm:text-xl">
+                      {user.firstName.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-300 rounded-full flex items-center justify-center">
+                    <span className="text-sm sm:text-base font-medium text-gray-700">U</span>
+                  </div>
+                )}
               </button>
-            ))}
+
+              {showUserMenu && createPortal(
+                <div
+                  ref={userMenuRef}
+                  className="fixed top-26 right-4 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-[99999]"
+                >
+                  <div className="p-3 sm:p-4 border-b border-gray-100">
+                    <p className="text-2xl font-medium text-gray-900">
+                      {user ? `${user.firstName} ${user.lastName}` : "User Name"}
+                    </p>
+                    <p className="text-sm text-gray-500">{user?.email || "user@example.com"}</p>
+                    <p className="text-sm text-gray-500">{user?.companyName || ""}</p>
+                  </div>
+                  <div className="p-1">
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem("token");
+                        navigate("/");
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-lg text-gray-700 hover:bg-gray-100 rounded"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>,
+                document.body
+              )}
+            </div>
           </nav>
 
           {/* Tab Content */}
