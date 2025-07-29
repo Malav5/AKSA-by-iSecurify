@@ -14,6 +14,7 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
     email: "",
     role: "user",
     password: "",
+    companyName: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
   useEffect(() => {
     const userRole = localStorage.getItem("role");
     setCurrentUserRole(userRole);
-    
+
     // Set default role based on current user's permissions
     if (userRole === 'subadmin') {
       setMemberData(prev => ({ ...prev, role: "user" }));
@@ -58,12 +59,13 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
       email: memberData.email,
       password: memberData.password || "changeme123",
       role: memberData.role,
+      ...(currentUserRole === 'admin' && { companyName: memberData.companyName }),
     };
 
     try {
       const result = await userServices.addUser(payload);
       showSuccess(result.message || "User added successfully!");
-      setMemberData({ firstName: "", lastName: "", email: "", role: "user", password: "" });
+      setMemberData({ firstName: "", lastName: "", email: "", role: "user", password: "", companyName: "" });
       if (onSuccess) onSuccess();
       setTimeout(() => onClose(), 1500);
     } catch (err) {
@@ -133,6 +135,20 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
             />
           </div>
 
+          {/* Company Name - Only for Admin */}
+          {currentUserRole === 'admin' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+              <input
+                type="text"
+                value={memberData.companyName}
+                onChange={(e) => setMemberData({ ...memberData, companyName: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee8cee]/40 focus:border-[#800080]"
+                placeholder="Enter company name"
+              />
+            </div>
+          )}
+
           {/* Password with show/hide toggle */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -184,8 +200,7 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
                         key={role}
                         value={role}
                         className={({ active }) =>
-                          `cursor-pointer px-4 py-2 text-sm ${
-                            active ? "bg-purple-100 text-purple-900" : "text-gray-800"
+                          `cursor-pointer px-4 py-2 text-sm ${active ? "bg-purple-100 text-purple-900" : "text-gray-800"
                           }`
                         }
                       >
