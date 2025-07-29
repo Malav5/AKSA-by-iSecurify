@@ -270,10 +270,23 @@ router.post("/add-user", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "Only admins can create users with 'admin' role" });
     }
 
-    // STEP 2: Create new user with current user's company and plan
+    // STEP 2: Create new user with appropriate plan based on creator's role
     const hashed = await bcrypt.hash(password, 10);
     const verificationToken = generateVerificationToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Determine plan based on who is creating the user
+    let assignedPlan;
+    if (currentUser.role === 'admin') {
+      // Admin creates user → User gets "Freemium" plan (regardless of admin's plan)
+      assignedPlan = "Freemium";
+    } else if (currentUser.role === 'subadmin') {
+      // Subadmin creates user → User gets same plan as subadmin
+      assignedPlan = currentUser.plan || "Freemium";
+    } else {
+      // Fallback to Freemium for any other case
+      assignedPlan = "Freemium";
+    }
 
     const newUser = new User({
       firstName,
@@ -282,7 +295,7 @@ router.post("/add-user", authMiddleware, async (req, res) => {
       passwordHash: hashed,
       role: role || 'user', // Use the role from request body, default to 'user' if not provided
       companyName: currentUser.companyName, // Use current user's company
-      plan: currentUser.plan, // Use current user's plan
+      plan: assignedPlan, // Use determined plan based on creator's role
       emailVerificationToken: verificationToken,
       emailVerificationExpires: verificationExpires,
       isEmailVerified: false
@@ -293,7 +306,9 @@ router.post("/add-user", authMiddleware, async (req, res) => {
       email: newUser.email,
       role: newUser.role,
       companyName: newUser.companyName,
-      plan: newUser.plan
+      plan: newUser.plan,
+      createdBy: currentUser.role,
+      creatorPlan: currentUser.plan
     });
 
     // Send verification email
@@ -348,12 +363,13 @@ router.post("/add-user", authMiddleware, async (req, res) => {
         lastName,
         email,
         companyName: currentUser.companyName,
-        plan: currentUser.plan
+        plan: assignedPlan
       },
       addedBy: {
-        subadminId: currentUser._id,
-        subadminEmail: currentUser.email,
-        subadminRole: currentUser.role
+        creatorId: currentUser._id,
+        creatorEmail: currentUser.email,
+        creatorRole: currentUser.role,
+        creatorPlan: currentUser.plan
       }
     });
   } catch (err) {
