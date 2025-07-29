@@ -57,7 +57,8 @@ const RiskDashboard = () => {
         const domains = await response.json();
 
         const userDomain = domains.find(
-          (domain) => domain.name === selectedDomain && domain.userEmail === currentUser
+          (domain) =>
+            domain.name === selectedDomain && domain.userEmail === currentUser
         );
 
         setDomainOwnership(!!userDomain);
@@ -96,8 +97,89 @@ const RiskDashboard = () => {
         if (!response.ok) throw new Error("Failed to fetch domain score");
         const apiData = await response.json();
 
+        // Calculate overall risk score
         const score = calculateOverallRiskScore(apiData);
         setRiskScore(score);
+
+        // Calculate individual domain scores using domainScoreServices
+        const patchingScore = await import(
+          "../../services/domainScoreServices"
+        ).then((m) => m.calculatePatchingScore(apiData.technologies));
+        const appSecScore = await import(
+          "../../services/domainScoreServices"
+        ).then((m) => m.calculateAppSecurityScore(selectedDomain));
+        const webEncScore = await import(
+          "../../services/domainScoreServices"
+        ).then((m) => m.calculateWebEncryptionScore(selectedDomain));
+        const netFiltScore = await import(
+          "../../services/domainScoreServices"
+        ).then((m) => m.calculateNetworkFilteringScore(selectedDomain));
+        const breachEventsScore = await import(
+          "../../services/domainScoreServices"
+        ).then((m) => m.calculateBreachEventsScore(selectedDomain));
+
+        // Calculate right part domain scores
+        const systemReputationScore = await import(
+          "../../services/domainScoreServices"
+        ).then((m) => m.calculateSystemReputationScore(selectedDomain));
+        const emailSecurityScore = 0; // Placeholder, add function if available
+        const dnsSecurityScore = await import(
+          "../../services/domainScoreServices"
+        ).then((m) => m.calculateDnsSecurityScore(selectedDomain));
+        const systemHostingScore = await import(
+          "../../services/domainScoreServices"
+        ).then((m) => m.calculateSystemHostingScore(selectedDomain));
+
+        setMetricsLeft([
+          {
+            domain: "Software Patching",
+            rating: getRating(patchingScore),
+            score: patchingScore,
+          },
+          {
+            domain: "Application Security",
+            rating: getRating(appSecScore),
+            score: appSecScore,
+          },
+          {
+            domain: "Web Encryption",
+            rating: getRating(webEncScore),
+            score: webEncScore,
+          },
+          {
+            domain: "Network Filtering",
+            rating: getRating(netFiltScore),
+            score: netFiltScore,
+          },
+          {
+            domain: "Breach Events",
+            rating: getRating(breachEventsScore),
+            score: breachEventsScore,
+          },
+        ]);
+
+        setMetricsRight([
+          {
+            domain: "System Reputation",
+            rating: getRating(systemReputationScore),
+            score: systemReputationScore,
+          },
+          {
+            domain: "Email Security",
+            rating: "N/A",
+            score: emailSecurityScore,
+          },
+          {
+            domain: "DNS Security",
+            rating: getRating(dnsSecurityScore),
+            score: dnsSecurityScore,
+          },
+          {
+            domain: "System Hosting",
+            rating: getRating(systemHostingScore),
+            score: systemHostingScore,
+          },
+        ]);
 
         // Grade logic
         let grade = "N/A";
@@ -196,14 +278,15 @@ const RiskDashboard = () => {
               />
             </svg>
           </div>
-          <p className="text-gray-700 font-semibold text-lg">No Data Available</p>
+          <p className="text-gray-700 font-semibold text-lg">
+            No Data Available
+          </p>
           <p className="text-gray-500 text-sm mt-2">
             {!selectedDomain
               ? "Please select a domain to view security analysis"
               : !domainOwnership
-                ? "This domain is not associated with your account"
-                : "Unable to load domain security score"
-            }
+              ? "This domain is not associated with your account"
+              : "Unable to load domain security score"}
           </p>
         </div>
       );
@@ -227,7 +310,9 @@ const RiskDashboard = () => {
 
   return (
     <div className="w-full p-4 md:p-6 pt-6 md:pt-8 text-gray-900">
-      <h2 className="text-gray-800 font-bold text-xl md:text-2xl mb-4">Security Analysis Results</h2>
+      <h2 className="text-gray-800 font-bold text-xl md:text-2xl mb-4">
+        Security Analysis Results
+      </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 mb-10">
         {/* Domain Score Panel */}
@@ -248,14 +333,13 @@ const RiskDashboard = () => {
               {isLoading
                 ? "..."
                 : riskScore !== null && domainOwnership
-                  ? `${riskScore.toFixed(1)} / 10`
-                  : "N/A"}
+                ? `${riskScore.toFixed(1)} / 10`
+                : "N/A"}
             </p>
             <p className="text-sm text-gray-500 mt-2">
               {selectedDomain && domainOwnership
                 ? `Last updated: ${new Date().toLocaleDateString()}`
-                : "Select your domain to view score"
-              }
+                : "Select your domain to view score"}
             </p>
           </div>
         </div>
@@ -269,20 +353,36 @@ const RiskDashboard = () => {
             </h3>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
-                <div className="text-blue-600 text-xs font-semibold mb-1">Industry Rating</div>
-                <div className="text-blue-900 font-bold text-lg">{industryInfo.industryRating}</div>
+                <div className="text-blue-600 text-xs font-semibold mb-1">
+                  Industry Rating
+                </div>
+                <div className="text-blue-900 font-bold text-lg">
+                  {industryInfo.industryRating}
+                </div>
               </div>
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
-                <div className="text-green-600 text-xs font-semibold mb-1">Industry Average</div>
-                <div className="text-green-900 font-bold text-lg">{industryInfo.industryAverage}</div>
+                <div className="text-green-600 text-xs font-semibold mb-1">
+                  Industry Average
+                </div>
+                <div className="text-green-900 font-bold text-lg">
+                  {industryInfo.industryAverage}
+                </div>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
-                <div className="text-purple-600 text-xs font-semibold mb-1">Percentile Rank</div>
-                <div className="text-purple-900 font-bold text-lg">{industryInfo.percentileRank}</div>
+                <div className="text-purple-600 text-xs font-semibold mb-1">
+                  Percentile Rank
+                </div>
+                <div className="text-purple-900 font-bold text-lg">
+                  {industryInfo.percentileRank}
+                </div>
               </div>
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
-                <div className="text-orange-600 text-xs font-semibold mb-1">Industry Type</div>
-                <div className="text-orange-900 font-bold text-sm leading-tight">{industryInfo.industryType}</div>
+                <div className="text-orange-600 text-xs font-semibold mb-1">
+                  Industry Type
+                </div>
+                <div className="text-orange-900 font-bold text-sm leading-tight">
+                  {industryInfo.industryType}
+                </div>
               </div>
             </div>
           </div>
@@ -305,7 +405,9 @@ const RiskDashboard = () => {
                     <div className="flex items-center gap-3">
                       {getStars(item.rating)}
                       <span
-                        className={`px-3 py-1 text-xs rounded-full font-bold border ${getRatingColor(item.rating)}`}
+                        className={`px-3 py-1 text-xs rounded-full font-bold border ${getRatingColor(
+                          item.rating
+                        )}`}
                       >
                         {item.rating}
                       </span>
@@ -338,7 +440,9 @@ const RiskDashboard = () => {
                     <div className="flex items-center gap-3">
                       {getStars(item.rating)}
                       <span
-                        className={`px-3 py-1 text-xs rounded-full font-bold border ${getRatingColor(item.rating)}`}
+                        className={`px-3 py-1 text-xs rounded-full font-bold border ${getRatingColor(
+                          item.rating
+                        )}`}
                       >
                         {item.rating}
                       </span>
