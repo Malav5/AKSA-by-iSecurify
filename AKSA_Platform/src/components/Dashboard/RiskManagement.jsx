@@ -25,7 +25,7 @@ const RiskManagement = ({ hideViewAll = false }) => {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-2 h-8 bg-gradient-to-b from-red-500 to-orange-600 rounded-full" />
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Risk Manager</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Risk Manager</h2>
         </div>
         {!hideViewAll && (
           <Link
