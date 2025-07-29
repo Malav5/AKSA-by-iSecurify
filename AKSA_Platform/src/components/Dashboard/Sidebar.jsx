@@ -44,7 +44,19 @@ const Sidebar = () => {
     { Icon: Settings, label: "Settings", path: "/settings" },
   ];
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    // Handle special cases for better active state detection
+    if (path === "/dashboard") {
+      return location.pathname === "/dashboard" || location.pathname === "/deaddashboard" || location.pathname === "/dead-dashboard";
+    }
+    if (path === "/settings") {
+      return location.pathname === "/settings" || location.pathname === "/company-profile";
+    }
+    if (path === "/soc") {
+      return location.pathname === "/soc" || location.pathname === "/soc-dashboard";
+    }
+    return location.pathname === path;
+  };
 
   const handleNavClick = async (item) => {
     if (item.label === "Dashboard") {
@@ -147,13 +159,13 @@ const Sidebar = () => {
               <div
                 key={idx}
                 onClick={() => handleNavClick(item)}
-                className={`flex items-center space-x-3 cursor-pointer px-4 py-4 rounded-lg transition-all duration-200 text-lg font-medium group
+                className={`flex items-center space-x-3 cursor-pointer px-4 py-4 rounded-lg transition-all duration-300 text-lg font-medium group
                   ${isActive(item.path)
-                    ? "bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white shadow-md"
-                    : "text-gray-700 hover:bg-[#f9ecf9] hover:shadow hover:text-[#800080]"
+                    ? "bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white shadow-lg transform scale-105"
+                    : "text-gray-700 hover:bg-[#f9ecf9] hover:shadow hover:text-[#800080] hover:scale-102"
                   }`}
               >
-                <item.Icon className={`w-6 h-6 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 ${isActive(item.path) ? "text-white" : "text-gray-700 group-hover:text-[#800080]"}`} />
+                <item.Icon className={`w-6 h-6 flex-shrink-0 transition-transform duration-300 ${isActive(item.path) ? "text-white scale-110" : "text-gray-700 group-hover:text-[#800080] group-hover:scale-110"}`} />
                 <span>{item.label}</span>
               </div>
             ))}
