@@ -123,7 +123,7 @@ const Sidebar = () => {
             </div>
           </div>
 
-          <div className="flex flex-col items-center my-6">
+          <div className="flex flex-col items-center my-8">
             <div className="bg-gradient-to-br from-[#e88ae8] via-white to-[#e9a6e9] p-1 rounded-full shadow-md">
               {user ? (
                 <img
@@ -142,18 +142,18 @@ const Sidebar = () => {
             </span>
           </div>
 
-          <nav className="space-y-3 md:space-y-6 ml-2 md:ml-4 text-gray-700">
+          <nav className="space-y-6 md:space-y-8 lg:space-y-10 ml-2 md:ml-4 text-gray-700 mb-8">
             {navItems.map((item, idx) => (
               <div
                 key={idx}
                 onClick={() => handleNavClick(item)}
-                className={`flex items-center space-x-3 cursor-pointer px-4 py-2 rounded-lg transition-all duration-200 text-base font-medium group
+                className={`flex items-center space-x-3 cursor-pointer px-4 py-4 rounded-lg transition-all duration-200 text-lg font-medium group
                   ${isActive(item.path)
                     ? "bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white shadow-md"
                     : "text-gray-700 hover:bg-[#f9ecf9] hover:shadow hover:text-[#800080]"
                   }`}
               >
-                <item.Icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 ${isActive(item.path) ? "text-white" : "text-gray-700 group-hover:text-[#800080]"}`} />
+                <item.Icon className={`w-6 h-6 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 ${isActive(item.path) ? "text-white" : "text-gray-700 group-hover:text-[#800080]"}`} />
                 <span>{item.label}</span>
               </div>
             ))}
