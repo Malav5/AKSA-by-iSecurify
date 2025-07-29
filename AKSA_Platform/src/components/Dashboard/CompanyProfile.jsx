@@ -110,14 +110,14 @@ const CompanyProfile = () => {
     if (tab) setActiveTab(tab);
   }, [location.search]);
 
-  // Tabs to render (add User Management only for admin)
+  // Tabs to render (add User Management for admin and subadmin)
   const visibleTabs = [
     { label: "Member Profile", key: "member" },
     { label: "Security Settings", key: "security" },
     { label: "Notification Settings", key: "notification" },
     { label: "Settings", key: "settings" },
   ];
-  if (role === "subadmin") {
+  if (role === "admin" || role === "subadmin") {
     visibleTabs.push({ label: "User Management", key: "user-management" });
   }
 
@@ -227,7 +227,7 @@ const CompanyProfile = () => {
             <path fill="#a78bfa" fillOpacity="0.2" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z" />
           </svg>
           {/* Tabs */}
-          <nav className="relative flex space-x-2 md:space-x-6 mb-8 bg-white/80 backdrop-blur-lg px-4 py-3 rounded-2xl shadow-lg z-10" style={{overflow: 'visible'}}>
+          <nav className="relative flex space-x-2 md:space-x-6 mb-8 bg-white/80 backdrop-blur-lg px-4 py-3 rounded-2xl shadow-lg z-10" style={{ overflow: 'visible' }}>
             {/* Glider */}
             <div
               className="absolute top-1/2 -translate-y-1/2 h-[44px] bg-primary rounded-full z-0 transition-all duration-300"
@@ -277,7 +277,7 @@ const CompanyProfile = () => {
             {activeTab === "security" && <SecuritySettings />}
             {activeTab === "notification" && <NotificationSettings />}
             {activeTab === "settings" && <Settings />}
-            {activeTab === "user-management" && role === "subadmin" && (
+            {activeTab === "user-management" && (role === "admin" || role === "subadmin") && (
               <UserManagement
                 showAddMemberModal={showAddMemberModal}
                 setShowAddMemberModal={setShowAddMemberModal}

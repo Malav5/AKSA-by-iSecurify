@@ -346,14 +346,15 @@ router.post("/add-user", authMiddleware, async (req, res) => {
 // Get all users with role 'user'
 router.get("/users-with-role-user", async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }, "_id email firstName lastName plan createdAt isEmailVerified");
+    const users = await User.find({ role: "user" }, "_id email firstName lastName plan createdAt isEmailVerified companyName");
     const formatted = users.map(u => ({
       _id: u._id,
       email: u.email,
       name: `${u.firstName} ${u.lastName}`.trim(),
       plan: u.plan || "Freemium",
       createdAt: u.createdAt,
-      isEmailVerified: u.isEmailVerified
+      isEmailVerified: u.isEmailVerified,
+      companyName: u.companyName
     }));
     res.json({ users: formatted });
   } catch (err) {
@@ -364,9 +365,15 @@ router.get("/users-with-role-user", async (req, res) => {
 // Get admin-user assignments (to track which admin added which users)
 router.get("/admin-user-assignments", authMiddleware, async (req, res) => {
   try {
+    // Check if user is admin or subadmin
+    const user = await User.findById(req.userId);
+    if (!user || (user.role !== 'admin' && user.role !== 'subadmin')) {
+      return res.status(403).json({ error: "Not authorized. Only admins and subadmins can view user assignments." });
+    }
+
     const assignments = await UserSubadminAssignment.find()
       .populate('subadminId', 'firstName lastName email')
-      .populate('userIds', 'firstName lastName email createdAt isEmailVerified plan');
+      .populate('userIds', 'firstName lastName email createdAt isEmailVerified plan companyName');
 
     const formattedAssignments = assignments.map(assignment => ({
       admin: {
@@ -380,7 +387,8 @@ router.get("/admin-user-assignments", authMiddleware, async (req, res) => {
         email: user.email,
         createdAt: user.createdAt,
         isEmailVerified: user.isEmailVerified,
-        plan: user.plan || "Freemium"
+        plan: user.plan || "Freemium",
+        companyName: user.companyName
       })),
       assignmentCreatedAt: assignment.createdAt
     }));
@@ -398,7 +406,7 @@ router.get("/admin-users/:adminId", authMiddleware, async (req, res) => {
     const { adminId } = req.params;
 
     const assignment = await UserSubadminAssignment.findOne({ subadminId: adminId })
-      .populate('userIds', 'firstName lastName email createdAt isEmailVerified plan');
+      .populate('userIds', 'firstName lastName email createdAt isEmailVerified plan companyName');
 
     if (!assignment) {
       return res.json({ users: [] });
@@ -410,7 +418,8 @@ router.get("/admin-users/:adminId", authMiddleware, async (req, res) => {
       email: user.email,
       createdAt: user.createdAt,
       isEmailVerified: user.isEmailVerified,
-      plan: user.plan
+      plan: user.plan,
+      companyName: user.companyName
     }));
 
     res.json({ users });

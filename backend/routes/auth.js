@@ -287,9 +287,15 @@ router.delete("/delete-account", authMiddleware, async (req, res) => {
   }
 });
 
-// Get all users (no restrictions)
-router.get("/users", async (req, res) => {
+// Get all users (admin only)
+router.get("/users", authMiddleware, async (req, res) => {
   try {
+    // Check if user is admin
+    const user = await User.findById(req.userId);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: "Not authorized. Only admins can view all users." });
+    }
+
     const users = await User.find({}, "-passwordHash");
     res.json({ users });
   } catch (err) {

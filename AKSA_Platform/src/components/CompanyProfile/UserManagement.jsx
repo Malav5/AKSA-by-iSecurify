@@ -35,30 +35,66 @@ const UserManagement = ({
     "Moksha": "bg-yellow-100 text-yellow-700"
   };
 
-  // Fetch admin-user assignments and filter for current subadmin
+  // Fetch all users and admin-user assignments
   const fetchAdminAssignments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const currentUserEmail = localStorage.getItem("currentUser");
-      // Fetch all assignments
-      const response = await fetch("http://localhost:3000/api/agentMap/admin-user-assignments", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setAdminAssignments(data.assignments || []);
-        // Find the assignment for the current subadmin
-        const myAssignment = (data.assignments || []).find(a => a.admin.email === currentUserEmail);
-        if (myAssignment) {
-          setMembers(myAssignment.users || []);
-        } else {
-          setMembers([]);
+      const userRole = localStorage.getItem("role");
+
+      // Only fetch all users if user is admin, otherwise fetch only assigned users
+      if (userRole === 'admin') {
+        // Fetch all users
+        const usersResponse = await fetch("http://localhost:3000/api/auth/users", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Fetch all admin-user assignments
+        const assignmentsResponse = await fetch("http://localhost:3000/api/agentMap/admin-user-assignments", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (usersResponse.ok && assignmentsResponse.ok) {
+          const usersData = await usersResponse.json();
+          const assignmentsData = await assignmentsResponse.json();
+
+          console.log('Users data received:', usersData.users);
+          console.log('Sample user company name:', usersData.users?.[0]?.companyName);
+
+          setAdminAssignments(assignmentsData.assignments || []);
+          // Filter out admin users for admin view
+          const filteredUsers = (usersData.users || []).filter(user => user.role !== 'admin');
+          setMembers(filteredUsers);
+        }
+      } else {
+        // For subadmins, fetch only their assigned users (original behavior)
+        const currentUserEmail = localStorage.getItem("currentUser");
+        const response = await fetch("http://localhost:3000/api/agentMap/admin-user-assignments", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Assignments data received:', data.assignments);
+          console.log('Sample user from assignment:', data.assignments?.[0]?.users?.[0]);
+
+          setAdminAssignments(data.assignments || []);
+          // Find the assignment for the current subadmin
+          const myAssignment = (data.assignments || []).find(a => a.admin.email === currentUserEmail);
+          if (myAssignment) {
+            console.log('My assignment users:', myAssignment.users);
+            setMembers(myAssignment.users || []);
+          } else {
+            setMembers([]);
+          }
         }
       }
     } catch (error) {
-      console.error("Failed to fetch admin assignments:", error);
+      console.error("Failed to fetch users and assignments:", error);
     }
   };
 
@@ -156,6 +192,10 @@ const UserManagement = ({
     showSuccess("User list refreshed");
   };
 
+  // Get user role for dynamic title
+  const userRole = localStorage.getItem("role");
+  const isAdmin = userRole === 'admin';
+
   return (
     <div className="w-full px-2 animate-fade-in-up">
       <ToastContainer position="top-right" autoClose={2000} />
@@ -164,8 +204,15 @@ const UserManagement = ({
         <div className="flex items-center gap-2">
           <Users className="w-7 h-7 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold text-primary mb-1">User Management</h1>
-            <p className="text-gray-500">Manage your organization's members, roles, and permissions.</p>
+            <h1 className="text-2xl font-bold text-primary mb-1">
+              {isAdmin ? 'User Management' : 'User Management'}
+            </h1>
+            <p className="text-gray-500">
+              {isAdmin
+                ? 'Manage users in the system (excluding admin users), view who added each user, and control permissions.'
+                : 'Manage your organization\'s members, roles, and permissions.'
+              }
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -187,6 +234,35 @@ const UserManagement = ({
           </button>
         </div>
       </div>
+
+      {/* Statistics for admin users */}
+      {isAdmin && members.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="text-2xl font-bold text-blue-600">{members.length}</div>
+            <div className="text-sm text-gray-600">Total Users</div>
+          </div>
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="text-2xl font-bold text-green-600">
+              {members.filter(m => m.isEmailVerified).length}
+            </div>
+            <div className="text-sm text-gray-600">Verified Users</div>
+          </div>
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="text-2xl font-bold text-purple-600">
+              {members.filter(m => m.role === 'subadmin').length}
+            </div>
+            <div className="text-sm text-gray-600">Subadmins</div>
+          </div>
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="text-2xl font-bold text-orange-600">
+              {members.filter(m => !getAdminForUser(m._id)).length}
+            </div>
+            <div className="text-sm text-gray-600">Self-registered</div>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white/80 backdrop-blur-lg shadow-xl animate-fade-in-up">
         <table className="min-w-full text-sm text-left">
           <thead className="bg-gray-100">
@@ -206,7 +282,7 @@ const UserManagement = ({
               <th className="px-4 py-3 font-semibold text-gray-700">Status</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Added By</th>
               <th className="px-4 py-3 font-semibold text-gray-700">Actions</th>
-              <th className="px-4 py-3 font-semibold text-gray-700">Date added</th>
+              <th className="px-4 py-3 font-semibold text-gray-700">Company</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -218,6 +294,8 @@ const UserManagement = ({
               let plan = member.plan || "Freemium";
               let isEmailVerified = member.isEmailVerified;
               const adminInfo = getAdminForUser(member._id);
+              const currentUserEmail = localStorage.getItem("currentUser");
+              const isAddedByCurrentUser = adminInfo && adminInfo.email === currentUserEmail;
 
               return (
                 <tr key={idx} className="hover:bg-purple-50 transition-colors duration-200">
@@ -258,11 +336,16 @@ const UserManagement = ({
                   <td className="px-4 py-3 text-gray-700">
                     {adminInfo ? (
                       <div className="text-sm">
-                        <div className="font-medium">{adminInfo.name}</div>
+                        <div className="font-medium flex items-center gap-1">
+                          {adminInfo.name}
+                          {isAdmin && isAddedByCurrentUser && (
+                            <span className="px-1 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">You</span>
+                          )}
+                        </div>
                         <div className="text-gray-500">{adminInfo.email}</div>
                       </div>
                     ) : (
-                      <span className="text-gray-400 text-sm">Unknown</span>
+                      <span className="text-gray-400 text-sm">Self-registered</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -283,7 +366,9 @@ const UserManagement = ({
                       </button>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{createdAt ? new Date(createdAt).toLocaleString() : ""}</td>
+                  <td className="px-4 py-3 text-gray-700">
+                    {member.companyName ? member.companyName : (member.companyName === "" ? "No Company" : "-")}
+                  </td>
                 </tr>
               );
             })}
