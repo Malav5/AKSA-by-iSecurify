@@ -155,12 +155,18 @@ router.post("/resend-verification", async (req, res) => {
       return res.status(400).json({ error: "Email is required" });
     }
 
+    // Find the user to get their details
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
     // Generate new verification token
     const newVerificationToken = generateVerificationToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Send verification email without password
-    const emailSent = await sendVerificationEmail(email, "User", "", newVerificationToken);
+    // Send verification email with user details including company name
+    const emailSent = await sendResendVerificationEmail(email, user.firstName, newVerificationToken, user.companyName);
 
     if (!emailSent) {
       return res.status(500).json({ error: "Failed to send verification email. Please try again." });

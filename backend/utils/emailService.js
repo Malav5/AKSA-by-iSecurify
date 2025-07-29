@@ -85,7 +85,7 @@ const sendVerificationEmail = async (email, firstName, password, verificationTok
 };
 
 // Send resend verification email (without password)
-const sendResendVerificationEmail = async (email, firstName, verificationToken) => {
+const sendResendVerificationEmail = async (email, firstName, verificationToken, companyName = null) => {
   try {
     const transporter = createTransporter();
 
@@ -105,7 +105,7 @@ const sendResendVerificationEmail = async (email, firstName, verificationToken) 
           <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
             <h2 style="color: #333; margin-bottom: 20px;">Email Verification Required</h2>
             <p style="color: #333; font-size: 16px; margin-bottom: 10px;">
-              <strong>Your Email:</strong> ${email}
+              <strong>Your Email:</strong> ${email}${companyName ? `<br/><strong>Company:</strong> ${companyName}` : ''}
             </p>
             <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
               Hello ${firstName}, you requested a new verification email for your AKSA Platform account. 
