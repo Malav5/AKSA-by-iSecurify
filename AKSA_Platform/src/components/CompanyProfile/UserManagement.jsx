@@ -35,10 +35,12 @@ const UserManagement = ({
     "Moksha": "bg-yellow-100 text-yellow-700"
   };
 
-  // Fetch admin-user assignments
+  // Fetch admin-user assignments and filter for current subadmin
   const fetchAdminAssignments = async () => {
     try {
       const token = localStorage.getItem("token");
+      const currentUserEmail = localStorage.getItem("currentUser");
+      // Fetch all assignments
       const response = await fetch("http://localhost:3000/api/agentMap/admin-user-assignments", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -47,35 +49,27 @@ const UserManagement = ({
       if (response.ok) {
         const data = await response.json();
         setAdminAssignments(data.assignments || []);
+        // Find the assignment for the current subadmin
+        const myAssignment = (data.assignments || []).find(a => a.admin.email === currentUserEmail);
+        if (myAssignment) {
+          setMembers(myAssignment.users || []);
+        } else {
+          setMembers([]);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch admin assignments:", error);
     }
   };
 
-  // Fetch users from backend
-  const fetchMembers = async () => {
-    setRefreshing(true);
-    try {
-      const users = await userServices.fetchMembers();
-      setMembers(users);
-      // Also fetch admin assignments
-      await fetchAdminAssignments();
-    } catch (error) {
-      showError("Failed to fetch users");
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   useEffect(() => {
-    fetchMembers();
-  }, []);
+    fetchAdminAssignments();
+  }, [location.pathname]);
 
   // Refresh data when component comes into focus (e.g., after returning from payment portal)
   useEffect(() => {
     const handleFocus = () => {
-      fetchMembers();
+      fetchAdminAssignments();
     };
 
     window.addEventListener('focus', handleFocus);
@@ -84,7 +78,7 @@ const UserManagement = ({
 
   // Refresh data when location changes (e.g., returning from another page)
   useEffect(() => {
-    fetchMembers();
+    fetchAdminAssignments();
   }, [location.pathname]);
 
   useEffect(() => {
@@ -119,7 +113,7 @@ const UserManagement = ({
   // When AddMemberModal closes, refresh the list
   const handleModalClose = () => {
     setShowAddMemberModal(false);
-    fetchMembers();
+    fetchAdminAssignments();
   };
 
   const handleDelete = async (id) => {
@@ -128,7 +122,7 @@ const UserManagement = ({
     try {
       await userServices.deleteUser(id);
       showSuccess("User deleted successfully");
-      fetchMembers(); // Refresh the user list
+      fetchAdminAssignments(); // Refresh the user list
     } catch (error) {
       showError("Failed to delete user");
     }
@@ -158,7 +152,7 @@ const UserManagement = ({
   };
 
   const handleRefresh = () => {
-    fetchMembers();
+    fetchAdminAssignments();
     showSuccess("User list refreshed");
   };
 
@@ -255,8 +249,8 @@ const UserManagement = ({
                   </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${isEmailVerified
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-yellow-100 text-yellow-700'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-yellow-100 text-yellow-700'
                       }`}>
                       {isEmailVerified ? 'Verified' : 'Pending'}
                     </span>
