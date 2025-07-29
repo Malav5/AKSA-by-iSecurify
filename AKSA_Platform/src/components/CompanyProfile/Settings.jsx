@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Bell, ArrowUpRight, Trash2, Moon, Sun, LogOut, Download, Globe, Eye } from "lucide-react";
+import { Bell, ArrowUpRight, Trash2, Moon, Sun, LogOut, Globe, Eye } from "lucide-react";
 
 const showToast = (msg, type = "info") => {
   const toast = document.createElement("div");
@@ -67,16 +67,14 @@ const Settings = () => {
     showToast(`Switched to ${theme === "light" ? "dark" : "light"} mode`, "success");
   };
 
-  const handleDownloadData = () => {
-    showToast("Your data download will start soon (placeholder)", "info");
-  };
+
 
   const handleLogoutAll = () => {
     showToast("Logged out of all devices (placeholder)", "success");
   };
 
   return (
-    <div className="max-w-2xl mx-auto animate-fade-in-up">
+    <div className="w-full max-w-6xl mx-auto animate-fade-in-up">
       <div className="mb-10 flex items-center gap-3">
         <Bell className="w-7 h-7 text-primary bg-secondary rounded-full p-1 shadow" />
         <h2 className="text-2xl font-bold text-gray-900">Opt-in notifications</h2>
@@ -92,53 +90,41 @@ const Settings = () => {
         <button className="text-teal-700 font-semibold hover:underline text-lg md:ml-8">Unsubscribe from this list</button>
       </div>
 
-      {/* Theme Toggle */}
-      <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 mb-6 shadow flex items-center gap-4 animate-fade-in-up">
-        <span className="inline-flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full">
-          {theme === "light" ? <Sun className="w-6 h-6 text-primary" /> : <Moon className="w-6 h-6 text-primary" />}
-        </span>
-        <div className="flex-1">
-          <div className="font-semibold text-gray-900">Theme</div>
-          <div className="text-gray-600 text-sm">Switch between light and dark mode</div>
+      {/* Settings Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Theme Toggle */}
+        <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 shadow flex items-center gap-4 animate-fade-in-up">
+          <span className="inline-flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full">
+            {theme === "light" ? <Sun className="w-6 h-6 text-primary" /> : <Moon className="w-6 h-6 text-primary" />}
+          </span>
+          <div className="flex-1">
+            <div className="font-semibold text-gray-900">Theme</div>
+            <div className="text-gray-600 text-sm">Switch between light and dark mode</div>
+          </div>
+          <button
+            className="px-4 py-2 rounded-lg font-semibold bg-primary text-white hover:bg-[#700070] transition shadow"
+            onClick={handleThemeToggle}
+          >
+            {theme === "light" ? "Enable Dark Mode" : "Enable Light Mode"}
+          </button>
         </div>
-        <button
-          className="px-4 py-2 rounded-lg font-semibold bg-primary text-white hover:bg-[#700070] transition shadow"
-          onClick={handleThemeToggle}
-        >
-          {theme === "light" ? "Enable Dark Mode" : "Enable Light Mode"}
-        </button>
-      </div>
 
-      {/* Session Management */}
-      <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 mb-6 shadow animate-fade-in-up">
-        <div className="flex items-center gap-3 mb-2">
-          <LogOut className="w-6 h-6 text-primary" />
-          <div className="font-semibold text-gray-900">Session Management</div>
+        {/* Session Management */}
+        <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 shadow animate-fade-in-up">
+          <div className="flex items-center gap-3 mb-2">
+            <LogOut className="w-6 h-6 text-primary" />
+            <div className="font-semibold text-gray-900">Session Management</div>
+          </div>
+          <div className="text-gray-600 text-sm mb-3">You are currently logged in on this device. For security, you can log out of all other devices.</div>
+          <button
+            className="px-4 py-2 rounded-lg font-semibold bg-primary text-white hover:bg-[#700070] transition shadow"
+            onClick={handleLogoutAll}
+          >
+            Log out of all devices
+          </button>
         </div>
-        <div className="text-gray-600 text-sm mb-3">You are currently logged in on this device. For security, you can log out of all other devices.</div>
-        <button
-          className="px-4 py-2 rounded-lg font-semibold bg-primary text-white hover:bg-[#700070] transition shadow"
-          onClick={handleLogoutAll}
-        >
-          Log out of all devices
-        </button>
-      </div>
 
-      {/* Download My Data */}
-      <div className="bg-white/80 backdrop-blur-lg border border-gray-200 rounded-2xl p-6 mb-6 shadow flex items-center gap-4 animate-fade-in-up">
-        <span className="inline-flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full">
-          <Download className="w-6 h-6 text-primary" />
-        </span>
-        <div className="flex-1">
-          <div className="font-semibold text-gray-900">Download My Data</div>
-          <div className="text-gray-600 text-sm">Download a copy of your account data for your records.</div>
-        </div>
-        <button
-          className="px-4 py-2 rounded-lg font-semibold bg-primary text-white hover:bg-[#700070] transition shadow"
-          onClick={handleDownloadData}
-        >
-          Download
-        </button>
+
       </div>
 
       {/* Privacy Controls */}

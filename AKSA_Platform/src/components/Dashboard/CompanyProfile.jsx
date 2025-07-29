@@ -220,14 +220,14 @@ const CompanyProfile = () => {
         <Sidebar />
       </aside>
 
-      <div className="flex-1 flex flex-col h-screen my-4">
-        <main className="flex-1 p-6 overflow-y-auto relative">
+      <div className="flex-1 flex flex-col h-screen">
+        <main className="flex-1 p-4 lg:p-6 overflow-y-auto relative">
           {/* Decorative SVG background */}
           <svg className="absolute left-0 top-0 w-full h-40 opacity-10 pointer-events-none z-0" viewBox="0 0 1440 320" fill="none">
             <path fill="#a78bfa" fillOpacity="0.2" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z" />
           </svg>
           {/* Tabs */}
-          <nav className="relative flex space-x-2 md:space-x-6 mb-8 bg-white/80 backdrop-blur-lg px-4 py-3 rounded-2xl shadow-lg z-10" style={{ overflow: 'visible' }}>
+          <nav className="relative flex space-x-2 md:space-x-6 mb-6 bg-white/80 backdrop-blur-lg px-4 py-3 rounded-2xl shadow-lg z-10" style={{ overflow: 'visible' }}>
             {/* Glider */}
             <div
               className="absolute top-1/2 -translate-y-1/2 h-[44px] bg-primary rounded-full z-0 transition-all duration-300"
@@ -257,7 +257,7 @@ const CompanyProfile = () => {
           </nav>
 
           {/* Tab Content */}
-          <div className="relative z-10">
+          <div className="relative z-10 max-w-7xl mx-auto">
             {activeTab === "member" && (
               showDomainsInline ? (
                 <DomainsInline setShowDomainsInline={setShowDomainsInline} />
