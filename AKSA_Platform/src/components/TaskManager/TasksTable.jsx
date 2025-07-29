@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BadgeCheck,
   ChevronDown,
@@ -6,6 +6,7 @@ import {
   Search,
   MoreHorizontal,
 } from "lucide-react";
+import { Menu, Transition, Listbox } from '@headlessui/react';
 import TaskDetail from "./TaskDetail";
 import {
   fetchAllTasks,
@@ -55,13 +56,66 @@ const getStatusStyle = (status) => {
       return "bg-gray-100 text-gray-800";
     case "Unassigned":
       return "bg-yellow-100 text-yellow-800";
+    case "Reopened":
+      return "bg-purple-100 text-purple-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
 };
 
 export default function TasksTable() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([
+    {
+      _id: "1",
+      name: "Check",
+      criticality: "Low",
+      priority: "Low",
+      status: "In Progress",
+      assignee: "Alice Johnson",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      _id: "2",
+      name: "check",
+      criticality: "Medium",
+      priority: "Medium",
+      status: "Resolved",
+      assignee: "Bob Smith",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      _id: "3",
+      name: "Check alerts",
+      criticality: "Low",
+      priority: "Low",
+      status: "In Progress",
+      assignee: "Charlie Davis",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      _id: "4",
+      name: "Check all rules",
+      criticality: "Medium",
+      priority: "Medium",
+      status: "Resolved",
+      assignee: "Dana Lane",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      _id: "5",
+      name: "vbn",
+      criticality: "High",
+      priority: "High",
+      status: "Reopened",
+      assignee: "Krina Patel (manager)",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  ]);
   const [sortField, setSortField] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,27 +123,34 @@ export default function TasksTable() {
   const [assignedTo, setAssignedTo] = useState("");
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
-  const [menuTaskId, setMenuTaskId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const menuRefs = useRef({});
-  const dropdownRefs = useRef({});
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const users = [
-    "Alice Johnson",
-    "Bob Smith",
-    "Charlie Davis",
-    "Dana Lane",
-    "Krina Patel (manager)",
+    { id: 0, name: "All", value: "" },
+    { id: 1, name: "Alice Johnson", value: "Alice Johnson" },
+    { id: 2, name: "Bob Smith", value: "Bob Smith" },
+    { id: 3, name: "Charlie Davis", value: "Charlie Davis" },
+    { id: 4, name: "Dana Lane", value: "Dana Lane" },
+    { id: 5, name: "Krina Patel (manager)", value: "Krina Patel (manager)" },
   ];
+
   const statuses = [
-    "Unassigned",
-    "To Do",
-    "In Progress",
-    "Resolved",
-    "Reopened",
+    { id: 0, name: "All", value: "" },
+    { id: 1, name: "Unassigned", value: "Unassigned" },
+    { id: 2, name: "To Do", value: "To Do" },
+    { id: 3, name: "In Progress", value: "In Progress" },
+    { id: 4, name: "Resolved", value: "Resolved" },
+    { id: 5, name: "Reopened", value: "Reopened" },
   ];
-  const priorities = ["Urgent", "High", "Medium", "Low"];
+
+  const priorities = [
+    { id: 0, name: "All", value: "" },
+    { id: 1, name: "Urgent", value: "Urgent" },
+    { id: 2, name: "High", value: "High" },
+    { id: 3, name: "Medium", value: "Medium" },
+    { id: 4, name: "Low", value: "Low" },
+  ];
 
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
@@ -131,12 +192,6 @@ export default function TasksTable() {
     loadTasks();
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = () => setMenuTaskId(null);
-    window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
-  }, []);
-
   const deleteTask = async (taskId) => {
     try {
       await deleteTaskById(taskId);
@@ -168,87 +223,91 @@ export default function TasksTable() {
     }
   };
 
-  const getDropdownPosition = (taskId) => {
-    const buttonElement = menuRefs.current[taskId];
-    const dropdownElement = dropdownRefs.current[taskId];
-    if (!buttonElement || !dropdownElement) return {};
-    const buttonRect = buttonElement.getBoundingClientRect();
-    const dropdownHeight = dropdownElement.offsetHeight;
-    const spaceBelow = window.innerHeight - buttonRect.bottom;
-    const spaceAbove = buttonRect.top;
-    if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
-      return {
-        bottom: "100%",
-        top: "auto",
-        right: "0",
-        boxShadow: "0 -2px 8px rgba(0,0,0,0.08)",
-      };
-    }
-    return {
-      top: "100%",
-      bottom: "auto",
-      right: "0",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    };
-  };
-
-  useEffect(() => {
-    if (menuTaskId) {
-      const position = getDropdownPosition(menuTaskId);
-      if (dropdownRefs.current[menuTaskId]) {
-        Object.assign(dropdownRefs.current[menuTaskId].style, position);
-      }
-    }
-  }, [menuTaskId, currentTasks]);
+  const FilterDropdown = ({ value, onChange, options, label }) => (
+    <Listbox value={value} onChange={onChange}>
+      {({ open }) => (
+        <div className="relative">
+          <Listbox.Label className="mr-2 font-semibold">{label}:</Listbox.Label>
+          <Listbox.Button className="relative w-40 bg-gray-50 border border-gray-300 text-gray-800 rounded px-3 py-2 text-left focus:ring-2 focus:ring-[#800080] focus:border-[#800080]">
+            <span className="block truncate">
+              {options.find(opt => opt.value === value)?.name || "All"}
+            </span>
+            <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+              <ChevronDown
+                className={`h-5 w-5 text-gray-400 transition-transform ${open ? 'transform rotate-180' : ''}`}
+                aria-hidden="true"
+              />
+            </span>
+          </Listbox.Button>
+          <Transition
+            show={open}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 scrollbar-hide overflow-auto focus:outline-none">
+              {options.map((option) => (
+                <Listbox.Option
+                  key={option.id}
+                  className={({ active }) =>
+                    `${
+                      active ? 'bg-secondary text-primary' : 'text-gray-900'
+                    } cursor-default select-none relative py-2 pl-3 pr-9`
+                  }
+                  value={option.value}
+                >
+                  {({ selected }) => (
+                    <>
+                      <span
+                        className={`${
+                          selected ? 'font-semibold' : 'font-normal'
+                        } block truncate`}
+                      >
+                        {option.name}
+                      </span>
+                      {selected && (
+                        <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-primary">
+                          <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </span>
+                      )}
+                    </>
+                  )}
+                </Listbox.Option>
+              ))}
+            </Listbox.Options>
+          </Transition>
+        </div>
+      )}
+    </Listbox>
+  );
 
   return (
     <div className="bg-white rounded-2xl shadow p-6 max-w-full overflow-hidden border border-gray-100">
-      <div className="flex flex-wrap gap-4 mb-4">
-        <div>
-          <label className="mr-2 font-semibold">Assigned To:</label>
-          <select
-            value={assignedTo}
-            onChange={(e) => setAssignedTo(e.target.value)}
-            className="bg-gray-50 border border-gray-300 text-gray-800 rounded px-3 py-2 focus:ring-2 focus:ring-[#800080] focus:border-[#800080]"
-          >
-            <option value="">All</option>
-            {users.map((user) => (
-              <option key={user} value={user}>
-                {user}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="mr-2 font-semibold">Status:</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="bg-gray-50 border border-gray-300 text-gray-800 rounded px-3 py-2 focus:ring-2 focus:ring-[#800080] focus:border-[#800080]"
-          >
-            <option value="">All</option>
-            {statuses.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="mr-2 font-semibold">Priority:</label>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            className="bg-gray-50 border border-gray-300 text-gray-800 rounded px-3 py-2 focus:ring-2 focus:ring-[#800080] focus:border-[#800080]"
-          >
-            <option value="">All</option>
-            {priorities.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="flex flex-wrap gap-4 mb-4 items-center">
+        <FilterDropdown
+          value={assignedTo}
+          onChange={setAssignedTo}
+          options={users}
+          label="Assigned To"
+        />
+        <FilterDropdown
+          value={status}
+          onChange={setStatus}
+          options={statuses}
+          label="Status"
+        />
+        <FilterDropdown
+          value={priority}
+          onChange={setPriority}
+          options={priorities}
+          label="Priority"
+        />
         <div className="relative w-full md:w-96">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="h-4 w-4 text-gray-400" />
@@ -265,7 +324,7 @@ export default function TasksTable() {
       <div className="overflow-x-auto border border-gray-200 rounded-xl">
         <div className="max-h-[400px] overflow-y-auto scrollbar-hide">
           <table className="w-full text-sm text-left">
-            <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
+            <thead className="bg-gray-100 text-gray-700 top-0 z-10">
               <tr>
                 {[
                   "name",
@@ -313,7 +372,7 @@ export default function TasksTable() {
                         task.criticality
                       )}`}
                     >
-                      {task.criticality}
+                      {task.criticality || "Unassigned"}
                     </span>
                   </td>
                   <td className="px-4 py-2">
@@ -322,7 +381,7 @@ export default function TasksTable() {
                         task.priority
                       )}`}
                     >
-                      {task.priority}
+                      {task.priority || "Unassigned"}
                     </span>
                   </td>
                   <td className="px-4 py-2">
@@ -331,7 +390,7 @@ export default function TasksTable() {
                         task.status
                       )}`}
                     >
-                      {task.status}
+                      {task.status || "Unassigned"}
                     </span>
                   </td>
                   <td className="px-4 py-2">{task.assignee || "Unassigned"}</td>
@@ -344,45 +403,50 @@ export default function TasksTable() {
                     ).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-2 relative">
-                    <button
-                      ref={(el) => (menuRefs.current[task._id] = el)}
-                      className="p-1 rounded-full hover:bg-gray-200"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMenuTaskId(
-                          menuTaskId === task._id ? null : task._id
-                        );
-                      }}
-                    >
-                      <MoreHorizontal className="w-5 h-5 text-gray-500" />
-                    </button>
-                    {menuTaskId === task._id && (
-                      <div
-                        ref={(el) => (dropdownRefs.current[task._id] = el)}
-                        className="absolute mt-1 w-32 bg-white border border-gray-200 rounded shadow-lg z-50"
-                      >
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedTask(task);
-                            setMenuTaskId(null);
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                        >
-                          View Details
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteTask(task._id);
-                            setMenuTaskId(null);
-                          }}
-                          className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm"
-                        >
-                          Delete
-                        </button>
+                    <Menu as="div" className="relative inline-block text-left">
+                      <div>
+                        <Menu.Button className="p-1 rounded-full hover:bg-gray-200">
+                          <MoreHorizontal className="w-5 h-5 text-gray-500" />
+                        </Menu.Button>
                       </div>
-                    )}
+                      <Transition
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 mt-2 w-32 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                          <div className="px-1 py-1">
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  onClick={() => setSelectedTask(task)}
+                                  className={`${
+                                    active ? 'bg-gray-100' : ''
+                                  } group flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-900`}
+                                >
+                                  View Details
+                                </button>
+                              )}
+                            </Menu.Item>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  onClick={() => deleteTask(task._id)}
+                                  className={`${
+                                    active ? 'bg-red-50' : ''
+                                  } group flex w-full items-center rounded-md px-2 py-2 text-sm text-red-600`}
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </Menu.Item>
+                          </div>
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
                   </td>
                 </tr>
               ))}

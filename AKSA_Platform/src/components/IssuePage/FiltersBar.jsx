@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 
 export default function FiltersBar({ onFilterChange, onCreateIssue }) {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-white border border-gray-100 rounded-xl shadow-sm px-4 py-3">
+    <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 px-4 py-3">
       {/* Left content — you can add filters here later */}
       <div className="flex-1 w-full md:w-auto">
         {/* Placeholder for filters if needed in future */}
