@@ -144,7 +144,7 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
                 value={memberData.companyName}
                 onChange={(e) => setMemberData({ ...memberData, companyName: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee8cee]/40 focus:border-[#800080]"
-                placeholder="Enter company name"
+                required
               />
             </div>
           )}
