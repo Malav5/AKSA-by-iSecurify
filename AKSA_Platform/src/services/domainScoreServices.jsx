@@ -910,16 +910,29 @@ export const calculateOverallRiskScore = (data) => {
 
 export const isValidDate = (d) => !isNaN(Date.parse(d));
 
-// Example scoring function for tech stack
+// Example scoring function for tech stack risk based on PHP version
 export function calculateTechRiskScore(data) {
-  // Basic example logic: give points based on PHP version
   const php = data.technologies.find((t) => t.slug === "php");
-  if (!php || !php.version) return 0;
 
-  const major = parseInt(php.version.split(".")[0], 10);
-  if (major >= 8) return 10; // Low risk
-  if (major >= 7) return 30; // Medium risk
-  return 50; // High risk
+  // No PHP detected or no version info – highest risk
+  if (!php || !php.version) return 50;
+
+  const versionParts = php.version.split(".");
+  const major = parseInt(versionParts[0], 10);
+  const minor = parseInt(versionParts[1] || "0", 10);
+
+  if (isNaN(major)) return 50;
+
+  // Risk scoring based on major (and minor) PHP version
+  if (major >= 8) {
+    if (minor >= 1) return 5;  // PHP 8.1+ — very low risk
+    return 10;                 // PHP 8.0 — low risk
+  } else if (major === 7) {
+    if (minor >= 4) return 30; // PHP 7.4 — medium risk (still used but near EOL)
+    return 40;                 // PHP 7.0–7.3 — high risk
+  } else {
+    return 50;                 // PHP 5.x or older — very high risk
+  }
 }
 
 // Example scoring function for SSL
