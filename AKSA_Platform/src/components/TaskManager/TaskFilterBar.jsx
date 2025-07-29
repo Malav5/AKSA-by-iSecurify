@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 
 export default function TaskFiltersBar({ onFilterChange, onCreateTask }) {
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4 bg-white border border-gray-100 rounded-xl shadow-sm px-4 py-3">
+    <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4 px-4 py-3">
       <div className="flex flex-wrap items-center gap-4">
         {/* Placeholder for future filters */}
       </div>

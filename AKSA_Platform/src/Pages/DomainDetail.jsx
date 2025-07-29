@@ -143,7 +143,7 @@ const StatusBadge = ({ status, text }) => {
       case 'warning':
         return 'bg-amber-100 text-amber-800 border-amber-200';
       case 'info':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-secondary text-primary border-primary';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -556,8 +556,8 @@ const DomainDetail = () => {
 
             {/* Empty State */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
-              <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-full p-6 mb-6 inline-block">
-                <Globe className="w-12 h-12 text-purple-600" />
+              <div className="bg-gradient-to-r from-[#ee8cee] to-[#e6bfe6] rounded-full p-6 mb-6 inline-block">
+                <Globe className="w-12 h-12 text-primary" />
                   </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">
                 No Domain Selected

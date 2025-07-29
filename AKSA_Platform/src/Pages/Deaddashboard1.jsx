@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Dashboard/Sidebar";
 import Header from "../components/Dashboard/Header";
@@ -34,6 +34,18 @@ ChartJS.register(
 const Deaddashboard1 = () => {
   const navigate = useNavigate();
   const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const [userPlan, setUserPlan] = useState(null);
+  const [domain, setDomain] = useState(null);
+
+  useEffect(() => {
+    // Example: fetch user plan from localStorage or API
+    const user = JSON.parse(localStorage.getItem("user"));
+    setUserPlan(user?.plan || "Freemium");
+
+    // Example: fetch domain from localStorage or API
+    const domainValue = localStorage.getItem("domain");
+    setDomain(domainValue || "default-domain");
+  }, []);
 
   const handleQuestionnaireSubmit = () => {
     setShowQuestionnaire(false);
@@ -66,16 +78,14 @@ const Deaddashboard1 = () => {
           </div> */}
 
           <div className="mt-6 space-y-6 bg-white ">
-     
-              <RiskDashboard />
-    
+            <RiskDashboard />
           </div>
 
           <div className="my-6 space-y-6 bg-white">
             <div className="p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 mb-10">
               <ComplianceScoreCard />
               <div className="col-span-2">
-                <SuggestedProducts />
+                <SuggestedProducts domain={domain} userPlan={userPlan} />
               </div>
             </div>
           </div>
