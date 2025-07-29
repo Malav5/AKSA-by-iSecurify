@@ -48,7 +48,7 @@ router.post("/register", async (req, res) => {
     await newUser.save();
 
     // Send verification email
-    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken);
+    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken, companyName);
 
     if (!emailSent) {
       // If email fails to send, delete the user and return error

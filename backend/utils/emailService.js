@@ -18,7 +18,7 @@ const generateVerificationToken = () => {
 };
 
 // Send verification email
-const sendVerificationEmail = async (email, firstName, password, verificationToken) => {
+const sendVerificationEmail = async (email, firstName, password, verificationToken, companyName = null) => {
   try {
     const transporter = createTransporter();
 
@@ -39,7 +39,7 @@ const sendVerificationEmail = async (email, firstName, password, verificationTok
             <h2 style="color: #333; margin-bottom: 20px;">Welcome to AKSA, ${firstName}!</h2>
             <p style="color: #333; font-size: 16px; margin-bottom: 10px;">
               <strong>Your Email:</strong> ${email}<br/>
-              <strong>Your Password:</strong> ${password}
+              <strong>Your Password:</strong> ${password}${companyName ? `<br/><strong>Company:</strong> ${companyName}` : ''}
             </p>
             <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
               Thank you for signing up for AKSA Platform. To complete your registration and start using our security services, 

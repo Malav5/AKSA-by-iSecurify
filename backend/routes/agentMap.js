@@ -312,7 +312,7 @@ router.post("/add-user", authMiddleware, async (req, res) => {
     });
 
     // Send verification email
-    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken);
+    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken, currentUser.companyName);
     if (!emailSent) {
       // If email fails to send, delete the user and return error
       await User.findByIdAndDelete(newUser._id);
