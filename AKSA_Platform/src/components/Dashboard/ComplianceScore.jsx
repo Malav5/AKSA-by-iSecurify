@@ -7,22 +7,35 @@ const ComplianceScore = () => {
   const [questionnaireSubmitted, setQuestionnaireSubmitted] = useState(false);
   const [userKey, setUserKey] = useState("");
 
-  // Helper to get user-specific key
+  // Improved user key generation with better error handling
   const getUserKey = (key) => {
-    const currentUser = localStorage.getItem("currentUser");
-    const userPrefix = currentUser ? currentUser.split("@")[0] : "";
-    return `${userPrefix}_${key}`;
+    try {
+      const currentUser = localStorage.getItem("currentUser");
+      if (!currentUser) {
+        console.warn("No current user found in localStorage");
+        return `anonymous_${key}`;
+      }
+      // Use the full email as the key to avoid conflicts
+      const sanitizedEmail = currentUser.replace(/[^a-zA-Z0-9@._-]/g, '_');
+      return `user_${sanitizedEmail}_${key}`;
+    } catch (error) {
+      console.error("Error generating user key:", error);
+      return `error_${key}`;
+    }
   };
 
   // On mount and when user changes, check if questionnaire is submitted
   useEffect(() => {
-    const currentUser = localStorage.getItem("currentUser");
-    const userPrefix = currentUser ? currentUser.split("@")[0] : "";
-    setUserKey(userPrefix);
-    const submittedFlag = localStorage.getItem(
-      `${userPrefix}_questionnaireSubmitted`
-    );
-    setQuestionnaireSubmitted(submittedFlag === "true");
+    try {
+      const currentUser = localStorage.getItem("currentUser");
+      const userPrefix = currentUser ? currentUser.replace(/[^a-zA-Z0-9@._-]/g, '_') : "anonymous";
+      setUserKey(userPrefix);
+      const submittedFlag = localStorage.getItem(getUserKey("questionnaireSubmitted"));
+      setQuestionnaireSubmitted(submittedFlag === "true");
+    } catch (error) {
+      console.error("Error checking questionnaire submission status:", error);
+      setQuestionnaireSubmitted(false);
+    }
   }, [localStorage.getItem("currentUser")]);
 
   // Listen for storage events to update view live
@@ -34,9 +47,45 @@ const ComplianceScore = () => {
         );
       }
     };
+
+    const handleQuestionnaireSubmitted = (e) => {
+      console.log("Questionnaire submitted event received in ComplianceScore:", e.detail);
+      setQuestionnaireSubmitted(true);
+    };
+
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("questionnaireSubmitted", handleQuestionnaireSubmitted);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("questionnaireSubmitted", handleQuestionnaireSubmitted);
+    };
   }, [userKey]);
+
+  // Check for user changes and reload data
+  useEffect(() => {
+    const handleUserChange = () => {
+      try {
+        const currentUser = localStorage.getItem("currentUser");
+        const userPrefix = currentUser ? currentUser.replace(/[^a-zA-Z0-9@._-]/g, '_') : "anonymous";
+        setUserKey(userPrefix);
+        const submittedFlag = localStorage.getItem(getUserKey("questionnaireSubmitted"));
+        setQuestionnaireSubmitted(submittedFlag === "true");
+      } catch (error) {
+        console.error("Error handling user change:", error);
+      }
+    };
+
+    // Check for user changes every 5 seconds
+    const interval = setInterval(() => {
+      const currentUser = localStorage.getItem("currentUser");
+      if (currentUser !== getUserKey("currentUser")) {
+        handleUserChange();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Render logic
   if (questionnaireSubmitted) {
