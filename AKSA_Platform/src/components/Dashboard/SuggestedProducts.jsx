@@ -7,7 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   LabelList,
-  Cell
+  Cell,
 } from "recharts";
 import QueAns, { questions as questionnaireQuestions } from "./QueAns";
 import { useNavigate } from "react-router-dom";
@@ -30,12 +30,14 @@ const SOLUTION_DESCRIPTIONS = {
   SAT: "Security Awareness Training - Educates employees on security best practices and threat awareness.",
   IRM: "Incident Response Management - Streamlines the process of handling security incidents.",
   ITAM: "IT Asset Management - Tracks and manages IT assets throughout their lifecycle.",
-  MSOAR: "Managed Security Operations and Response - Provides 24/7 security monitoring and response.",
+  MSOAR:
+    "Managed Security Operations and Response - Provides 24/7 security monitoring and response.",
   CSM: "Configuration Security Management - Ensures secure configuration of systems and applications.",
 };
 
 const getBarColor = (score, index, selectedSolutions) => {
-  const relatedSolutions = questionnaireQuestions[index]?.relatedSolutions || [];
+  const relatedSolutions =
+    questionnaireQuestions[index]?.relatedSolutions || [];
 
   if (selectedSolutions.some((sol) => relatedSolutions.includes(sol))) {
     return "#8b5cf6"; // Purple highlight
@@ -48,7 +50,17 @@ const getBarColor = (score, index, selectedSolutions) => {
 };
 
 const YOUR_SOLUTIONS = ["Freemium"];
-const PURCHASE_SOLUTIONS = ["TVM", "MFA", "SEM", "EBM", "SAT", "IRM", "ITAM", "MSOAR", "CSM"];
+const PURCHASE_SOLUTIONS = [
+  "TVM",
+  "MFA",
+  "SEM",
+  "EBM",
+  "SAT",
+  "IRM",
+  "ITAM",
+  "MSOAR",
+  "CSM",
+];
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -69,11 +81,11 @@ const SolutionTooltip = ({ solution, position, buttonRect }) => {
   if (!buttonRect) return null;
 
   const tooltipStyle = {
-    position: 'fixed',
+    position: "fixed",
     zIndex: 99999,
     top: buttonRect.top + buttonRect.height / 2,
     left: position === "right" ? buttonRect.right + 12 : buttonRect.left - 200,
-    transform: 'translateY(-50%)',
+    transform: "translateY(-50%)",
   };
 
   const tooltipContent = (
@@ -81,10 +93,10 @@ const SolutionTooltip = ({ solution, position, buttonRect }) => {
       className="bg-white border border-gray-200 rounded-xl shadow-2xl p-4 w-48 md:w-56 backdrop-blur-sm"
       style={tooltipStyle}
     >
-      <h3 className="font-bold text-gray-800 mb-2 text-sm">
-        {solution}
-      </h3>
-      <p className="text-xs text-gray-600 leading-relaxed">{SOLUTION_DESCRIPTIONS[solution]}</p>
+      <h3 className="font-bold text-gray-800 mb-2 text-sm">{solution}</h3>
+      <p className="text-xs text-gray-600 leading-relaxed">
+        {SOLUTION_DESCRIPTIONS[solution]}
+      </p>
     </div>
   );
 
@@ -93,6 +105,13 @@ const SolutionTooltip = ({ solution, position, buttonRect }) => {
 
 const SuggestedProducts = ({ domain }) => {
   const navigate = useNavigate();
+
+  // Fetch userPlan from localStorage
+  const [userPlan, setUserPlan] = useState(null);
+  useEffect(() => {
+    const plan = localStorage.getItem("plan");
+    setUserPlan(plan || "Freemium");
+  }, []);
 
   // Improved user key generation with better error handling
   const getUserKey = (key) => {
@@ -103,7 +122,7 @@ const SuggestedProducts = ({ domain }) => {
         return `anonymous_${key}`;
       }
       // Use the full email as the key to avoid conflicts
-      const sanitizedEmail = currentUser.replace(/[^a-zA-Z0-9@._-]/g, '_');
+      const sanitizedEmail = currentUser.replace(/[^a-zA-Z0-9@._-]/g, "_");
       return `user_${sanitizedEmail}_${key}`;
     } catch (error) {
       console.error("Error generating user key:", error);
@@ -126,17 +145,24 @@ const SuggestedProducts = ({ domain }) => {
 
     // Check each question and suggest solutions based on low scores
     if (answers.q1 === 0 || answers.q2 === 0) suggestions.push("ITAM");
-    if (answers.q3 === 0 || answers.q4 === 0 || answers.q12 === 0) suggestions.push("CSM");
-    if (answers.q5 === 0 || answers.q6 === 0 || answers.q18 === 0) suggestions.push("MSOAR");
-    if (answers.q7 === 0 || answers.q17 === 0 || answers.q20 === 0) suggestions.push("TVM");
-    if (answers.q8 === 0 || answers.q9 === 0 || answers.q10 === 0) suggestions.push("SEM");
+    if (answers.q3 === 0 || answers.q4 === 0 || answers.q12 === 0)
+      suggestions.push("CSM");
+    if (answers.q5 === 0 || answers.q6 === 0 || answers.q18 === 0)
+      suggestions.push("MSOAR");
+    if (answers.q7 === 0 || answers.q17 === 0 || answers.q20 === 0)
+      suggestions.push("TVM");
+    if (answers.q8 === 0 || answers.q9 === 0 || answers.q10 === 0)
+      suggestions.push("SEM");
     if (answers.q11 === 0 || answers.q16 === 0) suggestions.push("IRM");
     if (answers.q13 === 0) suggestions.push("SAT");
     if (answers.q14 === 0 || answers.q15 === 0) suggestions.push("EBM");
     if (answers.q19 === 0) suggestions.push("MFA");
 
     // Calculate overall score to suggest additional solutions
-    const totalScore = Object.values(answers).reduce((sum, val) => (val !== null && val !== -1 ? sum + val : sum), 0);
+    const totalScore = Object.values(answers).reduce(
+      (sum, val) => (val !== null && val !== -1 ? sum + val : sum),
+      0
+    );
     const percentage = Math.round((totalScore / 200) * 100);
 
     // If overall score is low, suggest more comprehensive solutions
@@ -151,8 +177,12 @@ const SuggestedProducts = ({ domain }) => {
 
   const loadAnswersAndData = () => {
     try {
-      const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
-      const savedSubmitted = localStorage.getItem(getUserKey("questionnaireSubmitted"));
+      const savedAnswers = localStorage.getItem(
+        getUserKey("domainHealthAnswers")
+      );
+      const savedSubmitted = localStorage.getItem(
+        getUserKey("questionnaireSubmitted")
+      );
 
       if (savedAnswers && savedSubmitted === "true") {
         const parsedAnswers = JSON.parse(savedAnswers);
@@ -184,23 +214,34 @@ const SuggestedProducts = ({ domain }) => {
     loadAnswersAndData();
 
     const handleStorageChange = (event) => {
-      if (event.key === getUserKey("domainHealthAnswers") ||
-        event.key === getUserKey("questionnaireSubmitted")) {
+      if (
+        event.key === getUserKey("domainHealthAnswers") ||
+        event.key === getUserKey("questionnaireSubmitted")
+      ) {
         loadAnswersAndData();
       }
     };
 
     const handleQuestionnaireSubmitted = (e) => {
-      console.log("Questionnaire submitted event received in SuggestedProducts:", e.detail);
+      console.log(
+        "Questionnaire submitted event received in SuggestedProducts:",
+        e.detail
+      );
       loadAnswersAndData();
     };
 
     window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("questionnaireSubmitted", handleQuestionnaireSubmitted);
+    window.addEventListener(
+      "questionnaireSubmitted",
+      handleQuestionnaireSubmitted
+    );
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("questionnaireSubmitted", handleQuestionnaireSubmitted);
+      window.removeEventListener(
+        "questionnaireSubmitted",
+        handleQuestionnaireSubmitted
+      );
     };
   }, []);
 
@@ -236,7 +277,9 @@ const SuggestedProducts = ({ domain }) => {
 
   const handleSolutionClick = (solution) => {
     setSelectedSolutions((prev) =>
-      prev.includes(solution) ? prev.filter((s) => s !== solution) : [...prev, solution]
+      prev.includes(solution)
+        ? prev.filter((s) => s !== solution)
+        : [...prev, solution]
     );
   };
 
@@ -276,7 +319,9 @@ const SuggestedProducts = ({ domain }) => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-3">
           <div className="w-3 h-8 bg-gradient-to-b from-[#800080] to-[#d181d1] rounded-full"></div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Score Distribution</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+            Score Distribution
+          </h2>
         </div>
         <button
           onClick={handleBuyClick}
@@ -339,7 +384,10 @@ const SuggestedProducts = ({ domain }) => {
                   width={35}
                   interval={0}
                 />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: "#a5b4fc", opacity: 0.15 }} />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: "#a5b4fc", opacity: 0.15 }}
+                />
                 <Bar
                   dataKey="score"
                   radius={[4, 4, 0, 0]}
@@ -360,10 +408,13 @@ const SuggestedProducts = ({ domain }) => {
             <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-2 h-6 bg-blue-500 rounded-full"></div>
-                <h3 className="font-bold text-lg text-gray-800">Recommended for You</h3>
+                <h3 className="font-bold text-lg text-gray-800">
+                  Recommended for You
+                </h3>
               </div>
               <p className="text-gray-600 text-sm mb-3">
-                Based on your assessment, we recommend these solutions to improve your security posture:
+                Based on your assessment, we recommend these solutions to
+                improve your security posture:
               </p>
               <div className="flex gap-3 flex-wrap">
                 {recommendedProducts.map((sol) => (
@@ -383,24 +434,24 @@ const SuggestedProducts = ({ domain }) => {
             <div className="flex flex-col items-start">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-2 h-6 bg-emerald-500 rounded-full"></div>
-                <h3 className="font-bold text-lg md:text-xl text-gray-800">Your Solutions</h3>
+                <h3 className="font-bold text-lg md:text-xl text-gray-800">
+                  Your Solutions
+                </h3>
               </div>
               <div className="flex gap-3 md:gap-4 flex-wrap">
-                {YOUR_SOLUTIONS.map((sol) => (
-                  <button
-                    key={sol}
-                    className="bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                  >
-                    {sol}
-                  </button>
-                ))}
+                {/* Show user plan from localStorage */}
+                <button className="bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                  {userPlan}
+                </button>
               </div>
             </div>
 
             <div className="flex flex-col items-start">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-2 h-6 bg-purple-500 rounded-full"></div>
-                <h3 className="font-bold text-lg md:text-xl text-gray-800">Purchase Solutions</h3>
+                <h3 className="font-bold text-lg md:text-xl text-gray-800">
+                  Purchase Solutions
+                </h3>
               </div>
               <div className="flex gap-3 md:gap-4 flex-wrap">
                 {PURCHASE_SOLUTIONS.map((sol) => (
@@ -409,12 +460,13 @@ const SuggestedProducts = ({ domain }) => {
                     onClick={() => handleSolutionClick(sol)}
                     onMouseEnter={(e) => handleSolutionHover(sol, e)}
                     onMouseLeave={handleSolutionLeave}
-                    className={`relative rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md transition-all duration-300 transform hover:scale-105 ${selectedSolutions.includes(sol)
+                    className={`relative rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md transition-all duration-300 transform hover:scale-105 ${
+                      selectedSolutions.includes(sol)
                         ? "bg-gradient-to-r from-[#800080] to-[#a242a2] text-white hover:from-purple-700 hover:to-blue-700 shadow-lg"
                         : recommendedProducts.includes(sol)
-                          ? "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-2 border-blue-300"
-                          : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 border border-gray-300"
-                      }`}
+                        ? "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-2 border-blue-300"
+                        : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 border border-gray-300"
+                    }`}
                   >
                     {sol}
                     {recommendedProducts.includes(sol) && (

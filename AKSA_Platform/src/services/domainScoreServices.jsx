@@ -1,5 +1,5 @@
-import axios from 'axios';
-import BASE_URL from "./api"
+import axios from "axios";
+import BASE_URL from "./api";
 // const BASE_URL = "http://localhost:3001/api";
 // Helper function to get rating based on score
 export const getRating = (score) => {
@@ -17,16 +17,19 @@ export const calculatePatchingScore = (technologies) => {
   let achievedPoints = 0;
   let maximumPoints = 0;
 
-  technologies.forEach(tech => {
+  technologies.forEach((tech) => {
     if (tech && tech.version) {
       // Base points for having a version
       achievedPoints += 2;
       maximumPoints += 2;
 
       // Bonus points for version quality
-      if (tech.version.toLowerCase().includes('latest')) {
+      if (tech.version.toLowerCase().includes("latest")) {
         achievedPoints += 2;
-      } else if (tech.version.toLowerCase().includes('stable') || tech.version.toLowerCase().includes('lts')) {
+      } else if (
+        tech.version.toLowerCase().includes("stable") ||
+        tech.version.toLowerCase().includes("lts")
+      ) {
         achievedPoints += 1;
       }
       maximumPoints += 2; // Max possible bonus points
@@ -38,9 +41,7 @@ export const calculatePatchingScore = (technologies) => {
   });
 
   // Calculate score out of 10
-  const score = maximumPoints > 0
-    ? (achievedPoints / maximumPoints) * 10
-    : 0;
+  const score = maximumPoints > 0 ? (achievedPoints / maximumPoints) * 10 : 0;
 
   return parseFloat(score.toFixed(1));
 };
@@ -54,7 +55,9 @@ export const calculateAppSecurityScore = async (domain) => {
 
     for (const endpoint of endpoints) {
       try {
-        const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
+        const response = await axios.get(
+          `${BASE_URL}${endpoint}?url=${domain}`
+        );
         const data = response.data;
 
         let endpointScore = 0;
@@ -79,7 +82,9 @@ export const calculateAppSecurityScore = async (domain) => {
       }
     }
 
-    return validEndpoints > 0 ? parseFloat((totalScore / validEndpoints).toFixed(1)) : 0;
+    return validEndpoints > 0
+      ? parseFloat((totalScore / validEndpoints).toFixed(1))
+      : 0;
   } catch (error) {
     console.error("Error calculating application security score:", error);
     return 0;
@@ -95,7 +100,9 @@ export const calculateWebEncryptionScore = async (domain) => {
 
     for (const endpoint of endpoints) {
       try {
-        const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
+        const response = await axios.get(
+          `${BASE_URL}${endpoint}?url=${domain}`
+        );
         const data = response.data;
 
         let endpointScore = 0;
@@ -117,7 +124,9 @@ export const calculateWebEncryptionScore = async (domain) => {
       }
     }
 
-    return validEndpoints > 0 ? parseFloat((totalScore / validEndpoints).toFixed(1)) : 0;
+    return validEndpoints > 0
+      ? parseFloat((totalScore / validEndpoints).toFixed(1))
+      : 0;
   } catch (error) {
     console.error("Error calculating web encryption score:", error);
     return 0;
@@ -133,7 +142,9 @@ export const calculateNetworkFilteringScore = async (domain) => {
 
     for (const endpoint of endpoints) {
       try {
-        const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
+        const response = await axios.get(
+          `${BASE_URL}${endpoint}?url=${domain}`
+        );
         const data = response.data;
 
         let endpointScore = 0;
@@ -155,7 +166,9 @@ export const calculateNetworkFilteringScore = async (domain) => {
       }
     }
 
-    return validEndpoints > 0 ? parseFloat((totalScore / validEndpoints).toFixed(1)) : 0;
+    return validEndpoints > 0
+      ? parseFloat((totalScore / validEndpoints).toFixed(1))
+      : 0;
   } catch (error) {
     console.error("Error calculating network filtering score:", error);
     return 0;
@@ -171,7 +184,9 @@ export const calculateBreachEventsScore = async (domain) => {
 
     for (const endpoint of endpoints) {
       try {
-        const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
+        const response = await axios.get(
+          `${BASE_URL}${endpoint}?url=${domain}`
+        );
         const data = response.data;
 
         let endpointScore = 0;
@@ -193,7 +208,9 @@ export const calculateBreachEventsScore = async (domain) => {
       }
     }
 
-    return validEndpoints > 0 ? parseFloat((totalScore / validEndpoints).toFixed(1)) : 0;
+    return validEndpoints > 0
+      ? parseFloat((totalScore / validEndpoints).toFixed(1))
+      : 0;
   } catch (error) {
     console.error("Error calculating breach events score:", error);
     return 0;
@@ -209,7 +226,9 @@ export const calculateSystemReputationScore = async (domain) => {
 
     for (const endpoint of endpoints) {
       try {
-        const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
+        const response = await axios.get(
+          `${BASE_URL}${endpoint}?url=${domain}`
+        );
         const data = response.data;
 
         let endpointScore = 0;
@@ -231,7 +250,9 @@ export const calculateSystemReputationScore = async (domain) => {
       }
     }
 
-    return validEndpoints > 0 ? parseFloat((totalScore / validEndpoints).toFixed(1)) : 0;
+    return validEndpoints > 0
+      ? parseFloat((totalScore / validEndpoints).toFixed(1))
+      : 0;
   } catch (error) {
     console.error("Error calculating system reputation score:", error);
     return 0;
@@ -247,7 +268,9 @@ export const calculateDnsSecurityScore = async (domain) => {
 
     for (const endpoint of endpoints) {
       try {
-        const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
+        const response = await axios.get(
+          `${BASE_URL}${endpoint}?url=${domain}`
+        );
         const data = response.data;
 
         let endpointScore = 0;
@@ -269,7 +292,9 @@ export const calculateDnsSecurityScore = async (domain) => {
       }
     }
 
-    return validEndpoints > 0 ? parseFloat((totalScore / validEndpoints).toFixed(1)) : 0;
+    return validEndpoints > 0
+      ? parseFloat((totalScore / validEndpoints).toFixed(1))
+      : 0;
   } catch (error) {
     console.error("Error calculating DNS security score:", error);
     return 0;
@@ -285,7 +310,9 @@ export const calculateSystemHostingScore = async (domain) => {
 
     for (const endpoint of endpoints) {
       try {
-        const response = await axios.get(`${BASE_URL}${endpoint}?url=${domain}`);
+        const response = await axios.get(
+          `${BASE_URL}${endpoint}?url=${domain}`
+        );
         const data = response.data;
 
         let endpointScore = 0;
@@ -307,7 +334,9 @@ export const calculateSystemHostingScore = async (domain) => {
       }
     }
 
-    return validEndpoints > 0 ? parseFloat((totalScore / validEndpoints).toFixed(1)) : 0;
+    return validEndpoints > 0
+      ? parseFloat((totalScore / validEndpoints).toFixed(1))
+      : 0;
   } catch (error) {
     console.error("Error calculating system hosting score:", error);
     return 0;
@@ -326,13 +355,13 @@ const calculateHttpSecurityScore = (data) => {
 
   // Other security headers
   const securityHeaders = [
-    { key: 'secureCookies', weight: 1 },
-    { key: 'xssProtection', weight: 1 },
-    { key: 'contentSecurityPolicy', weight: 1.5 },
-    { key: 'frameOptions', weight: 1 }
+    { key: "secureCookies", weight: 1 },
+    { key: "xssProtection", weight: 1 },
+    { key: "contentSecurityPolicy", weight: 1.5 },
+    { key: "frameOptions", weight: 1 },
   ];
 
-  securityHeaders.forEach(header => {
+  securityHeaders.forEach((header) => {
     maximumPoints += header.weight;
     if (data[header.key]) achievedPoints += header.weight;
   });
@@ -349,17 +378,17 @@ const calculateHeadersScore = (data) => {
 
   // Critical headers get more weight
   const headers = [
-    { key: 'strictTransportSecurity', weight: 2 },
-    { key: 'contentSecurityPolicy', weight: 2 },
-    { key: 'xContentTypeOptions', weight: 1 },
-    { key: 'xFrameOptions', weight: 1 },
-    { key: 'referrerPolicy', weight: 1 },
-    { key: 'permissionsPolicy', weight: 1 },
-    { key: 'xXssProtection', weight: 1 },
-    { key: 'expectCt', weight: 1 }
+    { key: "strictTransportSecurity", weight: 2 },
+    { key: "contentSecurityPolicy", weight: 2 },
+    { key: "xContentTypeOptions", weight: 1 },
+    { key: "xFrameOptions", weight: 1 },
+    { key: "referrerPolicy", weight: 1 },
+    { key: "permissionsPolicy", weight: 1 },
+    { key: "xXssProtection", weight: 1 },
+    { key: "expectCt", weight: 1 },
   ];
 
-  headers.forEach(header => {
+  headers.forEach((header) => {
     maximumPoints += header.weight;
     if (data[header.key]) achievedPoints += header.weight;
   });
@@ -396,8 +425,8 @@ const calculateHstsScore = (data) => {
   return parseFloat(score.toFixed(1));
 };
 
-const calculateSslScore = (data) => {
-  if (!data) return 0;
+export const calculateSslScore = (data) => {
+  if (!data || typeof data !== "object") return 0;
   let achievedPoints = 0;
   let maximumPoints = 0;
 
@@ -410,7 +439,9 @@ const calculateSslScore = (data) => {
     maximumPoints += 1;
 
     if (data.expiryDate) {
-      const daysUntilExpiry = Math.floor((new Date(data.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+      const daysUntilExpiry = Math.floor(
+        (new Date(data.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)
+      );
       if (daysUntilExpiry > 90) achievedPoints += 2;
       else if (daysUntilExpiry > 30) achievedPoints += 1;
       maximumPoints += 2;
@@ -471,7 +502,7 @@ const calculatePortsScore = (data) => {
   const keySecurePorts = [443, 22];
   maximumPoints += keySecurePorts.length * 1.5;
   if (data.securePorts) {
-    keySecurePorts.forEach(port => {
+    keySecurePorts.forEach((port) => {
       if (data.securePorts.includes(port)) {
         achievedPoints += 1.5;
       }
@@ -482,7 +513,7 @@ const calculatePortsScore = (data) => {
   const dangerousPorts = [21, 23, 3389, 445, 1433, 3306, 5432];
   maximumPoints += dangerousPorts.length;
   if (data.closedPorts) {
-    dangerousPorts.forEach(port => {
+    dangerousPorts.forEach((port) => {
       if (data.closedPorts.includes(port)) {
         achievedPoints += 1;
       }
@@ -550,16 +581,19 @@ const calculateThreatsScore = (data) => {
   const maxPointsPerThreatType = 2;
 
   maximumPoints += maxPointsPerThreatType; // activeThreats
-  if (!data.activeThreats || data.activeThreats.length === 0) achievedPoints += maxPointsPerThreatType;
+  if (!data.activeThreats || data.activeThreats.length === 0)
+    achievedPoints += maxPointsPerThreatType;
 
   maximumPoints += maxPointsPerThreatType; // recentBreaches
-  if (!data.recentBreaches || data.recentBreaches.length === 0) achievedPoints += maxPointsPerThreatType;
+  if (!data.recentBreaches || data.recentBreaches.length === 0)
+    achievedPoints += maxPointsPerThreatType;
 
   maximumPoints += maxPointsPerThreatType; // malwareDetected
   if (!data.malwareDetected) achievedPoints += maxPointsPerThreatType;
 
   maximumPoints += maxPointsPerThreatType; // phishingAttempts
-  if (!data.phishingAttempts || data.phishingAttempts.length === 0) achievedPoints += maxPointsPerThreatType;
+  if (!data.phishingAttempts || data.phishingAttempts.length === 0)
+    achievedPoints += maxPointsPerThreatType;
 
   // Normalize to a 0-10 score
   const score = maximumPoints > 0 ? (achievedPoints / maximumPoints) * 10 : 0;
@@ -579,19 +613,24 @@ const calculateBlockListsScore = (data) => {
   const maxPointsPerBlockListType = 2;
 
   maximumPoints += maxPointsPerBlockListType; // spamhaus
-  if (!data.spamhaus || data.spamhaus.length === 0) achievedPoints += maxPointsPerBlockListType;
+  if (!data.spamhaus || data.spamhaus.length === 0)
+    achievedPoints += maxPointsPerBlockListType;
 
   maximumPoints += maxPointsPerBlockListType; // surbl
-  if (!data.surbl || data.surbl.length === 0) achievedPoints += maxPointsPerBlockListType;
+  if (!data.surbl || data.surbl.length === 0)
+    achievedPoints += maxPointsPerBlockListType;
 
   maximumPoints += maxPointsPerBlockListType; // uribl
-  if (!data.uribl || data.uribl.length === 0) achievedPoints += maxPointsPerBlockListType;
+  if (!data.uribl || data.uribl.length === 0)
+    achievedPoints += maxPointsPerBlockListType;
 
   maximumPoints += maxPointsPerBlockListType; // dnsbl
-  if (!data.dnsbl || data.dnsbl.length === 0) achievedPoints += maxPointsPerBlockListType;
+  if (!data.dnsbl || data.dnsbl.length === 0)
+    achievedPoints += maxPointsPerBlockListType;
 
   maximumPoints += maxPointsPerBlockListType; // sorbs
-  if (!data.sorbs || data.sorbs.length === 0) achievedPoints += maxPointsPerBlockListType;
+  if (!data.sorbs || data.sorbs.length === 0)
+    achievedPoints += maxPointsPerBlockListType;
 
   // Normalize to a 0-10 score
   const score = maximumPoints > 0 ? (achievedPoints / maximumPoints) * 10 : 0;
@@ -604,7 +643,6 @@ const calculateThreatsReputationScore = (data) => {
   let maximumPoints = 0;
 
   if (data.reputationScore !== undefined) {
-
     const normalizedScore = data.reputationScore / 10;
     return parseFloat(normalizedScore.toFixed(1));
   }
@@ -612,20 +650,24 @@ const calculateThreatsReputationScore = (data) => {
   const pointsPerAbsence = 1.5; // Points for each type of threat absence
 
   maximumPoints += pointsPerAbsence; // activeThreats
-  if (!data.activeThreats || data.activeThreats.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.activeThreats || data.activeThreats.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   maximumPoints += pointsPerAbsence; // recentBreaches
-  if (!data.recentBreaches || data.recentBreaches.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.recentBreaches || data.recentBreaches.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   maximumPoints += pointsPerAbsence; // malwareDetected
   if (!data.malwareDetected) achievedPoints += pointsPerAbsence;
 
   maximumPoints += pointsPerAbsence; // phishingAttempts
-  if (!data.phishingAttempts || data.phishingAttempts.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.phishingAttempts || data.phishingAttempts.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   const pointsPerAbsenceSuspicious = 1; // Slightly less weight for suspicious activity
   maximumPoints += pointsPerAbsenceSuspicious; // suspiciousActivity
-  if (!data.suspiciousActivity || data.suspiciousActivity.length === 0) achievedPoints += pointsPerAbsenceSuspicious;
+  if (!data.suspiciousActivity || data.suspiciousActivity.length === 0)
+    achievedPoints += pointsPerAbsenceSuspicious;
 
   // Normalize to a 0-10 score
   const score = maximumPoints > 0 ? (achievedPoints / maximumPoints) * 10 : 0;
@@ -642,25 +684,32 @@ const calculateBlockListsReputationScore = (data) => {
   const pointsPerAbsence = 1.5; // Points for each block list type absence
 
   maximumPoints += pointsPerAbsence; // spamhaus
-  if (!data.spamhaus || data.spamhaus.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.spamhaus || data.spamhaus.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   maximumPoints += pointsPerAbsence; // surbl
-  if (!data.surbl || data.surbl.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.surbl || data.surbl.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   maximumPoints += pointsPerAbsence; // uribl
-  if (!data.uribl || data.uribl.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.uribl || data.uribl.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   maximumPoints += pointsPerAbsence; // dnsbl
-  if (!data.dnsbl || data.dnsbl.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.dnsbl || data.dnsbl.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   maximumPoints += pointsPerAbsence; // sorbs
-  if (!data.sorbs || data.sorbs.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.sorbs || data.sorbs.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   maximumPoints += pointsPerAbsence; // abuseipdb
-  if (!data.abuseipdb || data.abuseipdb.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.abuseipdb || data.abuseipdb.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   maximumPoints += pointsPerAbsence; // virustotal
-  if (!data.virustotal || data.virustotal.length === 0) achievedPoints += pointsPerAbsence;
+  if (!data.virustotal || data.virustotal.length === 0)
+    achievedPoints += pointsPerAbsence;
 
   // Normalize to a 0-10 score
   const score = maximumPoints > 0 ? (achievedPoints / maximumPoints) * 10 : 0;
@@ -711,10 +760,10 @@ const calculateDnsScore = (data) => {
   let maximumPoints = 0;
 
   // Points for having key DNS records
-  const keyRecords = ['A', 'AAAA', 'MX', 'TXT', 'SPF', 'DKIM', 'DMARC'];
+  const keyRecords = ["A", "AAAA", "MX", "TXT", "SPF", "DKIM", "DMARC"];
   maximumPoints += keyRecords.length;
   if (data.records) {
-    keyRecords.forEach(recordType => {
+    keyRecords.forEach((recordType) => {
       if (data.records[recordType]) {
         achievedPoints += 1;
       }
@@ -803,12 +852,13 @@ const calculateWhoisScore = (data) => {
     else if (data.domainAge && data.domainAge / 365 > 1) achievedPoints += 0.5; // Partial points for > 1 year
 
     maximumPoints += 1; // registrationPeriod > 5 years
-    if (data.registrationPeriod && data.registrationPeriod > 5) achievedPoints += 1;
-    else if (data.registrationPeriod && data.registrationPeriod > 1) achievedPoints += 0.5; // Partial points for > 1 year
+    if (data.registrationPeriod && data.registrationPeriod > 5)
+      achievedPoints += 1;
+    else if (data.registrationPeriod && data.registrationPeriod > 1)
+      achievedPoints += 0.5; // Partial points for > 1 year
 
     maximumPoints += 1; // registrarReputation === 'high'
-    if (data.registrarReputation === 'high') achievedPoints += 1;
-
+    if (data.registrarReputation === "high") achievedPoints += 1;
   } else {
     // If no registrant data, these points are not applicable.
     maximumPoints += 4; // for privacy, age, period, reputation
@@ -860,16 +910,29 @@ export const calculateOverallRiskScore = (data) => {
 
 export const isValidDate = (d) => !isNaN(Date.parse(d));
 
-// Example scoring function for tech stack
+// Example scoring function for tech stack risk based on PHP version
 export function calculateTechRiskScore(data) {
-  // Basic example logic: give points based on PHP version
   const php = data.technologies.find((t) => t.slug === "php");
-  if (!php || !php.version) return 0;
 
-  const major = parseInt(php.version.split(".")[0], 10);
-  if (major >= 8) return 10; // Low risk
-  if (major >= 7) return 30; // Medium risk
-  return 50; // High risk
+  // No PHP detected or no version info – highest risk
+  if (!php || !php.version) return 50;
+
+  const versionParts = php.version.split(".");
+  const major = parseInt(versionParts[0], 10);
+  const minor = parseInt(versionParts[1] || "0", 10);
+
+  if (isNaN(major)) return 50;
+
+  // Risk scoring based on major (and minor) PHP version
+  if (major >= 8) {
+    if (minor >= 1) return 5;  // PHP 8.1+ — very low risk
+    return 10;                 // PHP 8.0 — low risk
+  } else if (major === 7) {
+    if (minor >= 4) return 30; // PHP 7.4 — medium risk (still used but near EOL)
+    return 40;                 // PHP 7.0–7.3 — high risk
+  } else {
+    return 50;                 // PHP 5.x or older — very high risk
+  }
 }
 
 // Example scoring function for SSL
@@ -885,4 +948,4 @@ export function calculateSSLRiskScore(data) {
   }
 
   return score;
-} 
+}
