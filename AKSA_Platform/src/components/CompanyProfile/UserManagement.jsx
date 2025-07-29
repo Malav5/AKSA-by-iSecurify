@@ -201,8 +201,8 @@ const UserManagement = ({
       <ToastContainer position="top-right" autoClose={2000} />
       {/* Title, description, and add button */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-        <div className="flex items-center gap-2">
-          <Users className="w-7 h-7 text-primary" />
+        <div className="flex items-start gap-3">
+          <Users className="w-7 h-7 text-primary mt-1 flex-shrink-0" />
           <div>
             <h1 className="text-2xl font-bold text-primary mb-1">
               {isAdmin ? 'User Management' : 'User Management'}
