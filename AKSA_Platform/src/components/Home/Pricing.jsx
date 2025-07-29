@@ -105,11 +105,7 @@ const Pricing = () => {
                   ))}
                 </ul>
               </div>
-              <button
-                className="w-full bg-primary text-white py-2 sm:py-3 rounded-lg transition-all duration-300 hover:bg-[#700070] hover:scale-105 transform text-sm sm:text-base font-medium"
-              >
-                Get Started
-              </button>
+
             </div>
           ))}
         </div>
