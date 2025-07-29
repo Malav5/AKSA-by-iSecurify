@@ -21,8 +21,9 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
   const [visible, setVisible] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [currentUserRole, setCurrentUserRole] = useState(null);
+  const [currentUserCompany, setCurrentUserCompany] = useState("");
 
-  // Get current user's role and set available roles based on permissions
+  // Get current user's role and company name
   useEffect(() => {
     const userRole = localStorage.getItem("role");
     setCurrentUserRole(userRole);
@@ -31,6 +32,33 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
     if (userRole === 'subadmin') {
       setMemberData(prev => ({ ...prev, role: "user" }));
     }
+
+    // Fetch current user's company name
+    const fetchCurrentUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:3000/api/auth/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          const companyName = userData.user?.companyName || "";
+          setCurrentUserCompany(companyName);
+          
+          // For subadmin, automatically set company name to their company
+          if (userRole === 'subadmin') {
+            setMemberData(prev => ({ ...prev, companyName }));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+      }
+    };
+
+    fetchCurrentUser();
   }, []);
 
   // Define available roles based on current user's role
@@ -59,7 +87,7 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
       email: memberData.email,
       password: memberData.password || "changeme123",
       role: memberData.role,
-      ...(currentUserRole === 'admin' && { companyName: memberData.companyName }),
+      companyName: memberData.companyName || currentUserCompany,
     };
 
     try {
@@ -135,10 +163,19 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
             />
           </div>
 
-          {/* Company Name - Only for Admin */}
-          {currentUserRole === 'admin' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+          {/* Company Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+            {currentUserRole === 'subadmin' ? (
+              // For subadmin, show disabled input with their company name
+              <input
+                type="text"
+                value={memberData.companyName}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+              />
+            ) : (
+              // For admin, show editable input
               <input
                 type="text"
                 value={memberData.companyName}
@@ -146,8 +183,13 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee8cee]/40 focus:border-[#800080]"
                 placeholder="Enter company name"
               />
-            </div>
-          )}
+            )}
+            {currentUserRole === 'subadmin' && (
+              <p className="text-xs text-gray-500 mt-1">
+                Users created by subadmins will have the same company as the subadmin
+              </p>
+            )}
+          </div>
 
           {/* Password with show/hide toggle */}
           <div>

@@ -200,7 +200,7 @@ router.get("/users", async (req, res) => {
 
 // Add user (from AddUserModal)
 router.post("/add-user", authMiddleware, async (req, res) => {
-  const { firstName, lastName, email, password, role } = req.body;
+  const { firstName, lastName, email, password, role, companyName } = req.body;
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ error: "First name, last name, email, and password are required" });
   }
@@ -294,7 +294,7 @@ router.post("/add-user", authMiddleware, async (req, res) => {
       email,
       passwordHash: hashed,
       role: role || 'user', // Use the role from request body, default to 'user' if not provided
-      companyName: currentUser.companyName, // Use current user's company
+      companyName: companyName || currentUser.companyName, // Use provided company name or fallback to current user's company
       plan: assignedPlan, // Use determined plan based on creator's role
       emailVerificationToken: verificationToken,
       emailVerificationExpires: verificationExpires,
@@ -362,7 +362,7 @@ router.post("/add-user", authMiddleware, async (req, res) => {
         firstName,
         lastName,
         email,
-        companyName: currentUser.companyName,
+        companyName: newUser.companyName, // Use the actual stored company name
         plan: assignedPlan
       },
       addedBy: {
