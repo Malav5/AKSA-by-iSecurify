@@ -77,7 +77,7 @@ const SolutionTooltip = ({ solution, position, buttonRect }) => {
   };
 
   const tooltipContent = (
-    <div 
+    <div
       className="bg-white border border-gray-200 rounded-xl shadow-2xl p-4 w-48 md:w-56 backdrop-blur-sm"
       style={tooltipStyle}
     >
@@ -94,10 +94,21 @@ const SolutionTooltip = ({ solution, position, buttonRect }) => {
 const SuggestedProducts = ({ domain }) => {
   const navigate = useNavigate();
 
+  // Improved user key generation with better error handling
   const getUserKey = (key) => {
-    const currentUser = localStorage.getItem("currentUser");
-    const userPrefix = currentUser ? currentUser.split("@")[0] : "";
-    return `${userPrefix}_${key}`;
+    try {
+      const currentUser = localStorage.getItem("currentUser");
+      if (!currentUser) {
+        console.warn("No current user found in localStorage");
+        return `anonymous_${key}`;
+      }
+      // Use the full email as the key to avoid conflicts
+      const sanitizedEmail = currentUser.replace(/[^a-zA-Z0-9@._-]/g, '_');
+      return `user_${sanitizedEmail}_${key}`;
+    } catch (error) {
+      console.error("Error generating user key:", error);
+      return `error_${key}`;
+    }
   };
 
   const [showQuestionnaire, setShowQuestionnaire] = useState(false);
@@ -107,16 +118,65 @@ const SuggestedProducts = ({ domain }) => {
   const [hoveredSolution, setHoveredSolution] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState("right");
   const [buttonRect, setButtonRect] = useState(null);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+
+  // Function to suggest products based on questionnaire answers
+  const suggestProducts = (answers) => {
+    const suggestions = [];
+
+    // Check each question and suggest solutions based on low scores
+    if (answers.q1 === 0 || answers.q2 === 0) suggestions.push("ITAM");
+    if (answers.q3 === 0 || answers.q4 === 0 || answers.q12 === 0) suggestions.push("CSM");
+    if (answers.q5 === 0 || answers.q6 === 0 || answers.q18 === 0) suggestions.push("MSOAR");
+    if (answers.q7 === 0 || answers.q17 === 0 || answers.q20 === 0) suggestions.push("TVM");
+    if (answers.q8 === 0 || answers.q9 === 0 || answers.q10 === 0) suggestions.push("SEM");
+    if (answers.q11 === 0 || answers.q16 === 0) suggestions.push("IRM");
+    if (answers.q13 === 0) suggestions.push("SAT");
+    if (answers.q14 === 0 || answers.q15 === 0) suggestions.push("EBM");
+    if (answers.q19 === 0) suggestions.push("MFA");
+
+    // Calculate overall score to suggest additional solutions
+    const totalScore = Object.values(answers).reduce((sum, val) => (val !== null && val !== -1 ? sum + val : sum), 0);
+    const percentage = Math.round((totalScore / 200) * 100);
+
+    // If overall score is low, suggest more comprehensive solutions
+    if (percentage < 50) {
+      if (!suggestions.includes("TVM")) suggestions.push("TVM");
+      if (!suggestions.includes("SEM")) suggestions.push("SEM");
+      if (!suggestions.includes("MSOAR")) suggestions.push("MSOAR");
+    }
+
+    return [...new Set(suggestions)]; // Remove duplicates
+  };
 
   const loadAnswersAndData = () => {
-    const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
-    if (savedAnswers) {
-      const parsedAnswers = JSON.parse(savedAnswers);
-      setAnswers(parsedAnswers);
-      setQuestionnaireSubmitted(true);
-    } else {
+    try {
+      const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
+      const savedSubmitted = localStorage.getItem(getUserKey("questionnaireSubmitted"));
+
+      if (savedAnswers && savedSubmitted === "true") {
+        const parsedAnswers = JSON.parse(savedAnswers);
+        setAnswers(parsedAnswers);
+        setQuestionnaireSubmitted(true);
+
+        // Generate recommendations based on answers
+        const recommendations = suggestProducts(parsedAnswers);
+        setRecommendedProducts(recommendations);
+
+        // Auto-select recommended products
+        setSelectedSolutions(recommendations);
+      } else {
+        setAnswers({});
+        setQuestionnaireSubmitted(false);
+        setRecommendedProducts([]);
+        setSelectedSolutions([]);
+      }
+    } catch (error) {
+      console.error("Error loading answers and data:", error);
       setAnswers({});
       setQuestionnaireSubmitted(false);
+      setRecommendedProducts([]);
+      setSelectedSolutions([]);
     }
   };
 
@@ -124,16 +184,41 @@ const SuggestedProducts = ({ domain }) => {
     loadAnswersAndData();
 
     const handleStorageChange = (event) => {
-      if (event.key === getUserKey("domainHealthAnswers")) {
+      if (event.key === getUserKey("domainHealthAnswers") ||
+        event.key === getUserKey("questionnaireSubmitted")) {
         loadAnswersAndData();
       }
     };
 
+    const handleQuestionnaireSubmitted = (e) => {
+      console.log("Questionnaire submitted event received in SuggestedProducts:", e.detail);
+      loadAnswersAndData();
+    };
+
     window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("questionnaireSubmitted", handleQuestionnaireSubmitted);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("questionnaireSubmitted", handleQuestionnaireSubmitted);
     };
+  }, []);
+
+  // Check for user changes and reload data
+  useEffect(() => {
+    const handleUserChange = () => {
+      loadAnswersAndData();
+    };
+
+    // Check for user changes every 5 seconds
+    const interval = setInterval(() => {
+      const currentUser = localStorage.getItem("currentUser");
+      if (currentUser !== getUserKey("currentUser")) {
+        handleUserChange();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const chartData = QUESTION_LABELS.map((label, idx) => {
@@ -165,14 +250,14 @@ const SuggestedProducts = ({ domain }) => {
     const button = event.currentTarget;
     const rect = button.getBoundingClientRect();
     const windowWidth = window.innerWidth;
-    
+
     // Check if tooltip would go off screen to the right
     if (rect.right + 200 > windowWidth) {
       setTooltipPosition("left");
     } else {
       setTooltipPosition("right");
     }
-    
+
     setButtonRect(rect);
     setHoveredSolution(solution);
   };
@@ -187,7 +272,7 @@ const SuggestedProducts = ({ domain }) => {
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-100 to-transparent rounded-full -translate-y-20 translate-x-20 opacity-30"></div>
       <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-100 to-transparent rounded-full translate-y-16 -translate-x-16 opacity-30"></div>
-      
+
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-3">
           <div className="w-3 h-8 bg-gradient-to-b from-[#800080] to-[#d181d1] rounded-full"></div>
@@ -201,99 +286,162 @@ const SuggestedProducts = ({ domain }) => {
         </button>
       </div>
 
-      <div className="w-full h-72 md:h-96 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-4 md:p-8 border border-gray-200 shadow-inner">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
-            barSize={18}
+      {!questionnaireSubmitted ? (
+        <div className="text-center py-12">
+          <div className="bg-gray-50 rounded-full p-6 mb-4 inline-block">
+            <svg
+              className="w-12 h-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <p className="text-gray-600 font-semibold text-lg md:text-xl mb-2">
+            Complete Assessment First
+          </p>
+          <p className="text-gray-500 text-sm md:text-base mb-4">
+            Take the questionnaire to get personalized solution recommendations
+          </p>
+          <button
+            onClick={() => setShowQuestionnaire(true)}
+            className="bg-gradient-to-r from-[#800080] to-[#ee8cee] text-white rounded-xl px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
-            <XAxis
-              dataKey="label"
-              tick={{ fill: "#4B5563", fontWeight: 600, fontSize: 11 }}
-              tickLine={false}
-            />
-            <YAxis
-              domain={[-1, 10]}
-              ticks={yTicks}
-              tickFormatter={yTickFormatter}
-              tick={{ fill: "#4B5563", fontWeight: 600, fontSize: 11 }}
-              tickLine={false}
-              width={35}
-              interval={0}
-            />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: "#a5b4fc", opacity: 0.15 }} />
-            <Bar
-              dataKey="score"
-              radius={[4, 4, 0, 0]}
-              isAnimationActive
-              fill="#6366f1"
-              minPointSize={2}
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Solutions section */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mt-8 md:mt-10 gap-6 md:gap-8">
-        <div className="flex flex-col items-start">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-6 bg-emerald-500 rounded-full"></div>
-            <h3 className="font-bold text-lg md:text-xl text-gray-800">Your Solutions</h3>
-          </div>
-          <div className="flex gap-3 md:gap-4 flex-wrap">
-            {YOUR_SOLUTIONS.map((sol) => (
-              <button
-                key={sol}
-                className="bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-              >
-                {sol}
-              </button>
-            ))}
-          </div>
+            Start Assessment
+          </button>
         </div>
-
-        <div className="flex flex-col items-start">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-6 bg-purple-500 rounded-full"></div>
-            <h3 className="font-bold text-lg md:text-xl text-gray-800">Purchase Solutions</h3>
-          </div>
-          <div className="flex gap-3 md:gap-4 flex-wrap">
-            {PURCHASE_SOLUTIONS.map((sol) => (
-              <button
-                key={sol}
-                onClick={() => handleSolutionClick(sol)}
-                onMouseEnter={(e) => handleSolutionHover(sol, e)}
-                onMouseLeave={handleSolutionLeave}
-                className={`relative rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md transition-all duration-300 transform hover:scale-105 ${
-                  selectedSolutions.includes(sol)
-                    ? "bg-gradient-to-r from-[#800080] to-[#a242a2] text-white hover:from-purple-700 hover:to-blue-700 shadow-lg"
-                    : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 border border-gray-300"
-                }`}
+      ) : (
+        <>
+          <div className="w-full h-72 md:h-96 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-4 md:p-8 border border-gray-200 shadow-inner">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+                barSize={18}
               >
-                {sol}
-              </button>
-            ))}
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: "#4B5563", fontWeight: 600, fontSize: 11 }}
+                  tickLine={false}
+                />
+                <YAxis
+                  domain={[-1, 10]}
+                  ticks={yTicks}
+                  tickFormatter={yTickFormatter}
+                  tick={{ fill: "#4B5563", fontWeight: 600, fontSize: 11 }}
+                  tickLine={false}
+                  width={35}
+                  interval={0}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "#a5b4fc", opacity: 0.15 }} />
+                <Bar
+                  dataKey="score"
+                  radius={[4, 4, 0, 0]}
+                  isAnimationActive
+                  fill="#6366f1"
+                  minPointSize={2}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          {selectedSolutions.length > 0 && (
-            <button
-              onClick={handleClearSelection}
-              className="mt-3 text-sm text-gray-500 hover:text-gray-700 underline font-medium transition-colors duration-200"
-            >
-              Clear selection
-            </button>
+
+          {/* Recommended Solutions section */}
+          {recommendedProducts.length > 0 && (
+            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-2 h-6 bg-blue-500 rounded-full"></div>
+                <h3 className="font-bold text-lg text-gray-800">Recommended for You</h3>
+              </div>
+              <p className="text-gray-600 text-sm mb-3">
+                Based on your assessment, we recommend these solutions to improve your security posture:
+              </p>
+              <div className="flex gap-3 flex-wrap">
+                {recommendedProducts.map((sol) => (
+                  <button
+                    key={sol}
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg px-4 py-2 font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                    {sol}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
-        </div>
-      </div>
+
+          {/* Solutions section */}
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mt-8 md:mt-10 gap-6 md:gap-8">
+            <div className="flex flex-col items-start">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-6 bg-emerald-500 rounded-full"></div>
+                <h3 className="font-bold text-lg md:text-xl text-gray-800">Your Solutions</h3>
+              </div>
+              <div className="flex gap-3 md:gap-4 flex-wrap">
+                {YOUR_SOLUTIONS.map((sol) => (
+                  <button
+                    key={sol}
+                    className="bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                    {sol}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col items-start">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-6 bg-purple-500 rounded-full"></div>
+                <h3 className="font-bold text-lg md:text-xl text-gray-800">Purchase Solutions</h3>
+              </div>
+              <div className="flex gap-3 md:gap-4 flex-wrap">
+                {PURCHASE_SOLUTIONS.map((sol) => (
+                  <button
+                    key={sol}
+                    onClick={() => handleSolutionClick(sol)}
+                    onMouseEnter={(e) => handleSolutionHover(sol, e)}
+                    onMouseLeave={handleSolutionLeave}
+                    className={`relative rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md transition-all duration-300 transform hover:scale-105 ${selectedSolutions.includes(sol)
+                        ? "bg-gradient-to-r from-[#800080] to-[#a242a2] text-white hover:from-purple-700 hover:to-blue-700 shadow-lg"
+                        : recommendedProducts.includes(sol)
+                          ? "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-2 border-blue-300"
+                          : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 border border-gray-300"
+                      }`}
+                  >
+                    {sol}
+                    {recommendedProducts.includes(sol) && (
+                      <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        ★
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              {selectedSolutions.length > 0 && (
+                <button
+                  onClick={handleClearSelection}
+                  className="mt-3 text-sm text-gray-500 hover:text-gray-700 underline font-medium transition-colors duration-200"
+                >
+                  Clear selection
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Render tooltip using portal */}
       {hoveredSolution && (
-        <SolutionTooltip 
-          solution={hoveredSolution} 
+        <SolutionTooltip
+          solution={hoveredSolution}
           position={tooltipPosition}
           buttonRect={buttonRect}
         />

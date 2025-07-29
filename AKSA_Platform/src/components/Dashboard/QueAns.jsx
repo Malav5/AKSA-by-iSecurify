@@ -130,25 +130,66 @@ export const questions = [
 }));
 
 const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
+  // Improved user key generation with better error handling
   const getUserKey = (key) => {
-    const currentUser = localStorage.getItem("currentUser");
-    const userPrefix = currentUser ? currentUser.split("@")[0] : "";
-    return `${userPrefix}_${key}`;
+    try {
+      const currentUser = localStorage.getItem("currentUser");
+      if (!currentUser) {
+        console.warn("No current user found in localStorage");
+        return `anonymous_${key}`;
+      }
+      // Use the full email as the key to avoid conflicts
+      const sanitizedEmail = currentUser.replace(/[^a-zA-Z0-9@._-]/g, '_');
+      return `user_${sanitizedEmail}_${key}`;
+    } catch (error) {
+      console.error("Error generating user key:", error);
+      return `error_${key}`;
+    }
   };
 
-  const [answers, setAnswers] = useState(() => {
-    const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
-    return savedAnswers ? JSON.parse(savedAnswers) : Object.fromEntries(questions.map((q) => [q.name, null]));
-  });
+  // Initialize answers with better error handling
+  const initializeAnswers = () => {
+    try {
+      const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
+      if (savedAnswers) {
+        const parsed = JSON.parse(savedAnswers);
+        // Validate that all questions are present
+        const validAnswers = {};
+        questions.forEach(q => {
+          validAnswers[q.name] = parsed[q.name] !== undefined ? parsed[q.name] : null;
+        });
+        return validAnswers;
+      }
+    } catch (error) {
+      console.error("Error loading saved answers:", error);
+    }
+    // Return default empty answers
+    return Object.fromEntries(questions.map((q) => [q.name, null]));
+  };
+
+  const [answers, setAnswers] = useState(initializeAnswers);
   const [errorMessage, setErrorMessage] = useState("");
 
   const remainingQuestions = Object.values(answers).filter((answer) => answer === null).length;
   const totalQuestions = questions.length;
 
+  // Save answers to localStorage with error handling
+  const saveAnswersToStorage = (newAnswers) => {
+    try {
+      const key = getUserKey("domainHealthAnswers");
+      localStorage.setItem(key, JSON.stringify(newAnswers));
+      console.log("Answers saved successfully for key:", key);
+    } catch (error) {
+      console.error("Error saving answers to localStorage:", error);
+      setErrorMessage("Failed to save your answers. Please try again.");
+    }
+  };
+
   const handleAnswerChange = (question, points) => {
     const newAnswers = { ...answers, [question]: points };
     setAnswers(newAnswers);
-    localStorage.setItem(getUserKey("domainHealthAnswers"), JSON.stringify(newAnswers));
+    saveAnswersToStorage(newAnswers);
+    setErrorMessage(""); // Clear any previous error messages
   };
 
   const calculateScore = () => {
@@ -184,33 +225,75 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
       return;
     }
 
-    const newScore = calculateScore();
-    const suggestions = suggestProducts(answers, newScore);
-    const healthStatus = getHealthStatus(newScore);
+    try {
+      const newScore = calculateScore();
+      const suggestions = suggestProducts(answers, newScore);
+      const healthStatus = getHealthStatus(newScore);
 
-    localStorage.setItem(getUserKey("domainHealthAnswers"), JSON.stringify(answers));
-    localStorage.setItem(getUserKey("domainHealthScore"), newScore.toString());
-    localStorage.setItem(getUserKey("domainHealthStatus"), healthStatus);
-    localStorage.setItem(getUserKey("recommendedProducts"), JSON.stringify(suggestions));
-    localStorage.setItem(getUserKey("questionnaireSubmitted"), "true");
+      // Save all data with proper error handling
+      const dataToSave = {
+        answers: answers,
+        score: newScore.toString(),
+        status: healthStatus,
+        products: suggestions,
+        submitted: "true",
+        submittedAt: new Date().toISOString()
+      };
 
-    window.dispatchEvent(new StorageEvent("storage", {
-      key: getUserKey("domainHealthAnswers"),
-      newValue: JSON.stringify(answers),
-      oldValue: null,
-      url: window.location.href,
-      storageArea: localStorage,
-    }));
+      // Save each piece of data
+      Object.entries(dataToSave).forEach(([key, value]) => {
+        const storageKey = getUserKey(key === 'answers' ? 'domainHealthAnswers' :
+          key === 'score' ? 'domainHealthScore' :
+            key === 'status' ? 'domainHealthStatus' :
+              key === 'products' ? 'recommendedProducts' :
+                key === 'submitted' ? 'questionnaireSubmitted' : key);
+        localStorage.setItem(storageKey, typeof value === 'object' ? JSON.stringify(value) : value);
+      });
 
-    setQuestionnaireSubmitted(true);
-    onCancel();
+      console.log("Questionnaire data saved successfully");
+
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent("questionnaireSubmitted", {
+        detail: { user: localStorage.getItem("currentUser"), score: newScore }
+      }));
+
+      setQuestionnaireSubmitted(true);
+      onCancel();
+    } catch (error) {
+      console.error("Error submitting questionnaire:", error);
+      setErrorMessage("Failed to submit questionnaire. Please try again.");
+    }
   };
 
+  // Load saved answers when component mounts
   useEffect(() => {
     const savedAnswers = localStorage.getItem(getUserKey("domainHealthAnswers"));
     if (savedAnswers) {
-      setAnswers(JSON.parse(savedAnswers));
+      try {
+        const parsed = JSON.parse(savedAnswers);
+        setAnswers(parsed);
+      } catch (error) {
+        console.error("Error parsing saved answers:", error);
+      }
     }
+  }, []);
+
+  // Listen for user changes and reload data
+  useEffect(() => {
+    const handleUserChange = () => {
+      const newAnswers = initializeAnswers();
+      setAnswers(newAnswers);
+    };
+
+    // Check for user changes every 5 seconds
+    const interval = setInterval(() => {
+      const currentUser = localStorage.getItem("currentUser");
+      if (currentUser !== getUserKey("currentUser")) {
+        handleUserChange();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -226,7 +309,9 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
 
         <div className="p-6 sm:p-8 overflow-y-auto max-h-[75vh] space-y-6 scrollbar-hide">
           {errorMessage && (
-            <div className="text-red-600 text-center font-medium">{errorMessage}</div>
+            <div className="text-red-600 text-center font-medium bg-red-50 p-3 rounded-lg border border-red-200">
+              {errorMessage}
+            </div>
           )}
 
           {questions.map(({ label, name, options }) => (
@@ -250,7 +335,7 @@ const QueAns = ({ onCancel, setQuestionnaireSubmitted }) => {
                         if (answers[name] === opt.value) {
                           const newAnswers = { ...answers, [name]: null };
                           setAnswers(newAnswers);
-                          localStorage.setItem(getUserKey("domainHealthAnswers"), JSON.stringify(newAnswers));
+                          saveAnswersToStorage(newAnswers);
                         }
                       }}
                       className="h-5 w-5 accent-primary"
