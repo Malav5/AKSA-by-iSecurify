@@ -200,7 +200,7 @@ router.get("/users", async (req, res) => {
 
 // Add user (from AddUserModal)
 router.post("/add-user", authMiddleware, async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, role } = req.body;
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ error: "First name, last name, email, and password are required" });
   }
@@ -252,6 +252,24 @@ router.post("/add-user", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "You don't have permission to add users. Only admins and subadmins can add users." });
     }
 
+    // Validate role permissions
+    const requestedRole = role || 'user';
+    const validRoles = ['user', 'subadmin', 'admin'];
+    
+    if (!validRoles.includes(requestedRole)) {
+      return res.status(400).json({ error: "Invalid role. Valid roles are: user, subadmin, admin" });
+    }
+
+    // Check role creation permissions
+    if (currentUser.role === 'subadmin' && requestedRole !== 'user') {
+      return res.status(403).json({ error: "Subadmins can only create users with 'user' role" });
+    }
+
+    // Only admins can create admin users
+    if (requestedRole === 'admin' && currentUser.role !== 'admin') {
+      return res.status(403).json({ error: "Only admins can create users with 'admin' role" });
+    }
+
     // STEP 2: Create new user with current user's company and plan
     const hashed = await bcrypt.hash(password, 10);
     const verificationToken = generateVerificationToken();
@@ -262,7 +280,7 @@ router.post("/add-user", authMiddleware, async (req, res) => {
       lastName,
       email,
       passwordHash: hashed,
-      role: 'user',
+      role: role || 'user', // Use the role from request body, default to 'user' if not provided
       companyName: currentUser.companyName, // Use current user's company
       plan: currentUser.plan, // Use current user's plan
       emailVerificationToken: verificationToken,
@@ -273,6 +291,7 @@ router.post("/add-user", authMiddleware, async (req, res) => {
     console.log("STEP 2: New user created:", {
       _id: newUser._id,
       email: newUser.email,
+      role: newUser.role,
       companyName: newUser.companyName,
       plan: newUser.plan
     });
