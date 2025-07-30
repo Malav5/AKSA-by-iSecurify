@@ -64,7 +64,8 @@ const useSessionTimeout = () => {
     localStorage.removeItem('role');
     
     setShowTimeoutModal(false);
-    navigate('/login');
+    // Redirect to login page with session expired parameter
+    navigate('/login?sessionExpired=true');
   }, [navigate]);
 
   // Store handleLogout in ref to avoid circular dependency
