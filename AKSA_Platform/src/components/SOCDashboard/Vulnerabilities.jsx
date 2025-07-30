@@ -66,6 +66,64 @@ const Vulnerabilities = () => {
   // Ref to track the latest threadId for chatbox
   const latestThreadIdRef = React.useRef(null);
 
+  // Function to get or create a dedicated thread for a vulnerability
+  const getOrCreateVulnThread = async (vulnId) => {
+    if (!vulnId) return null;
+    
+    // If we already have a thread for this vulnerability, return it
+    if (vulnThreads[vulnId]) {
+      return vulnThreads[vulnId];
+    }
+    
+    // Create a new dedicated thread for this vulnerability
+    try {
+      const newThreadId = await createThread();
+      setVulnThreads(prev => ({ ...prev, [vulnId]: newThreadId }));
+      console.log(`Created new dedicated thread ${newThreadId} for vulnerability ${vulnId}`);
+      return newThreadId;
+    } catch (error) {
+      console.error('Error creating thread for vulnerability:', error);
+      return null;
+    }
+  };
+
+  // Function to clear chatbox state when closed
+  const clearChatbox = () => {
+    console.log('Clearing chatbox state');
+    setMessages([]);
+    setChatInput("");
+    setShownMessageIds([]);
+    setCurrentChatboxThread(null);
+    setThreadId(null);
+    setChatboxVulnId(null);
+    latestThreadIdRef.current = null;
+  };
+
+  // Function to initialize chatbox with a dedicated thread
+  const initializeChatbox = async (vulnId) => {
+    if (!vulnId) return null;
+    
+    console.log(`Initializing chatbox for vulnerability: ${vulnId}`);
+    
+    // Get or create the dedicated thread for this vulnerability
+    const dedicatedThreadId = await getOrCreateVulnThread(vulnId);
+    if (!dedicatedThreadId) {
+      console.error('Failed to create dedicated thread for vulnerability:', vulnId);
+      return null;
+    }
+    
+    // Set this as the current chatbox thread
+    setCurrentChatboxThread(dedicatedThreadId);
+    setThreadId(dedicatedThreadId);
+    latestThreadIdRef.current = dedicatedThreadId;
+    setChatboxVulnId(vulnId);
+    
+    console.log(`Chatbox initialized with dedicated thread ${dedicatedThreadId} for vulnerability ${vulnId}`);
+    
+    // Return the thread ID so it can be used immediately
+    return dedicatedThreadId;
+  };
+
   // Filter state
   const [selectedAgent, setSelectedAgent] = useState('All');
   const [selectedSeverity, setSelectedSeverity] = useState('All');
@@ -85,6 +143,7 @@ const Vulnerabilities = () => {
   const [showFilters, setShowFilters] = useState(false);
   // Map of vulnerability ID to thread ID
   const [vulnThreads, setVulnThreads] = useState({});
+  const [currentChatboxThread, setCurrentChatboxThread] = useState(null); // Current active thread for chatbox
 
   useEffect(() => {
     const fetchAgentsForFilter = async () => {
@@ -310,7 +369,16 @@ const Vulnerabilities = () => {
   };
 
   const handleSend = async () => {
-    if (!chatInput.trim() || !threadId) return;
+    if (!chatInput.trim()) {
+      console.log('No input to send');
+      return;
+    }
+    
+    if (!currentChatboxThread) {
+      console.error('No current chatbox thread available');
+      setMessages(prev => [...prev, { text: 'Error: Chat session not initialized. Please try opening the chat again.', isUser: false }]);
+      return;
+    }
 
     // Check if the message is JSON
     let msgToSend = chatInput;
@@ -328,17 +396,18 @@ const Vulnerabilities = () => {
     setIsLoading(true);
 
     try {
-      await createMessage(threadId, msgToSend);
-      const runId = await createRun(threadId, ASSISTANT_ID);
+      console.log(`Sending message to thread: ${currentChatboxThread}`);
+      await createMessage(currentChatboxThread, msgToSend);
+      const runId = await createRun(currentChatboxThread, ASSISTANT_ID);
       // Poll for run completion
       let runStatus = 'queued';
       while (runStatus !== 'completed' && runStatus !== 'failed') {
         await new Promise(res => setTimeout(res, 1500));
-        const run = await getRun(threadId, runId);
+        const run = await getRun(currentChatboxThread, runId);
         runStatus = run.status;
       }
       // Get all messages and append only new assistant replies
-      const allMsgs = await getMessages(threadId);
+      const allMsgs = await getMessages(currentChatboxThread);
       const newAssistantMsgs = allMsgs
         .filter(m => m.role === 'assistant')
         .sort((a, b) => a.created_at - b.created_at)
@@ -367,6 +436,7 @@ const Vulnerabilities = () => {
         ]);
       }
     } catch (err) {
+      console.error('Error in handleSend:', err);
       setMessages(prev => [...prev, { text: 'Error: Could not get response.', isUser: false }]);
     } finally {
       setIsLoading(false);
@@ -415,9 +485,9 @@ const Vulnerabilities = () => {
 
   // On chatbox open, create a thread if needed
   useEffect(() => {
-    if (!showChatbox || threadId) return;
-    createThread().then(setThreadId);
-  }, [showChatbox, threadId]);
+    if (!showChatbox || currentChatboxThread) return;
+    createThread().then(setCurrentChatboxThread);
+  }, [showChatbox, currentChatboxThread]);
 
   // Auto-scroll to bottom when messages change
   React.useEffect(() => {
@@ -556,6 +626,9 @@ const Vulnerabilities = () => {
             totalPages={totalPages}
             vulnThreads={vulnThreads}
             setVulnThreads={setVulnThreads}
+            initializeChatbox={initializeChatbox}
+            currentChatboxThread={currentChatboxThread}
+            setCurrentChatboxThread={setCurrentChatboxThread}
           />
 
         </div>
@@ -596,7 +669,10 @@ const Vulnerabilities = () => {
                 </span>
                 <button
                   className="text-primary text-3xl font-bold focus:outline-none transition"
-                  onClick={() => setShowChatbox(false)}
+                  onClick={() => {
+                    setShowChatbox(false);
+                    clearChatbox();
+                  }}
                   aria-label="Close"
                 >
                   ×
@@ -650,7 +726,7 @@ const Vulnerabilities = () => {
 
               {/* Input area: always visible at the bottom */}
               <div className="p-4 bg-white rounded-b-3xl flex flex-col gap-2">
-                {showChatbox && !threadId && (
+                {showChatbox && !currentChatboxThread && (
                   <div className="text-gray-500 text-center py-2">Connecting to assistant...</div>
                 )}
                 <div className="flex gap-2">
@@ -673,12 +749,12 @@ const Vulnerabilities = () => {
                     }}
                     rows={1}
                     style={{ minHeight: 40, maxHeight: 200, overflowY: 'auto' }}
-                    disabled={isLoading || !threadId}
+                    disabled={isLoading || !currentChatboxThread}
                   />
                   <button
                     className="bg-primary text-white px-3 py-2 rounded-2xl font-semibold shadow hover:from-blue-700 hover:to-purple-700 transition-colors disabled:opacity-60"
                     onClick={handleSend}
-                    disabled={isLoading || !threadId}
+                    disabled={isLoading || !currentChatboxThread}
                   >
                     <Send className="w-5 h-5" />
                   </button>
