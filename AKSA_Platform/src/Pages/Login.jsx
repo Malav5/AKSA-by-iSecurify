@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { userServices } from "../services/UserServices";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
+
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -14,8 +16,20 @@ const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
   // Add state for password visibility
   const [showPassword, setShowPassword] = useState(false);
+
+  // Check for session expired message on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const expired = urlParams.get('sessionExpired');
+    if (expired === 'true') {
+      setSessionExpired(true);
+      // Clear the URL parameter
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -160,14 +174,20 @@ const Login = () => {
             </div>
 
             {/* Alert Messages */}
-            {(error || success) && (
+            {(error || success || sessionExpired) && (
               <div
-                className={`p-3 sm:p-4 rounded-lg mb-4 text-sm sm:text-base font-medium ${error
+                className={`p-3 sm:p-4 rounded-lg mb-4 text-sm sm:text-base font-medium ${
+                  sessionExpired
+                    ? "bg-orange-100 text-orange-700 border border-orange-200"
+                    : error
                     ? "bg-red-100 text-red-700 border border-red-200"
                     : "bg-green-100 text-green-700 border border-green-200"
-                  }`}
+                }`}
               >
-                {error || success}
+                {sessionExpired 
+                  ? "Your session has expired due to inactivity. Please sign in again to continue."
+                  : error || success
+                }
               </div>
             )}
 

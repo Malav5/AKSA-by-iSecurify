@@ -28,7 +28,10 @@ const VulnerabilitiesTable = ({
   setCurrentPage,
   totalPages,
   vulnThreads,
-  setVulnThreads
+  setVulnThreads,
+  initializeChatbox,
+  currentChatboxThread,
+  setCurrentChatboxThread
 }) => {
   const listboxButtonRef = useRef(null);
   const [dropUp, setDropUp] = useState(false);
@@ -117,14 +120,17 @@ const VulnerabilitiesTable = ({
                             setShowChatbox(true);
                             const vulnId = item._source?.vulnerability?.id || null;
                             setChatboxVulnId(vulnId);
-                            let threadIdToUse = vulnThreads[vulnId];
+                            
+                            // Initialize chatbox with dedicated thread
+                            const threadIdToUse = await initializeChatbox(vulnId);
+                            
                             if (!threadIdToUse) {
-                              // Create a new thread for this vulnerability
-                              threadIdToUse = await createThread();
-                              setVulnThreads(prev => ({ ...prev, [vulnId]: threadIdToUse }));
+                              console.error('Failed to initialize chatbox thread');
+                              setMessages(prev => [...prev, { text: 'Error: Could not initialize chat session.', isUser: false }]);
+                              setIsLoading(false);
+                              return;
                             }
-                            setThreadId(threadIdToUse);
-                            latestThreadIdRef.current = threadIdToUse;
+                            
                             const logJson = JSON.stringify(item, null, 2);
                             setMessages(prev => [...prev, { text: logJson, isUser: true }]);
                             setIsLoading(true);
@@ -143,7 +149,7 @@ const VulnerabilitiesTable = ({
                                 .filter(m => m.role === 'assistant')
                                 .sort((a, b) => a.created_at - b.created_at)
                                 .slice(-1); // Only the latest
-                              if (latestThreadIdRef.current === threadIdToUse && newAssistantMsgs.length > 0) {
+                              if (newAssistantMsgs.length > 0) {
                                 setMessages(prev => {
                                   const updated = [
                                     ...prev,
