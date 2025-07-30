@@ -12,6 +12,7 @@ const Manager = require("../models/Manager");
 const SubadminManagerAssignment = require("../models/SubadminManagerAssignment");
 const UserSubadminAssignment = require("../models/UserSubadminAssignment");
 const authMiddleware = require("../middleware/authmiddleware");
+const sessionTimeoutMiddleware = require("../middleware/sessionTimeoutMiddleware");
 const { generateVerificationToken, sendVerificationEmail } = require("../utils/emailService");
 
 // Register agent mapping
@@ -199,8 +200,8 @@ router.get("/users", async (req, res) => {
 });
 
 // Add user (from AddUserModal)
-router.post("/add-user", authMiddleware, async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+router.post("/add-user", sessionTimeoutMiddleware, async (req, res) => {
+  const { firstName, lastName, email, password, role, companyName } = req.body;
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ error: "First name, last name, email, and password are required" });
   }
@@ -252,19 +253,50 @@ router.post("/add-user", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "You don't have permission to add users. Only admins and subadmins can add users." });
     }
 
-    // STEP 2: Create new user with current user's company and plan
+    // Validate role permissions
+    const requestedRole = role || 'user';
+    const validRoles = ['user', 'subadmin', 'admin'];
+    
+    if (!validRoles.includes(requestedRole)) {
+      return res.status(400).json({ error: "Invalid role. Valid roles are: user, subadmin, admin" });
+    }
+
+    // Check role creation permissions
+    if (currentUser.role === 'subadmin' && requestedRole !== 'user') {
+      return res.status(403).json({ error: "Subadmins can only create users with 'user' role" });
+    }
+
+    // Only admins can create admin users
+    if (requestedRole === 'admin' && currentUser.role !== 'admin') {
+      return res.status(403).json({ error: "Only admins can create users with 'admin' role" });
+    }
+
+    // STEP 2: Create new user with appropriate plan based on creator's role
     const hashed = await bcrypt.hash(password, 10);
     const verificationToken = generateVerificationToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Determine plan based on who is creating the user
+    let assignedPlan;
+    if (currentUser.role === 'admin') {
+      // Admin creates user → User gets "Freemium" plan (regardless of admin's plan)
+      assignedPlan = "Freemium";
+    } else if (currentUser.role === 'subadmin') {
+      // Subadmin creates user → User gets same plan as subadmin
+      assignedPlan = currentUser.plan || "Freemium";
+    } else {
+      // Fallback to Freemium for any other case
+      assignedPlan = "Freemium";
+    }
 
     const newUser = new User({
       firstName,
       lastName,
       email,
       passwordHash: hashed,
-      role: 'user',
-      companyName: currentUser.companyName, // Use current user's company
-      plan: currentUser.plan, // Use current user's plan
+      role: role || 'user', // Use the role from request body, default to 'user' if not provided
+      companyName: companyName || currentUser.companyName, // Use provided company name or fallback to current user's company
+      plan: assignedPlan, // Use determined plan based on creator's role
       emailVerificationToken: verificationToken,
       emailVerificationExpires: verificationExpires,
       isEmailVerified: false
@@ -273,12 +305,15 @@ router.post("/add-user", authMiddleware, async (req, res) => {
     console.log("STEP 2: New user created:", {
       _id: newUser._id,
       email: newUser.email,
+      role: newUser.role,
       companyName: newUser.companyName,
-      plan: newUser.plan
+      plan: newUser.plan,
+      createdBy: currentUser.role,
+      creatorPlan: currentUser.plan
     });
 
     // Send verification email
-    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken);
+    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken, currentUser.companyName);
     if (!emailSent) {
       // If email fails to send, delete the user and return error
       await User.findByIdAndDelete(newUser._id);
@@ -328,13 +363,14 @@ router.post("/add-user", authMiddleware, async (req, res) => {
         firstName,
         lastName,
         email,
-        companyName: currentUser.companyName,
-        plan: currentUser.plan
+        companyName: newUser.companyName, // Use the actual stored company name
+        plan: assignedPlan
       },
       addedBy: {
-        subadminId: currentUser._id,
-        subadminEmail: currentUser.email,
-        subadminRole: currentUser.role
+        creatorId: currentUser._id,
+        creatorEmail: currentUser.email,
+        creatorRole: currentUser.role,
+        creatorPlan: currentUser.plan
       }
     });
   } catch (err) {
@@ -363,7 +399,7 @@ router.get("/users-with-role-user", async (req, res) => {
 });
 
 // Get admin-user assignments (to track which admin added which users)
-router.get("/admin-user-assignments", authMiddleware, async (req, res) => {
+router.get("/admin-user-assignments", sessionTimeoutMiddleware, async (req, res) => {
   try {
     // Check if user is admin or subadmin
     const user = await User.findById(req.userId);
@@ -401,7 +437,7 @@ router.get("/admin-user-assignments", authMiddleware, async (req, res) => {
 });
 
 // Get users added by specific admin
-router.get("/admin-users/:adminId", authMiddleware, async (req, res) => {
+router.get("/admin-users/:adminId", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const { adminId } = req.params;
 
@@ -452,7 +488,7 @@ router.get("/debug-assignments", async (req, res) => {
 });
 
 // Debug endpoint to check current user's token
-router.get("/debug-current-user", authMiddleware, async (req, res) => {
+router.get("/debug-current-user", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
 
@@ -483,7 +519,7 @@ router.get("/debug-current-user", authMiddleware, async (req, res) => {
 });
 
 // Test endpoint to manually create a UserSubadminAssignment
-router.post("/test-create-assignment", authMiddleware, async (req, res) => {
+router.post("/test-create-assignment", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const { testUserId } = req.body;
 
@@ -526,7 +562,7 @@ router.post("/test-create-assignment", authMiddleware, async (req, res) => {
 });
 
 // Debug endpoint to check JWT token content
-router.get("/debug-token", authMiddleware, async (req, res) => {
+router.get("/debug-token", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     const token = authHeader.split(" ")[1];
@@ -548,7 +584,7 @@ router.get("/debug-token", authMiddleware, async (req, res) => {
 });
 
 // Upgrade user plan
-router.put("/upgrade-user-plan/:userId", authMiddleware, async (req, res) => {
+router.put("/upgrade-user-plan/:userId", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
     const { plan } = req.body;

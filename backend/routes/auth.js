@@ -3,7 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const authMiddleware = require("../middleware/authmiddleware");
-const { generateVerificationToken, sendVerificationEmail, sendResendVerificationEmail } = require("../utils/emailService");
+const sessionTimeoutMiddleware = require("../middleware/sessionTimeoutMiddleware");
+const { generateVerificationToken, sendVerificationEmail, sendResendVerificationEmail, sendAgentSetupEmail } = require("../utils/emailService");
 
 const router = express.Router();
 
@@ -48,7 +49,7 @@ router.post("/register", async (req, res) => {
     await newUser.save();
 
     // Send verification email
-    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken);
+    const emailSent = await sendVerificationEmail(email, firstName, password, verificationToken, companyName);
 
     if (!emailSent) {
       // If email fails to send, delete the user and return error
@@ -97,9 +98,18 @@ router.post("/verify-email", async (req, res) => {
     user.emailVerificationExpires = undefined;
     await user.save();
 
+    // Send agent setup instructions email
+    const setupEmailSent = await sendAgentSetupEmail(user.email, user.firstName, user.companyName);
+    if (!setupEmailSent) {
+      console.log("Failed to send agent setup email to:", user.email);
+      // Don't fail the verification process if setup email fails
+    } else {
+      console.log("Agent setup email sent successfully to:", user.email);
+    }
+
     // Generate JWT token for automatic login
     const jwtToken = jwt.sign(
-      { userId: user._id, plan: user.plan },
+      { userId: user._id, plan: user.plan, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -184,7 +194,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id, plan: user.plan },
+      { userId: user._id, plan: user.plan, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -237,7 +247,7 @@ router.get("/debug-temp-registrations", (req, res) => {
 });
 
 // Fetch current user (unchanged)
-router.get("/user", authMiddleware, async (req, res) => {
+router.get("/user", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("-passwordHash");
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -249,7 +259,7 @@ router.get("/user", authMiddleware, async (req, res) => {
 });
 
 // Update user plan
-router.patch("/update-plan", authMiddleware, async (req, res) => {
+router.patch("/update-plan", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const { plan } = req.body;
     if (!plan) return res.status(400).json({ error: "Plan is required" });
@@ -267,7 +277,7 @@ router.patch("/update-plan", authMiddleware, async (req, res) => {
 });
 
 // Delete current user account
-router.delete("/delete-account", authMiddleware, async (req, res) => {
+router.delete("/delete-account", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -288,7 +298,7 @@ router.delete("/delete-account", authMiddleware, async (req, res) => {
 });
 
 // Get all users (admin only)
-router.get("/users", authMiddleware, async (req, res) => {
+router.get("/users", sessionTimeoutMiddleware, async (req, res) => {
   try {
     // Check if user is admin
     const user = await User.findById(req.userId);
@@ -300,6 +310,38 @@ router.get("/users", authMiddleware, async (req, res) => {
     res.json({ users });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// Refresh session endpoint
+router.post("/refresh-session", sessionTimeoutMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("-passwordHash");
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Generate new token with same expiration logic
+    const token = jwt.sign(
+      { userId: user._id, plan: user.plan, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return res.json({
+      token,
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        companyName: user.companyName,
+        plan: user.plan,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
+      },
+    });
+  } catch (err) {
+    console.error("Refresh session error:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 

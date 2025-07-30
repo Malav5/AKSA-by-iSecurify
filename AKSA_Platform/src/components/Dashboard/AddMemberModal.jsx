@@ -14,12 +14,64 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
     email: "",
     role: "user",
     password: "",
+    companyName: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const roles = ["admin", "manager", "user"];
+  const [currentUserRole, setCurrentUserRole] = useState(null);
+  const [currentUserCompany, setCurrentUserCompany] = useState("");
+
+  // Get current user's role and company name
+  useEffect(() => {
+    const userRole = localStorage.getItem("role");
+    setCurrentUserRole(userRole);
+
+    // Set default role based on current user's permissions
+    if (userRole === 'subadmin') {
+      setMemberData(prev => ({ ...prev, role: "user" }));
+    }
+
+    // Fetch current user's company name
+    const fetchCurrentUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:3000/api/auth/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          const companyName = userData.user?.companyName || "";
+          setCurrentUserCompany(companyName);
+          
+          // For subadmin, automatically set company name to their company
+          if (userRole === 'subadmin') {
+            setMemberData(prev => ({ ...prev, companyName }));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  // Define available roles based on current user's role
+  const getAvailableRoles = () => {
+    if (currentUserRole === 'admin') {
+      return ["user", "subadmin", "admin"];
+    } else if (currentUserRole === 'subadmin') {
+      return ["user"];
+    }
+    return ["user"]; // Default fallback
+  };
+
+  const roles = getAvailableRoles();
 
   useEffect(() => {
     setVisible(true);
@@ -35,12 +87,13 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
       email: memberData.email,
       password: memberData.password || "changeme123",
       role: memberData.role,
+      companyName: memberData.companyName || currentUserCompany,
     };
 
     try {
       const result = await userServices.addUser(payload);
       showSuccess(result.message || "User added successfully!");
-      setMemberData({ firstName: "", lastName: "", email: "", role: "user", password: "" });
+      setMemberData({ firstName: "", lastName: "", email: "", role: "user", password: "", companyName: "" });
       if (onSuccess) onSuccess();
       setTimeout(() => onClose(), 1500);
     } catch (err) {
@@ -58,9 +111,7 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
-        className={`bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4 transition-transform duration-500 ease-out ${
-          visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"
-        }`}
+        className={`bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4 transition-transform duration-500 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"}`}
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
@@ -112,6 +163,34 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
             />
           </div>
 
+          {/* Company Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+            {currentUserRole === 'subadmin' ? (
+              // For subadmin, show disabled input with their company name
+              <input
+                type="text"
+                value={memberData.companyName}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+              />
+            ) : (
+              // For admin, show editable input
+              <input
+                type="text"
+                value={memberData.companyName}
+                onChange={(e) => setMemberData({ ...memberData, companyName: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee8cee]/40 focus:border-[#800080]"
+                required
+              />
+            )}
+            {currentUserRole === 'subadmin' && (
+              <p className="text-xs text-gray-500 mt-1">
+                Users created by subadmins will have the same company as the subadmin
+              </p>
+            )}
+          </div>
+
           {/* Password with show/hide toggle */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -138,37 +217,52 @@ const AddMemberModal = ({ onClose, onSuccess }) => {
           {/* Role Select */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <Listbox
-              value={memberData.role}
-              onChange={(value) => setMemberData({ ...memberData, role: value })}
-            >
-              <div className="relative">
-                <Listbox.Button className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee8cee]/40 focus:border-[#800080] flex justify-between items-center">
-                  <span>{memberData.role}</span>
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
-                </Listbox.Button>
-                <Listbox.Options className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
-                  {roles.map((role) => (
-                    <Listbox.Option
-                      key={role}
-                      value={role}
-                      className={({ active }) =>
-                        `cursor-pointer px-4 py-2 text-sm ${
-                          active ? "bg-purple-100 text-purple-900" : "text-gray-800"
-                        }`
-                      }
-                    >
-                      {({ selected }) => (
-                        <span className="flex justify-between items-center">
-                          {role.charAt(0).toUpperCase() + role.slice(1)}
-                          {selected && <Check className="w-4 h-4 text-purple-600" />}
-                        </span>
-                      )}
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>
-              </div>
-            </Listbox>
+            {currentUserRole === 'subadmin' ? (
+              // For subadmin, show disabled input with only "user" role
+              <input
+                type="text"
+                value="User"
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+              />
+            ) : (
+              // For admin, show dropdown with all available roles
+              <Listbox
+                value={memberData.role}
+                onChange={(value) => setMemberData({ ...memberData, role: value })}
+              >
+                <div className="relative">
+                  <Listbox.Button className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee8cee]/40 focus:border-[#800080] flex justify-between items-center">
+                    <span>{memberData.role.charAt(0).toUpperCase() + memberData.role.slice(1)}</span>
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  </Listbox.Button>
+                  <Listbox.Options className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
+                    {roles.map((role) => (
+                      <Listbox.Option
+                        key={role}
+                        value={role}
+                        className={({ active }) =>
+                          `cursor-pointer px-4 py-2 text-sm ${active ? "bg-purple-100 text-purple-900" : "text-gray-800"
+                          }`
+                        }
+                      >
+                        {({ selected }) => (
+                          <span className="flex justify-between items-center">
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                            {selected && <Check className="w-4 h-4 text-purple-600" />}
+                          </span>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </div>
+              </Listbox>
+            )}
+            {currentUserRole === 'subadmin' && (
+              <p className="text-xs text-gray-500 mt-1">
+                Subadmins can only create users with "User" role
+              </p>
+            )}
           </div>
         </div>
 
