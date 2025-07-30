@@ -12,6 +12,7 @@ const Manager = require("../models/Manager");
 const SubadminManagerAssignment = require("../models/SubadminManagerAssignment");
 const UserSubadminAssignment = require("../models/UserSubadminAssignment");
 const authMiddleware = require("../middleware/authmiddleware");
+const sessionTimeoutMiddleware = require("../middleware/sessionTimeoutMiddleware");
 const { generateVerificationToken, sendVerificationEmail } = require("../utils/emailService");
 
 // Register agent mapping
@@ -199,7 +200,7 @@ router.get("/users", async (req, res) => {
 });
 
 // Add user (from AddUserModal)
-router.post("/add-user", authMiddleware, async (req, res) => {
+router.post("/add-user", sessionTimeoutMiddleware, async (req, res) => {
   const { firstName, lastName, email, password, role, companyName } = req.body;
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ error: "First name, last name, email, and password are required" });
@@ -398,7 +399,7 @@ router.get("/users-with-role-user", async (req, res) => {
 });
 
 // Get admin-user assignments (to track which admin added which users)
-router.get("/admin-user-assignments", authMiddleware, async (req, res) => {
+router.get("/admin-user-assignments", sessionTimeoutMiddleware, async (req, res) => {
   try {
     // Check if user is admin or subadmin
     const user = await User.findById(req.userId);
@@ -436,7 +437,7 @@ router.get("/admin-user-assignments", authMiddleware, async (req, res) => {
 });
 
 // Get users added by specific admin
-router.get("/admin-users/:adminId", authMiddleware, async (req, res) => {
+router.get("/admin-users/:adminId", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const { adminId } = req.params;
 
@@ -487,7 +488,7 @@ router.get("/debug-assignments", async (req, res) => {
 });
 
 // Debug endpoint to check current user's token
-router.get("/debug-current-user", authMiddleware, async (req, res) => {
+router.get("/debug-current-user", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
 
@@ -518,7 +519,7 @@ router.get("/debug-current-user", authMiddleware, async (req, res) => {
 });
 
 // Test endpoint to manually create a UserSubadminAssignment
-router.post("/test-create-assignment", authMiddleware, async (req, res) => {
+router.post("/test-create-assignment", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const { testUserId } = req.body;
 
@@ -561,7 +562,7 @@ router.post("/test-create-assignment", authMiddleware, async (req, res) => {
 });
 
 // Debug endpoint to check JWT token content
-router.get("/debug-token", authMiddleware, async (req, res) => {
+router.get("/debug-token", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     const token = authHeader.split(" ")[1];
@@ -583,7 +584,7 @@ router.get("/debug-token", authMiddleware, async (req, res) => {
 });
 
 // Upgrade user plan
-router.put("/upgrade-user-plan/:userId", authMiddleware, async (req, res) => {
+router.put("/upgrade-user-plan/:userId", sessionTimeoutMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
     const { plan } = req.body;

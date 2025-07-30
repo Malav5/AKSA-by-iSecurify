@@ -5,6 +5,7 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { NotificationProvider } from "./context/NotificationContext";
+import "./services/axiosConfig"; // Import axios configuration for global interceptors
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
