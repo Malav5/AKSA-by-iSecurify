@@ -68,7 +68,7 @@ const SessionTimeoutModal = ({ isOpen, onExtend, onLogout, timeLeft }) => {
             </div>
           </div>
                       <p className="text-sm text-gray-500 mb-6">
-              For security reasons, regular user sessions expire after 2 minutes of inactivity (testing mode). Your session will automatically reset when you're active.
+              For security reasons, regular user sessions expire after 10 minutes of inactivity. Your session will automatically reset when you're active.
             </p>
           
           <div className="flex gap-3">

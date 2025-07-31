@@ -5,8 +5,8 @@ const SessionCountdownBanner = ({ timeLeft, onExtend, onLogout }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Show banner when timeLeft is 60 seconds or less
-    if (timeLeft <= 60 && timeLeft > 0) {
+    // Show banner when timeLeft is greater than 0 (full 10 minutes)
+    if (timeLeft > 0) {
       setIsVisible(true);
       setCountdown(timeLeft);
     } else {
@@ -82,7 +82,7 @@ const SessionCountdownBanner = ({ timeLeft, onExtend, onLogout }) => {
                 </span>
               </p>
               <p className="text-xs opacity-90">
-                For security reasons, your session will automatically end after 2 minutes of inactivity.
+                For security reasons, your session will automatically end after 10 minutes of inactivity.
               </p>
             </div>
           </div>
