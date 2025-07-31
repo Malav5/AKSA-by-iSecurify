@@ -37,9 +37,9 @@ const useSessionTimeout = () => {
       const decoded = jwtDecode(token);
       const tokenIssuedAt = decoded.iat * 1000; // Convert to milliseconds
       const currentTime = Date.now();
-      const tenMinutesInMs = 10 * 60 * 1000; // 10 minutes in milliseconds
+      const twelveMinutesInMs = 12 * 60 * 1000; // 12 minutes in milliseconds
       const elapsed = currentTime - tokenIssuedAt;
-      const remaining = tenMinutesInMs - elapsed;
+              const remaining = twelveMinutesInMs - elapsed;
       const remainingSeconds = Math.max(0, Math.floor(remaining / 1000));
 
       console.log('Session Timeout: Token issued at:', new Date(tokenIssuedAt).toLocaleTimeString());
@@ -113,18 +113,18 @@ const useSessionTimeout = () => {
         console.error('Error refreshing session on activity:', error);
         // Don't logout on refresh error, just continue with current token
       }
-    } else if (remaining > 0) { // Show countdown banner for the full 10 minutes
+    } else if (remaining > 0 && remaining <= 10 * 60) { // Show countdown banner after 2 minutes of inactivity (remaining 10 minutes or less)
       console.log('Session Timeout: Showing countdown banner with remaining time:', remaining);
       setTimeLeft(remaining);
-      // Show banner for the full duration when user is inactive
+      // Show banner for the remaining time after 2 minutes of inactivity
     } else if (remaining <= 0) {
       console.log('Session Timeout: Session expired, logging out');
       setTimeLeft(0); // Ensure timeLeft is set to 0
       logoutRef.current();
     } else {
-      // Show timer for remaining time when user is inactive
-      setTimeLeft(remaining);
-      console.log('Session Timeout: Showing timer with remaining time:', remaining);
+      // Hide timer for first 2 minutes of inactivity
+      setTimeLeft(0);
+      console.log('Session Timeout: User inactive but timer hidden (first 2 minutes)');
     }
   }, [isAdmin, calculateTimeLeft]);
 
