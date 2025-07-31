@@ -22,10 +22,10 @@ function sessionTimeoutMiddleware(req, res, next) {
       return next();
     }
 
-    // For regular users, check if token was issued more than 2 minutes ago
+    // For regular users, check if token was issued more than 10 minutes ago
     const tokenIssuedAt = decoded.iat * 1000; // Convert to milliseconds
     const currentTime = Date.now();
-    const tenMinutesInMs = 2 * 60 * 1000; // 2 minutes in milliseconds (for testing)
+    const tenMinutesInMs = 10 * 60 * 1000; // 10 minutes in milliseconds
 
     if (currentTime - tokenIssuedAt > tenMinutesInMs) {
       return res.status(401).json({ 
