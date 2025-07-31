@@ -22,12 +22,12 @@ function sessionTimeoutMiddleware(req, res, next) {
       return next();
     }
 
-    // For regular users, check if token was issued more than 10 minutes ago
+    // For regular users, check if token was issued more than 12 minutes ago
     const tokenIssuedAt = decoded.iat * 1000; // Convert to milliseconds
     const currentTime = Date.now();
-    const tenMinutesInMs = 10 * 60 * 1000; // 10 minutes in milliseconds
+    const twelveMinutesInMs = 12 * 60 * 1000; // 12 minutes in milliseconds
 
-    if (currentTime - tokenIssuedAt > tenMinutesInMs) {
+    if (currentTime - tokenIssuedAt > twelveMinutesInMs) {
       return res.status(401).json({ 
         error: "Session expired", 
         message: "Your session has expired. Please log in again.",
