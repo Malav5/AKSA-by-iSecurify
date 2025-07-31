@@ -202,7 +202,7 @@ const Settings = () => {
           onClick={handleCancelAccount}
         >
           <Trash2 className="w-5 h-5 mr-2 text-red-500" />
-          Cancel my account
+          Delete my account
         </button>
       </div>
     </div>
