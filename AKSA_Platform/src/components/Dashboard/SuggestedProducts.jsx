@@ -106,11 +106,73 @@ const SolutionTooltip = ({ solution, position, buttonRect }) => {
 const SuggestedProducts = ({ domain }) => {
   const navigate = useNavigate();
 
-  // Fetch userPlan from localStorage
+  // Fetch userPlan from backend and localStorage
   const [userPlan, setUserPlan] = useState(null);
+  const [isLoadingPlan, setIsLoadingPlan] = useState(true);
+
   useEffect(() => {
-    const plan = localStorage.getItem("plan");
-    setUserPlan(plan || "Freemium");
+    const fetchUserPlan = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          // Fallback to localStorage if no token
+          const plan = localStorage.getItem("plan");
+          setUserPlan(plan || "Freemium");
+          setIsLoadingPlan(false);
+          return;
+        }
+
+        const response = await fetch("http://localhost:3000/api/auth/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const plan = data.user.plan || "Freemium";
+          setUserPlan(plan);
+          // Update localStorage with the latest plan
+          localStorage.setItem("plan", plan);
+        } else {
+          // Fallback to localStorage if API call fails
+          const plan = localStorage.getItem("plan");
+          setUserPlan(plan || "Freemium");
+        }
+      } catch (error) {
+        console.error("Error fetching user plan:", error);
+        // Fallback to localStorage if there's an error
+        const plan = localStorage.getItem("plan");
+        setUserPlan(plan || "Freemium");
+      } finally {
+        setIsLoadingPlan(false);
+      }
+    };
+
+    fetchUserPlan();
+
+    // Listen for plan changes in localStorage
+    const handlePlanChange = (event) => {
+      if (event.key === "plan") {
+        setUserPlan(event.newValue || "Freemium");
+      }
+    };
+
+    window.addEventListener("storage", handlePlanChange);
+
+    // Refresh plan when component becomes visible (user navigates back to dashboard)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        refreshUserPlan();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("storage", handlePlanChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   // Improved user key generation with better error handling
@@ -310,6 +372,42 @@ const SuggestedProducts = ({ domain }) => {
     setButtonRect(null);
   };
 
+  // Function to refresh user plan
+  const refreshUserPlan = async () => {
+    setIsLoadingPlan(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        const plan = localStorage.getItem("plan");
+        setUserPlan(plan || "Freemium");
+        setIsLoadingPlan(false);
+        return;
+      }
+
+      const response = await fetch("http://localhost:3000/api/auth/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const plan = data.user.plan || "Freemium";
+        setUserPlan(plan);
+        localStorage.setItem("plan", plan);
+      } else {
+        const plan = localStorage.getItem("plan");
+        setUserPlan(plan || "Freemium");
+      }
+    } catch (error) {
+      console.error("Error refreshing user plan:", error);
+      const plan = localStorage.getItem("plan");
+      setUserPlan(plan || "Freemium");
+    } finally {
+      setIsLoadingPlan(false);
+    }
+  };
+
   return (
     <div className="bg-white text-gray-900 rounded-2xl px-6 md:px-8 lg:px-10 py-6 md:py-8 mx-2 md:mx-4 shadow-lg border border-gray-100 relative overflow-hidden">
       {/* Background decoration */}
@@ -437,12 +535,28 @@ const SuggestedProducts = ({ domain }) => {
                 <h3 className="font-bold text-lg md:text-xl text-gray-800">
                   Your Solutions
                 </h3>
+                <button
+                  onClick={refreshUserPlan}
+                  disabled={isLoadingPlan}
+                  className="ml-2 p-1 text-emerald-600 hover:text-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  title="Refresh plan"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </button>
               </div>
               <div className="flex gap-3 md:gap-4 flex-wrap">
-                {/* Show user plan from localStorage */}
-                <button className="bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                  {userPlan}
-                </button>
+                {/* Show user plan from backend/localStorage */}
+                {isLoadingPlan ? (
+                  <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md animate-pulse">
+                    Loading...
+                  </div>
+                ) : (
+                  <button className="bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                    {userPlan}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -460,13 +574,12 @@ const SuggestedProducts = ({ domain }) => {
                     onClick={() => handleSolutionClick(sol)}
                     onMouseEnter={(e) => handleSolutionHover(sol, e)}
                     onMouseLeave={handleSolutionLeave}
-                    className={`relative rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md transition-all duration-300 transform hover:scale-105 ${
-                      selectedSolutions.includes(sol)
-                        ? "bg-gradient-to-r from-[#800080] to-[#a242a2] text-white hover:from-purple-700 hover:to-blue-700 shadow-lg"
-                        : recommendedProducts.includes(sol)
+                    className={`relative rounded-xl px-4 md:px-6 py-2 md:py-3 font-bold text-sm md:text-base shadow-md transition-all duration-300 transform hover:scale-105 ${selectedSolutions.includes(sol)
+                      ? "bg-gradient-to-r from-[#800080] to-[#a242a2] text-white hover:from-purple-700 hover:to-blue-700 shadow-lg"
+                      : recommendedProducts.includes(sol)
                         ? "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-2 border-blue-300"
                         : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 border border-gray-300"
-                    }`}
+                      }`}
                   >
                     {sol}
                     {recommendedProducts.includes(sol) && (
