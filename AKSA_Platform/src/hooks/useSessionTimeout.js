@@ -1,13 +1,25 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 const useSessionTimeout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const logoutRef = useRef();
+
+  // Check if session timeout should be disabled for current route
+  const shouldDisableSessionTimeout = useCallback(() => {
+    const currentPath = location.pathname;
+    const excludedRoutes = ['/login', '/signup', '/verify-email'];
+    
+    const isExcludedRoute = excludedRoutes.some(route => currentPath === route);
+    console.log('Session Timeout: Current path:', currentPath, 'Is excluded route:', isExcludedRoute);
+    
+    return isExcludedRoute;
+  }, [location.pathname]);
 
   // Check if user is admin or subadmin
   const checkUserRole = useCallback(() => {
@@ -166,16 +178,18 @@ const useSessionTimeout = () => {
   useEffect(() => {
     console.log('Session Timeout: Initializing session monitoring');
     const adminStatus = checkUserRole();
+    const isExcludedRoute = shouldDisableSessionTimeout();
     setIsAdmin(adminStatus);
     console.log('Session Timeout: Admin status set to:', adminStatus);
+    console.log('Session Timeout: Is excluded route:', isExcludedRoute);
 
-    if (adminStatus) {
-      console.log('Session Timeout: Admin user detected, no timeout monitoring');
-      // No timeout for admin/subadmin
+    if (adminStatus || isExcludedRoute) {
+      console.log('Session Timeout: Admin user or excluded route detected, no timeout monitoring');
+      // No timeout for admin/subadmin or excluded routes
       return;
     }
 
-    console.log('Session Timeout: Regular user detected, starting timeout monitoring');
+    console.log('Session Timeout: Regular user on protected route detected, starting timeout monitoring');
     
     // Check session status every 10 seconds (for testing)
     const interval = setInterval(() => {
@@ -190,7 +204,7 @@ const useSessionTimeout = () => {
     const throttleDelay = 30000; // 30 seconds between activity resets
     
     const resetTimer = () => {
-      if (!isAdmin) {
+      if (!isAdmin && !shouldDisableSessionTimeout()) {
         const now = Date.now();
         if (now - lastActivityTime > throttleDelay) {
           lastActivityTime = now;
@@ -217,7 +231,7 @@ const useSessionTimeout = () => {
         document.removeEventListener(event, resetTimer, true);
       });
     };
-  }, [checkUserRole, handleUserActivity, isAdmin]);
+  }, [checkUserRole, handleUserActivity, isAdmin, shouldDisableSessionTimeout]);
 
   return {
     showTimeoutModal,
